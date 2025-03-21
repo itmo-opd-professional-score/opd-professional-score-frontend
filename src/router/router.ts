@@ -65,8 +65,8 @@ const router = createRouter({
 });
 
 
-router.beforeEach((to, from, next) => {
-  if ((to.meta.requiresAuth && UserState.status != "authorized") || from.meta.requiresAuth && UserState.status != "authorized") {
+router.beforeEach((to, _, next) => {
+  if ((to.meta.requiresAuth && UserState.status != "authorized")) {
     next({path: '/auth/login/'})
   } else {
     next()
