@@ -1,12 +1,14 @@
 import mitt from "mitt";
-import type {LoginEvent} from "./event-bus.types.ts";
+import type {LoginEvent, RegisterFirstStepEvent, RegisterSecondStepEvent} from "./event-bus.types.ts";
 
 type Events = {
   infoPopupCallback: void;
   errorPopupCallback: void;
   sendCode: void;
   approveCode: string;
-  login: LoginEvent
+  login: LoginEvent;
+  registerFirstStep: RegisterFirstStepEvent;
+  registerSecondStep: RegisterSecondStepEvent;
 }
 
 const eventBus = mitt<Events>()
