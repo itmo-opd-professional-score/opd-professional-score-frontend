@@ -8,6 +8,7 @@ import {usePopupStore} from "../store/popup.store.ts";
 import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
 import type {SendCodeAgainDto} from "../api/resolvers/auth/dto/output/send-code-again-output.dto.ts";
 import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
+import eventBus from "../store/event-bus.ts";
 
 export default {
   name: 'PasswordChangingPage',
@@ -52,6 +53,7 @@ export default {
     },
 
     approveCode(code: string) {
+      console.log(code);
       const data = {
         email: this.email,
         code: parseInt(code),
@@ -69,6 +71,7 @@ export default {
     },
 
     async sendCode() {
+      console.log("SendCode");
       const user = (await this.userResolver.getByEmail(this.email))?.body as UserDataInputDto;
       const data: SendCodeAgainDto = {
         email: this.email,
@@ -80,6 +83,9 @@ export default {
     }
   },
   mounted() {
+    eventBus.on("sendCode", this.sendCode);
+    eventBus.on("approveCode", (code: string) => this.approveCode(code));
+
     document.addEventListener('keydown', (e) => {
       if (e.key == "Enter") {
         if (this.step == 1) {
@@ -95,6 +101,9 @@ export default {
     });
   },
   unmounted() {
+    eventBus.off("sendCode");
+    eventBus.off("approveCode");
+
     document.removeEventListener('keydown', (e) => {
       if (e.key == "Enter") {
         if (this.step == 1) {
