@@ -1,6 +1,5 @@
 <script lang="ts">
 import {UserResolver} from "../api/resolvers/user/user.resolver.ts";
-import router from "../router/router.ts";
 import {usePopupStore} from "../store/popup.store.ts";
 import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
 import {useDevice} from "../utils/MobileDetector.ts";
