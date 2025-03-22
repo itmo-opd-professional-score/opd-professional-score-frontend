@@ -8,7 +8,7 @@ import {usePopupStore} from "../store/popup.store.ts";
 import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
 import type {SendCodeAgainDto} from "../api/resolvers/auth/dto/output/send-code-again-output.dto.ts";
 import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
-import eventBus from "../store/event-bus.ts";
+import eventBus from "../store/eventBus/event-bus.ts";
 
 export default {
   name: 'PasswordChangingPage',

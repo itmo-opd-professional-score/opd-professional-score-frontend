@@ -1,6 +1,6 @@
 <script lang="ts">
 import {usePopupStore} from "../../../store/popup.store.ts";
-import eventBus from "../../../store/event-bus.ts";
+import eventBus from "../../../store/eventBus/event-bus.ts";
 
 export default {
   name: 'InfoPopup',

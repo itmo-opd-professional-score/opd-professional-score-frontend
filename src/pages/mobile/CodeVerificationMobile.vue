@@ -1,7 +1,7 @@
 <script lang="ts">
 import CustomInput from "../../components/UI/inputs/CustomInput.vue";
 import CommonButton from "../../components/UI/CommonButton.vue";
-import eventBus from "../../store/event-bus.ts";
+import eventBus from "../../store/eventBus/event-bus.ts";
 
 export default {
   name: "CodeVerificationMobile",
