@@ -12,4 +12,8 @@ const socket = io(apiConf.socketEndpoint, {
   transports: ['websocket'],
 })
 
-createApp(App).use(router).use(pinia).provide('socket', socket).mount('#app')
+createApp(App)
+  .use(router)
+  .use(pinia)
+  .provide('socket', socket)
+  .mount('#app')
