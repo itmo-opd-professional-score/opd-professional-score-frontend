@@ -9,7 +9,8 @@ type Events = {
   login: LoginEvent;
   registerFirstStep: RegisterFirstStepEvent;
   registerSecondStep: RegisterSecondStepEvent;
-  editProfession: EventTarget
+  editProfession: EventTarget;
+  editUserRole: EventTarget;
 }
 
 const eventBus = mitt<Events>()
