@@ -1,88 +1,31 @@
-<script setup lang="ts">
+<script lang="ts">
+import {useDevice} from "../../utils/MobileDetector.ts";
+import ChangeProfessionElementDesktop from "./desktop/ChangeProfessionElementDesktop.vue";
+import eventBus from "../../store/eventBus/event-bus.ts";
+import ChangeProfessionElementMobile from "./mobile/ChangeProfessionElementMobile.vue";
 
-import CommonButton from "./CommonButton.vue";
-import { onMounted, ref } from 'vue';
-import { ProfessionStatisticResolver } from '../../api/resolvers/professionStatistic/professionStatistic.resolver.ts';
-const props = defineProps<{ id: number }>()
-defineEmits(['edit-profession'])
-
-const noStats = ref(true)
-
-onMounted(async () => {
-  const profStatsResolver = new ProfessionStatisticResolver()
-  const stats = await profStatsResolver.getProfessionStatistics(props.id)
-  if (stats.length > 0) {
-    noStats.value = false
+export default {
+  name: "ProfessionsManagerElement",
+  emits: ["edit-profession"],
+  components: {ChangeProfessionElementMobile, ChangeProfessionElementDesktop},
+  props: {
+    id: {
+      type: Number,
+      required: true,
+      default: 0,
+    }
+  },
+  data() {
+    const isMobile = useDevice().isMobile;
+    return {isMobile};
+  },
+  mounted() {
+    eventBus.on("editProfession", (event) => this.$emit('edit-profession', event));
   }
-})
+}
 </script>
 
 <template>
-  <div class="wrapper">
-    <div class="id" id="id">#
-      <slot name="id">12345</slot>
-    </div>
-    <a class="prof_name" id="test_name" :href="`/profession/${id}`">
-      <slot name="name">Lorem ipsum dolor sit amet.</slot>
-    </a>
-    <div class="created">
-      <slot name="description">Ivanov Ivan Ivanovich</slot>
-    </div>
-    <div class="created">
-      <slot name="requirements">Ivanov Ivan Ivanovich</slot>
-    </div>
-    <div class="created">
-      <slot name="sphere">Ivanov Ivan Ivanovich</slot>
-    </div>
-    <div class="changeProfession">
-      <CommonButton
-          @click="$emit('edit-profession', $event.currentTarget)"
-          :disabled="false"
-          v-if="noStats"
-      >
-        <template v-slot:placeholder>
-          <slot name="placeholder">Изменить</slot>
-        </template>
-      </CommonButton>
-    </div>
-  </div>
+  <ChangeProfessionElementDesktop :id="id" v-if="!isMobile"/>
+  <ChangeProfessionElementMobile :id="id" v-else/>
 </template>
-
-<style scoped>
-.wrapper {
-  background: var(--background-secondary);
-  border-radius: 10px;
-  width: 95%;
-  padding: 1vw;
-  justify-content: center;
-  align-items: center;
-  display: grid;
-  grid-template-columns: 1fr 2fr 4fr 3fr 1fr 1fr;
-}
-
-.wrapper:hover {
-  cursor: pointer;
-}
-
-.wrapper > div,
-.wrapper > a {
-  border-right: 1px solid black;
-  padding: 5px;
-  height: 70%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-  box-sizing: border-box;
-  text-decoration: none;
-  color: black;
-}
-
-#id, #test_name{
-  text-align: left;
-}
-
-.wrapper > div:last-child {
-  border-right: none;
-}
-</style>
