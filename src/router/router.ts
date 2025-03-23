@@ -8,6 +8,7 @@ import PvkSetupPage from "../pages/PvkSetupPage.vue";
 import PasswordChanging from "../pages/PasswordChanging.vue";
 import LogInPage from "../pages/LogInPage.vue";
 import RegistrationPage from "../pages/RegistrationPage.vue";
+import PersonalAccountChanging from "../pages/PersonalAccountChanging.vue";
 
 const routes = [
   {
@@ -41,6 +42,11 @@ const routes = [
     path: '/profile',
     component: PersonalAccount,
     meta: {requiresAuth: true, ruName: "Профиль"}
+  },
+  {
+    path: `/profile/change`,
+    component: PersonalAccountChanging,
+    meta: {requiresAuth: true, ruName: "Изменение профиля"}
   },
   {
     path: '/auth/login',

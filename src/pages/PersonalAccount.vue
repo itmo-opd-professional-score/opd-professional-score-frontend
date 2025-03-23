@@ -12,6 +12,7 @@ import type {GetProfessionOutputDto} from "../api/resolvers/profession/dto/outpu
 import {usePopupStore} from "../store/popup.store.ts";
 import type {DefaultErrorDto} from "../api/dto/common/default-error.dto.ts";
 import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
+import router from "../router/router.ts";
 
 const authResolver = new AuthResolver();
 const popupStore = usePopupStore();
@@ -320,6 +321,9 @@ onMounted(() => {
         </div>
       </div>
       <div class="buttons_container">
+        <Button @click="router.push('/profile/change')">
+          <template v-slot:placeholder>Редактировать профиль</template>
+        </Button>
         <Button @click="authResolver.logout" class="logout_button">
           <template v-slot:placeholder>Выйти из аккаунта</template>
         </Button>
@@ -447,18 +451,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-}
-
-.logout_button {
-  background-color: var(--danger-button-secondary);
-  border-color: var(--danger-button-primary);
-  color: white;
-}
-
-.logout_button:hover {
-  background-color: var(--danger-button-primary);
-  border-color: transparent;
-  color: white;
 }
 
 .test_data_block {
