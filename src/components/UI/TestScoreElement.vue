@@ -1,55 +1,19 @@
-<script setup lang="ts">
+<script lang="ts">
+import {useDevice} from "../../utils/MobileDetector.ts";
+import TestScoreElementDesktop from "./desktop/TestScoreElementDesktop.vue";
+import TestScoreElementMobile from "./mobile/TestScoreElementMobile.vue";
 
+export default {
+  name: 'TestScoreElement',
+  components: {TestScoreElementMobile, TestScoreElementDesktop},
+  data() {
+    const isMobile = useDevice().isMobile;
+    return {isMobile}
+  }
+}
 </script>
 
 <template>
-  <div class="wrapper">
-    <div class="id" id="id">#
-      <slot name="id">0</slot>
-    </div>
-    <div class="test_name" id="test_name">
-      <slot name="test_name">Lorem ipsum dolor sit amet.</slot>
-    </div>
-    <div class="score"><slot name="current_points">0</slot>/<slot name="max_points">100</slot></div>
-    <div class="time"><slot name="time">00:00:00</slot></div>
-    <div class="username"><slot name="username">Имя пользователя</slot></div>
-    <div class="createdAt"><slot name="createdAt">2022-22-22</slot></div>
-    <div class="valid"><slot name="valid">true</slot></div>
-  </div>
+  <TestScoreElementDesktop v-if="!isMobile"/>
+  <TestScoreElementMobile v-else/>
 </template>
-
-<style scoped>
-.wrapper {
-  background: var(--background-secondary);
-  border-radius: 10px;
-  width: 95%;
-  height: 4rem;
-  padding: 0 1rem;
-  justify-content: center;
-  align-items: center;
-  display: grid;
-  grid-template-columns: 1fr 1.5fr 1.25fr 1fr 1.5fr 1fr 1fr;
-}
-
-.wrapper:hover {
-  cursor: pointer;
-}
-
-.wrapper > div {
-  border-right: 1px solid black;
-  padding: 5px;
-  height: 70%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-#id, #test_name {
-  text-align: left;
-}
-
-.wrapper > div:last-child {
-  border-right: none;
-}
-</style>
