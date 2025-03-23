@@ -39,7 +39,7 @@ export default {
     </div>
     <div class="field" id="prof_name" @click="$router.push(`/profession/${id}`)">
       <span class="bold-text">Name: </span>
-      <slot name="field">Lorem ipsum dolor sit amet.</slot>
+      <slot name="name">Lorem ipsum dolor sit amet.</slot>
     </div>
     <div class="field" @click="$router.push(`/profession/${id}`)">
       <span class="bold-text">Description: </span>

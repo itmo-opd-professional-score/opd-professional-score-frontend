@@ -26,6 +26,20 @@ export default {
 </script>
 
 <template>
-  <ProfessionsManagerElementDesktop :id="id" v-if="!isMobile"/>
-  <ProfessionsManagerElementMobile :id="id" v-else/>
+  <ProfessionsManagerElementDesktop :id="id" v-if="!isMobile">
+    <template v-slot:id><slot name="id">12345</slot></template>
+    <template v-slot:name><slot name="name">Name</slot></template>
+    <template v-slot:description><slot name="description">Description</slot></template>
+    <template v-slot:requirements><slot name="requirements">Requirements</slot></template>
+    <template v-slot:sphere><slot name="sphere">Sphere</slot></template>
+    <template v-slot:placeholder><slot name="placeholder">Изменить</slot></template>
+  </ProfessionsManagerElementDesktop>
+  <ProfessionsManagerElementMobile :id="id" v-else>
+    <template v-slot:id><slot name="id">12345</slot></template>
+    <template v-slot:name><slot name="name">Name</slot></template>
+    <template v-slot:description><slot name="description">Description</slot></template>
+    <template v-slot:requirements><slot name="requirements">Requirements</slot></template>
+    <template v-slot:sphere><slot name="sphere">Sphere</slot></template>
+    <template v-slot:placeholder><slot name="placeholder">Изменить</slot></template>
+  </ProfessionsManagerElementMobile>
 </template>
