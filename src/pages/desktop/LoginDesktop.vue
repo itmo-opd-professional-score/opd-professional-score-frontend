@@ -1,12 +1,17 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import CustomInput from "../components/UI/inputs/CustomInput.vue";
-import CommonButton from "../components/UI/CommonButton.vue";
-import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
-import type {LoginUserOutputDto} from "../api/resolvers/auth/dto/output/login-user-output.dto.ts";
+import CustomInput from "../../components/UI/inputs/CustomInput.vue";
+import CommonButton from "../../components/UI/CommonButton.vue";
+import {AuthResolver} from "../../api/resolvers/auth/auth.resolver.ts";
+import eventBus from "../../store/eventBus/event-bus.ts";
 
 export default defineComponent({
-  name: "LogInPage",
+  name: "LoginDesktop",
+  computed: {
+    eventBus() {
+      return eventBus
+    }
+  },
   components: {CommonButton, CustomInput},
   data() {
     return {
@@ -15,26 +20,17 @@ export default defineComponent({
       authResolver: new AuthResolver(),
     }
   },
-  methods: {
-    login() {
-      const data: LoginUserOutputDto = {
-        email: this.email,
-        password: this.password
-      };
-      this.authResolver.login(data)
-    }
-  },
   mounted() {
     document.addEventListener('keydown', (e) => {
       if (e.key == "Enter") {
-        this.login()
+        eventBus.emit('login', {email: this.email, password: this.password})
       }
     });
   },
   unmounted() {
     document.removeEventListener('keydown', (e) => {
       if (e.key == "Enter") {
-        this.login()
+        eventBus.emit('login', {email: this.email, password: this.password})
       }
     })
   }
@@ -53,10 +49,10 @@ export default defineComponent({
       <custom-input v-model="password" :placeholder="'Введите пароль'" class="form-input" :type="'password'"/>
     </div>
     <div class="auth-links-container">
-      <router-link to="/auth/changePassword">Забыли пароль?</router-link>
-      <router-link to="/auth/registration">Создать аккаунт</router-link>
+      <router-link to="/auth/changePassword" class="router">Забыли пароль?</router-link>
+      <router-link to="/auth/registration" class="router">Создать аккаунт</router-link>
     </div>
-    <CommonButton class="auth-button" @click="login">
+    <CommonButton class="auth-button" @click="eventBus.emit('login', {email: email, password: password})">
       <template v-slot:placeholder>Войти</template>
     </CommonButton>
   </div>
@@ -65,8 +61,8 @@ export default defineComponent({
 <style scoped>
 .container {
   margin-top: 20vh;
-  min-width: 35vw;
-  max-width: 50vw;
+  min-width: 35%;
+  max-width: 40%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -96,6 +92,12 @@ export default defineComponent({
   display: flex;
   justify-content: space-between;
   width: 100%;
+  gap: 1rem;
+}
+
+.router {
+  text-align: center;
+  padding: 0;
 }
 
 .auth-button, .auth-button:hover {

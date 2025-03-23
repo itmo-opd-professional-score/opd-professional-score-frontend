@@ -6,7 +6,7 @@ import ProfessionPage from "../pages/ProfessionPage.vue";
 import ProfessionForm from "../components/ProfessionForm.vue";
 import PvkSetupPage from "../pages/PvkSetupPage.vue";
 import PasswordChanging from "../pages/PasswordChanging.vue";
-import LogInPage from "../pages/LogInPage.vue";
+import LoginPage from "../pages/LoginPage.vue";
 import RegistrationPage from "../pages/RegistrationPage.vue";
 
 const routes = [
@@ -44,7 +44,7 @@ const routes = [
   },
   {
     path: '/auth/login',
-    component: LogInPage,
+    component: LoginPage,
     meta: {ruName: "Вход"}
   },
   {
