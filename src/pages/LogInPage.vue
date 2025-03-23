@@ -46,11 +46,23 @@ export default defineComponent({
     <h1 class="header">Вход</h1>
     <div class="input-container">
       <p>Логин:</p>
-      <custom-input v-model="email" :placeholder="'Введите адрес электронной почты'" class="form-input"/>
+      <div class="form-input">
+        <CustomInput
+            v-model="email"
+            :placeholder="'Введите адрес электронной почты'"
+            type="email"
+        />
+      </div>
     </div>
     <div class="input-container">
       <p>Пароль:</p>
-      <custom-input v-model="password" :placeholder="'Введите пароль'" class="form-input" :type="'password'"/>
+      <div class="form-input">
+        <CustomInput
+            v-model="password"
+            :placeholder="'Введите пароль'"
+            type="password"
+        />
+      </div>
     </div>
     <div class="auth-links-container">
       <router-link to="/auth/changePassword">Забыли пароль?</router-link>

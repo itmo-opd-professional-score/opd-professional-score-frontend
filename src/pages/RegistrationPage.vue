@@ -91,19 +91,43 @@ export default defineComponent({
     <h1 class="header">Регистрация</h1>
     <div class="input-container">
       <p>Имя пользователя:</p>
-      <custom-input v-model="username" :placeholder="'Введите имя пользователя'" class="form-input"/>
+      <div class="form-input">
+        <CustomInput
+            v-model="username"
+            placeholder="Введите имя пользователя"
+            type="email"
+        />
+      </div>
     </div>
     <div class="input-container">
       <p>Электронная почта:</p>
-      <custom-input v-model="email" :placeholder="'Введите электронную почту'" class="form-input"/>
+      <div class="form-input">
+        <CustomInput
+            v-model="email"
+            placeholder="Введите электронную почту"
+            type="email"
+        />
+      </div>
     </div>
     <div class="input-container">
       <p>Пароль:</p>
-      <custom-input v-model="password" :placeholder="'Введите пароль'" class="form-input" :type="'password'"/>
+      <div class="form-input">
+        <CustomInput
+            v-model="password"
+            placeholder="Введите пароль"
+            type="password"
+        />
+      </div>
     </div>
     <div class="input-container">
       <p>Подтверждение пароля:</p>
-      <custom-input v-model="passwordCheck" :placeholder="'Подтвердите пароль'" class="form-input" :type="'password'"/>
+      <div class="form-input">
+        <CustomInput
+            v-model="passwordCheck"
+            placeholder="Подтвердите пароль"
+            type="password"
+        />
+      </div>
     </div>
     <div class="auth-links-container">
       <router-link to="/auth/registration">Уже есть аккаунт?</router-link>

@@ -118,7 +118,11 @@ export default {
     <h1 class="header">Изменение пароля</h1>
     <label class="email-label">Введите электронную почту, на которую зарегистрирован Ваш аккаунт</label>
     <div class="input-block">
-      <CustomInput v-model="email" :placeholder="'Эл. почта'"/>
+      <CustomInput
+          v-model="email"
+          placeholder="Эл. почта"
+          type="email"
+      />
     </div>
     <CommonButton class="button" @click="goToSecondStep" @keyup.enter="goToSecondStep">
       <template v-slot:placeholder>Продолжить</template>
@@ -132,10 +136,10 @@ export default {
     </div>
     <div class="input-wrapper">
       <div class="input-block">
-        <CustomInput :placeholder="'Введите новый пароль'" v-model="password" :type="'password'"/>
+        <CustomInput :placeholder="'Введите новый пароль'" v-model="password" type="password"/>
       </div>
       <div class="input-block">
-        <CustomInput :placeholder="'Подтвердите новый пароль'" v-model="passwordCheck" :type="'password'"/>
+        <CustomInput :placeholder="'Подтвердите новый пароль'" v-model="passwordCheck" type="password"/>
       </div>
     </div>
     <CommonButton class="button" @click="checkPassword">

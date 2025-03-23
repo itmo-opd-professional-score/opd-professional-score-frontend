@@ -21,8 +21,14 @@ export default {
     </h1>
 
     <div class="input">
-      <CustomInput :type="'number'" v-model="code" :min-number="0" :max-number="999999" :max-length="6"
-                   :placeholder="'Введите код с почты'"/>
+      <CustomInput
+          :type="'number'"
+          v-model="code"
+          :min-number="0"
+          :max-number="999999"
+          :max-length="6"
+          :placeholder="'Введите код с почты'"
+      />
     </div>
 
     <div class="code-links-container">

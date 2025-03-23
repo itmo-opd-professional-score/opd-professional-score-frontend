@@ -161,7 +161,12 @@ onUnmounted(() => {
       <div class="multiselect">
         <div class="search-field">
           <label>
-            <CustomInput class="search-input" @input="search(searchQuery)" v-model="searchQuery" :placeholder="'Введите сюда название ПВК'"/>
+            <CustomInput
+                @search="search(searchQuery)"
+                v-model="searchQuery"
+                placeholder="Введите сюда название ПВК"
+                type="text"
+            />
           </label>
           <button type="button" :class="isOpened ? 'show-options clicked' : 'show-options'" @click="showOptions">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -261,15 +266,9 @@ button:hover {
       flex: 15;
       margin: 0;
 
-      input {
-        box-sizing: border-box;
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        border: none;
-      }
       input:hover {
         transform: none;
+        outline: none;
       }
       input:focus {
         outline: none;
