@@ -60,7 +60,7 @@ export default {
       this.userResolver.changePasswordSecondStep(data).then((result) => {
         if (result.status == 200) {
           localStorage.removeItem("token");
-          router.push('/');
+          router.push('/profile');
           this.popupStore.activateInfoPopup(result.body)
         }
       }).catch((err) => {

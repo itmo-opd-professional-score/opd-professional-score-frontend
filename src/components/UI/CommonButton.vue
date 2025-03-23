@@ -33,4 +33,28 @@ defineProps<{ disabled?: boolean }>()
 .wrapper[disabled="disabled"]:hover {
   cursor: wait;
 }
+
+.submit_button {
+  background-color: var(--submit-button-secondary);
+  border-color: var(--submit-button-primary);
+  color: white;
+}
+
+.submit_button:hover {
+  background-color: var(--submit-button-primary);
+  border-color: transparent;
+  color: white;
+}
+
+.logout_button {
+  background-color: var(--danger-button-secondary);
+  border-color: var(--danger-button-primary);
+  color: white;
+}
+
+.logout_button:hover {
+  background-color: var(--danger-button-primary);
+  border-color: transparent;
+  color: white;
+}
 </style>

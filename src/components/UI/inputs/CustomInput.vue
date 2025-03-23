@@ -1,12 +1,21 @@
 <script lang="ts">
+
 export default {
   name: 'CustomInput',
   emits: ['search', 'update:modelValue'],
+  data() {
+    return {
+      id: `input-${Math.random().toString(36).substring(2, 9)}`,
+    }
+  },
   props: {
     placeholder: String,
     type: {
       type: String,
       default: 'text',
+      required: true,
+      validator: (v: string) =>
+          ['text', 'password', 'email', 'number', 'radio', 'checkbox', 'tel', 'date'].includes(v),
     },
     modelValue: {
       type: [String, Number],
@@ -22,6 +31,20 @@ export default {
     maxLength: {
       type: Number,
       default: 1000,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+    name: {
+      type: String,
+    },
+    required: {
+      type: Boolean,
+      default: false,
+    },
+    labelText: {
+      type: String,
     }
   },
   methods: {
@@ -49,30 +72,28 @@ export default {
     update(event: InputEvent) {
       this.$emit('search');
       this.$emit('update:modelValue', (event.target as HTMLInputElement).value)
-    }
+    },
   },
 }
 </script>
 
 <template>
-  <input class="input"
-         v-if="type!='number'"
-         :placeholder="placeholder"
-         :type="type"
-         :value="modelValue"
-         :maxlength="maxLength"
-         @input="update($event as InputEvent)"
-  />
-  <input class="input"
-         v-else
-         :placeholder="placeholder"
-         :type="type"
-         :min="minNumber"
-         :max="maxNumber"
-         :value="modelValue"
-         @input="validate($event as InputEvent)"
-         required
-  />
+  <label :for="id" v-if="labelText">
+      {{ labelText }}
+  </label>
+  <input
+      class="input"
+      :type="type"
+      :min="minNumber"
+      :max="maxNumber"
+      :value="modelValue"
+      :placeholder="placeholder"
+      :disabled="disabled"
+      :required="required"
+      :name="name"
+      @input="update($event as InputEvent)"
+      :id="id"
+  >
 </template>
 
 <style scoped>
@@ -104,6 +125,14 @@ export default {
   border: 1px solid var(--input-border);
   transition-duration: 0.2s;
   text-indent: 2%;
+}
+
+input[type="number"] {
+  text-align: center;
+}
+
+input[type="date"] {
+  padding: 1vw;
 }
 
 input[type="number"]::-webkit-outer-spin-button,

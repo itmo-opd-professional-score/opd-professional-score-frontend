@@ -1,11 +1,11 @@
 export type UserStatus = "unauthorized" | "unverified" | "authorized";
 export type UserRole = "USER" | "EXPERT" | "CONSULTANT" | "MODERATOR" | "ADMIN"
-
+export type UserSex = "MALE" | "FEMALE"
 export interface UserStateInterface {
     /**
      * id of User in system
      */
-    id?: number | null;
+    id?: number;
     /**
      * status of User - on what step of authentication currently is
      */
@@ -14,17 +14,27 @@ export interface UserStateInterface {
     /**
      * Name on website
      */
-    username?: string | null;
+    username?: string;
 
     /**
      * User's password
      */
-    password?: string | null;
+    password?: string;
 
     /**
      * User's email (and login)
      */
-    email?: string | null;
+    email?: string;
+
+    /**
+     * User's age (for tests)
+     */
+    birth?: string;
+
+    /**
+     * User's sex (for tests)
+     */
+    sex?: UserSex | undefined;
 
     /**
      * User's role on website
