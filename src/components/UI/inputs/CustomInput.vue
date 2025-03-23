@@ -9,7 +9,7 @@ export default {
       default: 'text',
     },
     modelValue: {
-      type: [String, Number],
+      type: [String, Number, Boolean],
     },
     minNumber: {
       type: Number,
@@ -22,6 +22,10 @@ export default {
     maxLength: {
       type: Number,
       default: 1000,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     }
   },
   methods: {
@@ -55,27 +59,40 @@ export default {
 </script>
 
 <template>
-  <input class="input"
-         v-if="type!='number'"
-         :placeholder="placeholder"
-         :type="type"
-         :value="modelValue"
-         :maxlength="maxLength"
-         @input="update($event as InputEvent)"
-  />
-  <input class="input"
-         v-else
-         :placeholder="placeholder"
-         :type="type"
-         :min="minNumber"
-         :max="maxNumber"
-         :value="modelValue"
-         @input="validate($event as InputEvent)"
-         required
-  />
+  <div class="input-wrapper">
+    <input class="input"
+           v-if="type!='number' && type!='checkbox'"
+           :placeholder="placeholder"
+           :type="type"
+           :value="modelValue"
+           :maxlength="maxLength"
+           @input="update($event as InputEvent)"
+    />
+    <input class="input"
+           v-if="type=='number'"
+           :placeholder="placeholder"
+           :type="type"
+           :min="minNumber"
+           :max="maxNumber"
+           :value="modelValue"
+           @input="validate($event as InputEvent)"
+           required
+    />
+    <input class="input"
+           v-if="type == 'checkbox'"
+           type="checkbox"
+           :checked="modelValue as boolean"
+           :disabled="disabled"
+           required
+    />
+  </div>
 </template>
 
 <style scoped>
+.input-wrapper {
+  width: 100%;
+}
+
 .input {
   width: 100%;
   height: 100%;
