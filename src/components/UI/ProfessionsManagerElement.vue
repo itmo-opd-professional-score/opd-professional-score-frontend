@@ -1,13 +1,13 @@
 <script lang="ts">
 import {useDevice} from "../../utils/MobileDetector.ts";
-import ChangeProfessionElementDesktop from "./desktop/ChangeProfessionElementDesktop.vue";
+import ProfessionsManagerElementDesktop from "./desktop/ProfessionsManagerElementDesktop.vue";
 import eventBus from "../../store/eventBus/event-bus.ts";
-import ChangeProfessionElementMobile from "./mobile/ChangeProfessionElementMobile.vue";
+import ProfessionsManagerElementMobile from "./mobile/ProfessionsManagerElementMobile.vue";
 
 export default {
   name: "ProfessionsManagerElement",
+  components: {ProfessionsManagerElementMobile, ProfessionsManagerElementDesktop},
   emits: ["edit-profession"],
-  components: {ChangeProfessionElementMobile, ChangeProfessionElementDesktop},
   props: {
     id: {
       type: Number,
@@ -26,6 +26,6 @@ export default {
 </script>
 
 <template>
-  <ChangeProfessionElementDesktop :id="id" v-if="!isMobile"/>
-  <ChangeProfessionElementMobile :id="id" v-else/>
+  <ProfessionsManagerElementDesktop :id="id" v-if="!isMobile"/>
+  <ProfessionsManagerElementMobile :id="id" v-else/>
 </template>

@@ -4,7 +4,7 @@ import CommonButton from "../CommonButton.vue";
 import eventBus from "../../../store/eventBus/event-bus.ts";
 
 export default {
-  name: 'ChangeProfessionElementMobile',
+  name: 'ProfessionsManagerElementDesktop',
   computed: {
     eventBus() {
       return eventBus
@@ -33,12 +33,21 @@ export default {
 
 <template>
   <div class="wrapper" @click="$router.push(`/profession/${id}`)">
-    <div class="id" id="id">
-      #<slot name="id">12345</slot>
+    <div class="id" id="id">#
+      <slot name="id">12345</slot>
     </div>
-    <a class="prof_name" id="name">
+    <a class="prof_name" id="prof_name">
       <slot name="name">Lorem ipsum dolor sit amet.</slot>
     </a>
+    <div class="created">
+      <slot name="description">Ivanov Ivan Ivanovich</slot>
+    </div>
+    <div class="created">
+      <slot name="requirements">Ivanov Ivan Ivanovich</slot>
+    </div>
+    <div class="created">
+      <slot name="sphere">Ivanov Ivan Ivanovich</slot>
+    </div>
     <div class="changeProfession">
       <CommonButton
           @click="eventBus.emit('editProfession', $event.currentTarget)"
@@ -57,13 +66,12 @@ export default {
 .wrapper {
   background: var(--background-secondary);
   border-radius: 10px;
-  width: 90%;
-  height: 4rem;
+  width: 95%;
+  padding: 1vw;
   justify-content: center;
   align-items: center;
-  padding: 0;
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: 1fr 2fr 4fr 3fr 1fr 1fr;
 }
 
 .wrapper:hover {
@@ -73,7 +81,7 @@ export default {
 .wrapper > div,
 .wrapper > a {
   border-right: 1px solid black;
-  padding: 0 5px;
+  padding: 5px;
   height: 70%;
   display: flex;
   flex-direction: column;
@@ -84,8 +92,8 @@ export default {
   color: black;
 }
 
-#id, #name{
-  text-align: center;
+#id, #prof_name{
+  text-align: left;
 }
 
 .wrapper > div:last-child {
