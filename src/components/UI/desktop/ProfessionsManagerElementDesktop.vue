@@ -32,20 +32,20 @@ export default {
 </script>
 
 <template>
-  <div class="wrapper" @click="$router.push(`/profession/${id}`)">
-    <div class="id" id="id">#
+  <div class="wrapper">
+    <div class="id" id="id" @click="$router.push(`/profession/${id}`)">#
       <slot name="id">12345</slot>
     </div>
-    <a class="prof_name" id="prof_name">
+    <a class="prof_name" id="prof_name" @click="$router.push(`/profession/${id}`)">
       <slot name="name">Lorem ipsum dolor sit amet.</slot>
     </a>
-    <div class="created">
+    <div class="created" @click="$router.push(`/profession/${id}`)">
       <slot name="description">Ivanov Ivan Ivanovich</slot>
     </div>
-    <div class="created">
+    <div class="created" @click="$router.push(`/profession/${id}`)">
       <slot name="requirements">Ivanov Ivan Ivanovich</slot>
     </div>
-    <div class="created">
+    <div class="created" @click="$router.push(`/profession/${id}`)">
       <slot name="sphere">Ivanov Ivan Ivanovich</slot>
     </div>
     <div class="changeProfession">

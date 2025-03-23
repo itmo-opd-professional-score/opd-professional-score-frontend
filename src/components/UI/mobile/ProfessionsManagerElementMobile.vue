@@ -32,16 +32,16 @@ export default {
 </script>
 
 <template>
-  <div class="wrapper" @click="$router.push(`/profession/${id}`)">
-    <div class="field" id="id">
+  <div class="wrapper">
+    <div class="field" id="id" @click="$router.push(`/profession/${id}`)">
       <span class="bold-text">Profession ID: </span>
       <slot name="id">12345</slot>
     </div>
-    <div class="field" id="prof_name">
+    <div class="field" id="prof_name" @click="$router.push(`/profession/${id}`)">
       <span class="bold-text">Name: </span>
       <slot name="field">Lorem ipsum dolor sit amet.</slot>
     </div>
-    <div class="field">
+    <div class="field" @click="$router.push(`/profession/${id}`)">
       <span class="bold-text">Description: </span>
       <slot name="description">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos tempore, tenetur. Cumque
         fugiat ipsum minima omnis perferendis placeat qui quisquam sapiente. Dignissimos hic incidunt quas repudiandae
@@ -49,13 +49,13 @@ export default {
         reiciendis sequi tempore? Accusantium amet at doloribus harum, minima temporibus veritatis?
       </slot>
     </div>
-    <div class="field">
+    <div class="field" @click="$router.push(`/profession/${id}`)">
       <span class="bold-text">Requirements: </span>
       <slot name="requirements">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate dicta, ipsum
         officia qui veritatis voluptate.
       </slot>
     </div>
-    <div class="field">
+    <div class="field" @click="$router.push(`/profession/${id}`)">
       <span class="bold-text">Sphere: </span>
       <slot name="sphere">IT</slot>
     </div>
