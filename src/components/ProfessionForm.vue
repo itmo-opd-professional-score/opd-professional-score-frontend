@@ -54,13 +54,11 @@ export default {
     <h1>Добавить профессию</h1>
 
     <label for="profession-name">Название профессии:</label>
-    <div class="input">
-      <CustomInput
-          placeholder="Введите название профессии"
-          v-model="name"
-          type="text"
-      />
-    </div>
+    <CustomInput
+        placeholder="Введите название профессии"
+        v-model="name"
+        type="text"
+    />
 
     <label for="description">Описание:</label>
     <CustomTextareaInput class="textarea" :placeholder="'Описание профессии'" :rows="4" v-model="description"/>

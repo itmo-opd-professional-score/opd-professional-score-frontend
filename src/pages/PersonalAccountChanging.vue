@@ -37,18 +37,14 @@ const updateProfile = async () => {
     <div class="fields">
       <div class="field username">
         <h3>Имя пользователя</h3>
-        <div class="input-wrapper">
-          <CustomInput type="text" v-model="UserState.username"/>
-        </div>
+        <CustomInput type="text" v-model="UserState.username"/>
       </div>
       <div class="field age">
         <h3>Дата Рождения</h3>
-        <div class="input-wrapper">
-          <CustomInput
-              type="date"
-              v-model="UserState.birth"
-          />
-        </div>
+        <CustomInput
+            type="date"
+            v-model="UserState.birth"
+        />
       </div>
       <div class="field sex">
         <h3>Пол</h3>

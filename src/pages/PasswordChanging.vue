@@ -116,14 +116,12 @@ export default {
 <template>
   <div class="container" v-if="step == 1">
     <h1 class="header">Изменение пароля</h1>
-    <label class="email-label">Введите электронную почту, на которую зарегистрирован Ваш аккаунт</label>
-    <div class="input-block">
-      <CustomInput
-          v-model="email"
-          placeholder="Эл. почта"
-          type="email"
-      />
-    </div>
+    <CustomInput
+        label-text="Введите электронную почту, на которую зарегистрирован Ваш аккаунт"
+        v-model="email"
+        placeholder="Эл. почта"
+        type="email"
+    />
     <CommonButton class="button" @click="goToSecondStep" @keyup.enter="goToSecondStep">
       <template v-slot:placeholder>Продолжить</template>
     </CommonButton>
@@ -186,6 +184,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  align-items: center;
 }
 
 .input-block {

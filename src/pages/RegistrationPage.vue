@@ -91,43 +91,35 @@ export default defineComponent({
     <h1 class="header">Регистрация</h1>
     <div class="input-container">
       <p>Имя пользователя:</p>
-      <div class="form-input">
-        <CustomInput
-            v-model="username"
-            placeholder="Введите имя пользователя"
-            type="email"
-        />
-      </div>
+      <CustomInput
+          v-model="username"
+          placeholder="Введите имя пользователя"
+          type="email"
+      />
     </div>
     <div class="input-container">
       <p>Электронная почта:</p>
-      <div class="form-input">
-        <CustomInput
-            v-model="email"
-            placeholder="Введите электронную почту"
-            type="email"
-        />
-      </div>
+      <CustomInput
+          v-model="email"
+          placeholder="Введите электронную почту"
+          type="email"
+      />
     </div>
     <div class="input-container">
       <p>Пароль:</p>
-      <div class="form-input">
-        <CustomInput
-            v-model="password"
-            placeholder="Введите пароль"
-            type="password"
-        />
-      </div>
+      <CustomInput
+          v-model="password"
+          placeholder="Введите пароль"
+          type="password"
+      />
     </div>
     <div class="input-container">
       <p>Подтверждение пароля:</p>
-      <div class="form-input">
-        <CustomInput
-            v-model="passwordCheck"
-            placeholder="Подтвердите пароль"
-            type="password"
-        />
-      </div>
+      <CustomInput
+          v-model="passwordCheck"
+          placeholder="Подтвердите пароль"
+          type="password"
+      />
     </div>
     <div class="auth-links-container">
       <router-link to="/auth/registration">Уже есть аккаунт?</router-link>
@@ -166,14 +158,6 @@ export default defineComponent({
   p {
     font-weight: 500;
   }
-}
-
-.form-input {
-  height: 2.5rem;
-}
-
-.form-input::placeholder {
-  font-size: 0.9rem;
 }
 
 .auth-links-container {
