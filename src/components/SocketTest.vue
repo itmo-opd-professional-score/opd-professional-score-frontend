@@ -34,9 +34,12 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="wrapper">
-    <CustomInput @search="search(inputValue)" v-model="inputValue" :placeholder="'Введите сюда название ПВК'"/>
-  </div>
+  <CustomInput
+      @search="search(inputValue)"
+      v-model="inputValue"
+      placeholder="Введите сюда название ПВК"
+      type="text"
+  />
 </template>
 
 <style scoped>

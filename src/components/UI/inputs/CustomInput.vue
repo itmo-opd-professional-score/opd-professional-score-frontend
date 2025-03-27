@@ -17,6 +17,7 @@ export default {
       validator: (v: string) =>
           ['text', 'password', 'email', 'number', 'radio', 'checkbox', 'tel', 'date'].includes(v),
     },
+    selector: String,
     modelValue: {
       type: [String, Number],
     },
@@ -78,25 +79,31 @@ export default {
 </script>
 
 <template>
-  <label :for="id" v-if="labelText">
+  <div class="input-wrapper">
+    <label :for="id" v-if="labelText">
       {{ labelText }}
-  </label>
-  <input
-      class="input"
-      :type="type"
-      :min="minNumber"
-      :max="maxNumber"
-      :value="modelValue"
-      :placeholder="placeholder"
-      :disabled="disabled"
-      :required="required"
-      :name="name"
-      @input="update($event as InputEvent)"
-      :id="id"
-  >
+    </label>
+    <input
+        class="input"
+        :type="type"
+        :min="minNumber"
+        :max="maxNumber"
+        :value="modelValue"
+        :placeholder="placeholder"
+        :disabled="disabled"
+        :required="required"
+        :class="selector"
+        :name="name"
+        @input="update($event as InputEvent)"
+        :id="id"
+    >
+  </div>
 </template>
 
 <style scoped>
+.input-wrapper {
+  min-height: 2.5rem;
+}
 .input {
   width: 100%;
   height: 100%;
@@ -104,6 +111,7 @@ export default {
   border-radius: 0.5rem;
   transition-duration: 0.2s;
   background-color: white;
+  padding: 0.5rem;
   text-align: left;
   text-indent: 2%;
 }
@@ -139,5 +147,13 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+.input.no-borders {
+  border: none;
+
+  :focus, :active, :focus {
+    border: none;
+  }
 }
 </style>
