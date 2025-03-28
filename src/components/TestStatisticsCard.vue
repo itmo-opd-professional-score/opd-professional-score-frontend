@@ -20,7 +20,7 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    maxScore: { //можно откорректировать в будущем в зависимости от того
+    maxScore: {
       type: Number,
       required: true
     },
@@ -117,7 +117,8 @@ export default defineComponent({
 .text
 {
   font-size: 16px;
-  color: #ffffff;
+  color: rgb(237, 227, 227, 0.9);
+  font-weight: 500;
 }
 .date {
   margin-top: 30px;
@@ -132,7 +133,7 @@ export default defineComponent({
 .progress-bar {
   max-width: 500px;
   height: 10px;
-  background: #eee;
+  color: rgb(237, 227, 227, 0.9);
   border-radius: 5px;
   overflow: hidden;
   margin-bottom: 30px;
