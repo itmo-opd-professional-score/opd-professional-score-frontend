@@ -1,24 +1,11 @@
-name: Assign Reviewer
-
+name: Review Assign
 on:
   pull_request:
-    types: [opened]
-
+    types: [opened, ready_for_review]
 jobs:
-  assign-reviewer:
+  assign:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Assign Reviewer
-        uses: actions/github-script@v6
+      - uses: hkusu/review-assign-action@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.pulls.createReviewRequest({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-              reviewers: ['scobca', 'TheGeniusOfEternity']
-            });
+          reviewers: scobca, TheGeniusOfEternity
