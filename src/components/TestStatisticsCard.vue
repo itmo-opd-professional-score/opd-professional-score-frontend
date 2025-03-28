@@ -1,5 +1,5 @@
 <script lang="ts">
-import {computed, defineComponent} from 'vue'
+import {defineComponent} from 'vue'
 
 export default defineComponent({
   name: "StatisticsCard",
@@ -54,14 +54,23 @@ export default defineComponent({
     <h4 class="title">{{ testName }}</h4>
     <p class="category">Категория: {{ testCategory }}</p>
     <p class="user">Респондент: {{ userName }}</p>
-    <p class="score">
-      Результат: {{ score }} / {{ maxScore }} ({{ scorePercentage }})
-    </p>
-    <div class="progress-bar">
-      <div class="progress" :style="{ width: scorePercentage, backgroundColor: cardColors }"></div>
+    <div class="result">
+      <div class="score-result">
+        <p class="score">
+          Результат: {{ score }} / {{ maxScore }} ({{ scorePercentage }})
+       </p>
+        <div class="progress-bar">
+          <div class="progress" :style="{ width: scorePercentage, backgroundColor: cardColors }"></div>
+        </div>
+      </div>
+      <div class="time-result">
+        <p class="text">Затраченное время:</p>
+        <p class="time">{{time}}</p>
+      </div>
+      <div class="level-result">
+        <p class="level">Оценка: </p>
+      </div>
     </div>
-    <p class="time">Затраченное время: </p>
-    <p class="level">Оценка: <b></b></p>
     <p class="date">Дата: {{ date }}</p>
     <p class="valid">Валидность: {{valid}}</p>
   </div>
@@ -69,19 +78,35 @@ export default defineComponent({
 
 <style scoped>
 .statistics-card {
+  background-color: var(--background-primary);
   display: flex;
   flex-direction: column;
+  gap: 20px;
   padding: 15px;
-  border-radius: 10px;
-  border: 2px solid;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-  max-width: 300px;
-  background: #fff;
+  border-radius: 15px;
+  width: 35vw;
 }
 
 .title {
-  font-size: 18px;
+  font-size: 24px;
+  margin: 15px 0;
+  color: #ffffff;
   font-weight: bold;
+}
+.result {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  background-color: var(--background-primary);
+  padding: 10px;
+  border-radius: 15px;
+}
+.score-result,
+.time-result,
+.level-result {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .category,
@@ -89,20 +114,28 @@ export default defineComponent({
 .score,
 .time,
 .level,
-.date,
-.valid
+.text
 {
-  font-size: 14px;
-  margin: 4px 0;
+  font-size: 16px;
+  color: #ffffff;
 }
-
+.date {
+  margin-top: 30px;
+}
+.date,
+.valid {
+  color: #3a3e53;
+}
+.valid{
+  margin-bottom: 15px;
+}
 .progress-bar {
-  width: 100%;
+  max-width: 500px;
   height: 10px;
   background: #eee;
   border-radius: 5px;
   overflow: hidden;
-  margin: 5px 0;
+  margin-bottom: 30px;
 }
 
 .progress {

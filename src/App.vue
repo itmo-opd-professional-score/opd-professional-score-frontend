@@ -7,6 +7,9 @@ import TestResultsPage from "./pages/TestResultsPage.vue";
 import TestStatisticsCard from "./components/TestStatisticsCard.vue";
 import TestManagerElement from "./components/UI/TestManagerElement.vue";
 import TestScoreElement from "./components/UI/TestScoreElement.vue";
+import FlipCard from "./components/UI/FlipCard.vue";
+import TestsScoreList from "./components/TestsScoreList.vue";
+import PersonalAccount from "./pages/PersonalAccount.vue";
 
 const popupStore = usePopupStore();
 </script>
@@ -22,8 +25,8 @@ const popupStore = usePopupStore();
     </div>
     <router-view></router-view>
   </div>
-  <TestStatisticsCard :time="2" :date="'33'" :max-score="10" :score="10" :test-name="'ff'"></TestStatisticsCard>
-  <TestScoreElement></TestScoreElement>
+  <PersonalAccount></PersonalAccount>
+  <TestResultsPage></TestResultsPage>
 </template>
 
 <style scoped>
