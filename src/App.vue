@@ -4,12 +4,6 @@ import InfoPopup from "./components/UI/popups/InfoPopup.vue";
 import ErrorPopup from "./components/UI/popups/ErrorPopup.vue";
 import {usePopupStore} from "./store/popup.store.ts";
 import TestResultsPage from "./pages/TestResultsPage.vue";
-import TestStatisticsCard from "./components/TestStatisticsCard.vue";
-import TestManagerElement from "./components/UI/TestManagerElement.vue";
-import TestScoreElement from "./components/UI/TestScoreElement.vue";
-import FlipCard from "./components/UI/FlipCard.vue";
-import TestsScoreList from "./components/TestsScoreList.vue";
-import PersonalAccount from "./pages/PersonalAccount.vue";
 
 const popupStore = usePopupStore();
 </script>
@@ -25,7 +19,6 @@ const popupStore = usePopupStore();
     </div>
     <router-view></router-view>
   </div>
-  <PersonalAccount></PersonalAccount>
   <TestResultsPage></TestResultsPage>
 </template>
 

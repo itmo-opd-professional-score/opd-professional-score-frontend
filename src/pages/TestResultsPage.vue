@@ -94,9 +94,9 @@ const testData = ref([
     <h3>Текущий тест</h3>
     <!-- Блок 1: Информация о текущем тесте -->
     <section class="current-test">
-      <!--Пока графа нет - два одинаковых блока для визуализации-->
+      <!--Пока графа нет его заменяет блок temp -->
       <TestStatisticsCard :time="2" :date="'33'" :max-score="10" :score="10" :test-name="'Проверка на скорость'"></TestStatisticsCard>
-      <TestStatisticsCard :time="0" :date="''" :max-score="3" :score="2" :test-name="''"></TestStatisticsCard>
+      <div class = "temp"></div>
     </section>
     <!--Блок 2: Все результаты теста этого пользователя-->
 
@@ -129,6 +129,14 @@ const testData = ref([
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+}
+.temp {
+  background-color: var(--background-primary);
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  border-radius: 15px;
+  width: 35vw;
 }
 .user-test-history {
   display: flex;
