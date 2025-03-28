@@ -34,25 +34,25 @@ defineProps<{ disabled?: boolean }>()
   cursor: wait;
 }
 
-.submit_button {
+.wrapper.submit_button {
   background-color: var(--submit-button-secondary);
   border-color: var(--submit-button-primary);
   color: white;
 }
 
-.submit_button:hover {
+.wrapper.submit_button:hover {
   background-color: var(--submit-button-primary);
   border-color: transparent;
   color: white;
 }
 
-.logout_button {
+.wrapper.logout_button {
   background-color: var(--danger-button-secondary);
   border-color: var(--danger-button-primary);
   color: white;
 }
 
-.logout_button:hover {
+.wrapper.logout_button:hover {
   background-color: var(--danger-button-primary);
   border-color: transparent;
   color: white;
