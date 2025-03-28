@@ -9,6 +9,7 @@ import PasswordChanging from "../pages/PasswordChanging.vue";
 import LogInPage from "../pages/LogInPage.vue";
 import RegistrationPage from "../pages/RegistrationPage.vue";
 import PersonalAccountChanging from "../pages/PersonalAccountChanging.vue";
+import SoundHardTest from "../pages/tests/sound/hard/SoundHardTest.vue";
 
 const routes = [
   {
@@ -63,6 +64,11 @@ const routes = [
     component: PasswordChanging,
     meta: {ruName: "Изменение пароля"}
   },
+  {
+    path: '/test/sound/hard',
+    component: SoundHardTest,
+    meta: {ruName: "Оценка скорости реакции на сложный звуковой сигнал - сложение в уме"}
+  }
 ];
 
 const router = createRouter({
