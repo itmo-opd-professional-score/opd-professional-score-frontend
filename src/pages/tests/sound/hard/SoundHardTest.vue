@@ -1,9 +1,10 @@
 <script setup lang="ts">
   import CommonButton from "../../../../components/UI/CommonButton.vue";
-  import {ref} from "vue";
+  import {onMounted, ref} from "vue";
   import router from "../../../../router/router.ts";
-  import type {SoundHardTestAnswerDto, SoundHardTestQuestionDto} from "./SoundHardTest.types.ts";
-  import type {CreateSoundAdditionOutput} from "../../../../api/resolvers/test/dto/output/create-sound-addition-output.dto.ts";
+  import type {SoundHardTestAnswerDto, SoundHardTestQuestionDto, SoundHardTestSumType} from "./SoundHardTest.types.ts";
+  import {TestResolver} from "../../../../api/resolvers/test/test.resolver.ts";
+  import {usePopupStore} from "../../../../store/popup.store.ts";
 
   const questionsCount = 10
   const step = ref<number>(0);
@@ -14,7 +15,10 @@
   const averageResponse = ref<string>()
   const questions: SoundHardTestQuestionDto[] = []
   const answers: SoundHardTestAnswerDto[] = []
-  const testResults = ref<CreateSoundAdditionOutput>()
+
+  const props = defineProps<{
+    token: string
+  }>()
 
   const changeStep = () => {
     step.value = step.value + 1;
@@ -27,12 +31,6 @@
         timeSum += answer.elapsedTime
       })
       averageResponse.value = (timeSum / questionsCount).toFixed(2)
-      testResults.value = {
-        id: Math.floor(timeSum * 10 / questionsCount),
-        questions: questions,
-        answers: answers,
-        elapsedTime: Date.now() - timeSum,
-      }
     }
   }
 
@@ -69,9 +67,36 @@
     questionNumber.value++
   }
 
-  const saveResults = () => {
-    //TODO implement data upload
+  const calculateDispersion = (data: number[]) => {
+    const mean = data.reduce((sum, value) => sum + value, 0) / data.length;
+    const variance = data.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0);
+    return Math.sqrt(variance / (data.length - 1));
   }
+
+  const saveResults = () => {
+    const testResolver = new TestResolver()
+    const popUpStore = usePopupStore()
+    testResolver.createSoundAddition({
+      userId: null,
+      averageCallbackTime: answers.reduce((sum, answer) => sum + answer.elapsedTime, 0) / questionsCount,
+      dispersion: calculateDispersion(answers.map(answer => answer.elapsedTime)),
+      allSignals: questionsCount,
+      mistakes: questionsCount - score.value,
+    }).then(result => {
+      localStorage.setItem("completedTestsLinks", JSON.stringify(props.token))
+      localStorage.setItem("completedTestsResults", JSON.stringify(result.body.token))
+      popUpStore.activateInfoPopup("Results were saved successfully!")
+    }).catch(error => {
+      popUpStore.activateErrorPopup(`Error code: ${error.status}. ${error.message}`)
+    })
+  }
+
+  onMounted(() => {
+    const completedTestsLinks = localStorage.getItem("completedTestsLinks")
+    if (completedTestsLinks != null && completedTestsLinks.indexOf(props.token) != -1) {
+      step.value = -1
+    }
+  })
 </script>
 
 <template>
