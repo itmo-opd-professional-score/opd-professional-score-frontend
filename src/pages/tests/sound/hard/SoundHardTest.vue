@@ -2,10 +2,9 @@
   import CommonButton from "../../../../components/UI/CommonButton.vue";
   import {ref} from "vue";
   import router from "../../../../router/router.ts";
-  import type {SoundHardTestQuestionDto} from "./dto/SoundHardTestQuestion.dto.ts";
-  import type {SoundHardTestAnswerDto} from "./dto/SoundHardTestAnswer.dto.ts";
-  import type {SoundHardTestDto} from "./dto/SoundHardTest.dto.ts";
-  import type {SoundHardTestSumType} from "./dto/SoundHardTestSumType.types.ts";
+  import type {SoundHardTestAnswerDto, SoundHardTestQuestionDto} from "./SoundHardTest.types.ts";
+  import type {CreateSoundAdditionOutput} from "../../../../api/resolvers/test/dto/output/create-sound-addition-output.dto.ts";
+
   const questionsCount = 10
   const step = ref<number>(0);
   const score = ref<number>(0);
@@ -15,7 +14,7 @@
   const averageResponse = ref<string>()
   const questions: SoundHardTestQuestionDto[] = []
   const answers: SoundHardTestAnswerDto[] = []
-  const testResults = ref<SoundHardTestDto>()
+  const testResults = ref<CreateSoundAdditionOutput>()
 
   const changeStep = () => {
     step.value = step.value + 1;
