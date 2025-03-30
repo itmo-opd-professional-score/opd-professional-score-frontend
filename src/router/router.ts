@@ -65,9 +65,14 @@ const routes = [
     meta: {ruName: "Изменение пароля"}
   },
   {
-    path: `/test/sound/hard/:token`,
+    path: `/test/addition/sound`,
     component: SoundHardTest,
+    meta: {requiresAuth: true, ruName: "Оценка скорости реакции на сложный звуковой сигнал - сложение в уме"}
+  },
+  {
+    path: `/invitation/test/:token`,
     props: true,
+    component: SoundHardTest,
     meta: {ruName: "Оценка скорости реакции на сложный звуковой сигнал - сложение в уме"}
   }
 ];

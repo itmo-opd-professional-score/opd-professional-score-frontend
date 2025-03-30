@@ -5,6 +5,8 @@
   import type {SoundHardTestAnswerDto, SoundHardTestQuestionDto, SoundHardTestSumType} from "./SoundHardTest.types.ts";
   import {TestResolver} from "../../../../api/resolvers/test/test.resolver.ts";
   import {usePopupStore} from "../../../../store/popup.store.ts";
+  import {UserState} from "../../../../utils/userState/UserState.ts";
+  import type {CreateSoundAdditionOutputDto} from "../../../../api/resolvers/test/dto/output/create-sound-addition-output.dto.ts";
 
   const questionsCount = 10
   const step = ref<number>(0);
@@ -13,12 +15,37 @@
   const testStartTime = ref<number>(0);
   const questionNumber = ref<number>(-1);
   const averageResponse = ref<string>()
+  const isSpeaking = ref<boolean>(false);
   const questions: SoundHardTestQuestionDto[] = []
   const answers: SoundHardTestAnswerDto[] = []
-
+  const utterance = new SpeechSynthesisUtterance()
+  let voices = speechSynthesis.getVoices()
   const props = defineProps<{
-    token: string
+    token?: string
   }>()
+
+  speechSynthesis.onvoiceschanged = () => {
+    voices = speechSynthesis.getVoices()
+  }
+
+  const convertTextToSpeech = (str: string) => {
+
+    return new Promise<void>((resolve): void => {
+      utterance.onstart = () => {
+        isSpeaking.value = true
+      }
+      utterance.onend = () => {
+        isSpeaking.value = false
+        resolve()
+      }
+      const voice = voices[0];
+      if (!str) return;
+      utterance.text = str;
+      utterance.voice = voice;
+      utterance.lang = voice.lang;
+      speechSynthesis.speak(utterance);
+    })
+  }
 
   const changeStep = () => {
     step.value = step.value + 1;
@@ -31,6 +58,7 @@
         timeSum += answer.elapsedTime
       })
       averageResponse.value = (timeSum / questionsCount).toFixed(2)
+      saveResults()
     }
   }
 
@@ -55,7 +83,7 @@
     }
   }
 
-  const generateQuestion = () => {
+  const generateQuestion = async () => {
     const num1 = Math.floor(Math.random() * 1000);
     const num2 = Math.floor(Math.random() * 1000);
     questions.push({
@@ -63,8 +91,9 @@
       question: `${num1} + ${num2}`,
       answer: (num1 + num2) % 2 == 0 ? "EVEN" : "ODD",
     })
-    questionStartTime.value = Date.now()
     questionNumber.value++
+    await convertTextToSpeech(`${num1} + ${num2}`)
+    questionStartTime.value = Date.now()
   }
 
   const calculateDispersion = (data: number[]) => {
@@ -76,25 +105,28 @@
   const saveResults = () => {
     const testResolver = new TestResolver()
     const popUpStore = usePopupStore()
-    testResolver.createSoundAddition({
-      userId: null,
+    const data: CreateSoundAdditionOutputDto = {
+      userId: UserState.id != undefined ? UserState.id : null,
       averageCallbackTime: answers.reduce((sum, answer) => sum + answer.elapsedTime, 0) / questionsCount,
       dispersion: calculateDispersion(answers.map(answer => answer.elapsedTime)),
       allSignals: questionsCount,
       mistakes: questionsCount - score.value,
-    }).then(result => {
+    }
+    testResolver.createSoundAddition(data).then(result => {
       localStorage.setItem("completedTestsLinks", JSON.stringify(props.token))
       localStorage.setItem("completedTestsResults", JSON.stringify(result.body.token))
       popUpStore.activateInfoPopup("Results were saved successfully!")
     }).catch(error => {
-      popUpStore.activateErrorPopup(`Error code: ${error.status}. ${error.message}`)
+      popUpStore.activateErrorPopup(`Error code: ${error.status}. ${error.response.data.message}`)
     })
   }
 
-  onMounted(() => {
-    const completedTestsLinks = localStorage.getItem("completedTestsLinks")
-    if (completedTestsLinks != null && completedTestsLinks.indexOf(props.token) != -1) {
-      step.value = -1
+  onMounted(async () => {
+    if (props.token) {
+      const completedTestsLinks = localStorage.getItem("completedTestsLinks")
+      if (completedTestsLinks != null && completedTestsLinks.indexOf(props.token) != -1) {
+        step.value = -1
+      }
     }
   })
 </script>
@@ -126,16 +158,16 @@
       </div>
       <h3 class="question">{{ questions[questionNumber].question }}</h3>
       <div class="controls">
-        <CommonButton class="button" @click="submitAnswer('ODD')">
+        <CommonButton :disabled="isSpeaking" class="button" @click="submitAnswer('ODD')">
           <template v-slot:placeholder>ODD</template>
         </CommonButton>
-        <CommonButton class="button" @click="submitAnswer('EVEN')">
+        <CommonButton :disabled="isSpeaking" class="button" @click="submitAnswer('EVEN')">
           <template v-slot:placeholder>EVEN</template>
         </CommonButton>
       </div>
     </div>
     <div class="results block" v-if="step == 2">
-      <h1 class="heading">Тест пройден!"</h1>
+      <h1 class="heading">Тест пройден!</h1>
       <div class="description">
         <p>Поздравляем Вас с прохождением теста на проверку скорости реакции на сложный звуковой сигнал! Ваши результаты:</p>
         <ul>
@@ -144,13 +176,33 @@
           <li>Правильные ответы: {{ score }} / {{ questionsCount }} </li>
           <li>Среднее время ответа: {{ averageResponse }} сек</li>
         </ul>
-        <p>Результат будет отображен после ответа на все вопросы</p>
+        <a href="#">Посмотреть рейтинг и оценку результатов</a>
       </div>
       <div class="controls">
-        <CommonButton class="button" @click="router.go">
+        <CommonButton v-if="UserState.id" class="button" @click="router.go">
           <template v-slot:placeholder>Пройти заново</template>
         </CommonButton>
-        <CommonButton class="button submit_button" @click="saveResults">
+        <CommonButton v-else class="button" @click="router.push('/auth/login')">
+          <template v-slot:placeholder>Сохранить результаты</template>
+        </CommonButton>
+      </div>
+    </div>
+    <div class="error block" v-if="step == -1">
+      <h1 class="heading">Тест недоступен</h1>
+      <div class="description">
+        <p>К сожалению, вы не можете пройти данный тест. Возможные причины</p>
+        <ul>
+          <li>Пригласительная ссылка недействительна</li>
+          <li>Тест не опубликован</li>
+          <li>Вы уже проходили этот тест</li>
+        </ul>
+        <p>Если ни один из вариантов Вам не подходит, то можете связаться с нами</p>
+      </div>
+      <div class="controls">
+        <CommonButton v-if="UserState.id" class="button" @click="router.go">
+          <template v-slot:placeholder>Пройти заново</template>
+        </CommonButton>
+        <CommonButton v-else class="button" @click="router.push('/auth/login')">
           <template v-slot:placeholder>Сохранить результаты</template>
         </CommonButton>
       </div>
@@ -209,9 +261,10 @@
         justify-content: space-between;
         width: 100%;
         margin-top: auto;
+        gap: 2vw;
 
         .button {
-          width: 15vw;
+          flex: 1;
           height: 10vw;
         }
       }
