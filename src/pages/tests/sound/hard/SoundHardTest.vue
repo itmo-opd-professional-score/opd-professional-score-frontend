@@ -118,32 +118,37 @@
       mistakes: questionsCount - score.value,
     }
     testResolver.createSoundAddition(data).then(result => {
-      completedTestsLinks.push(props.token)
-      completedTestsResults.push(result.body.testToken)
-      localStorage.setItem("completedTestsLinks", JSON.stringify(completedTestsLinks))
-      localStorage.setItem("completedTestsResults", JSON.stringify(completedTestsResults))
+      if (!UserState.id) {
+        completedTestsLinks.push(props.token)
+        completedTestsResults.push(result.body.testToken)
+        localStorage.setItem("completedTestsLinks", JSON.stringify(completedTestsLinks))
+        localStorage.setItem("completedTestsResults", JSON.stringify(completedTestsResults))
+      }
       popUpStore.activateInfoPopup("Results were saved successfully!")
     }).catch(error => {
       popUpStore.activateErrorPopup(`Error code: ${error.status}. ${error.response.data.message}`)
     })
   }
   onMounted(async () => {
-    const linksData = localStorage.getItem("completedTestsLinks")
-    const resultsData = localStorage.getItem("completedTestsResults")
-    if (linksData) {
-      completedTestsLinks.push(...JSON.parse(linksData))
-    }
-
-    if (resultsData) {
-      completedTestsResults.push(...JSON.parse(resultsData))
-    }
-    if (props.token && completedTestsLinks.length != 0) {
-      completedTestsLinks.forEach(link => {
-        const data = jwtDecode(link) as TestJwt
-        if (data.testType == "SOUND_ADDITION") {
-          step.value = -1
-        }
-      })
+    if (UserState.id) {
+      await router.push('/test/addition/sound')
+    } else {
+      const linksData = localStorage.getItem("completedTestsLinks")
+      const resultsData = localStorage.getItem("completedTestsResults")
+      if (linksData) {
+        completedTestsLinks.push(...JSON.parse(linksData))
+      }
+      if (resultsData) {
+        completedTestsResults.push(...JSON.parse(resultsData))
+      }
+      if (props.token && completedTestsLinks.length != 0) {
+        completedTestsLinks.forEach(link => {
+          const data = jwtDecode(link) as TestJwt
+          if (data.testType == "SOUND_ADDITION") {
+            step.value = -1
+          }
+        })
+      }
     }
   })
 </script>
