@@ -10,7 +10,7 @@
   import {jwtDecode} from "jwt-decode";
   import type {TestJwt} from "../../types";
 
-  const questionsCount = 10
+  const questionsCount = 25
   const step = ref<number>(0);
   const score = ref<number>(0);
   const questionStartTime = ref<number>(0);
@@ -161,7 +161,7 @@
         <p>Тест генерирует случайные суммы двух чисел, и Ваша задача как можно быстрее определить чётность суммы</p>
         <ul>
           <li>Кол-во вопросов: {{ questionsCount }}</li>
-          <li>Время выполнения: ~ {{ 5 }} минут</li>
+          <li>Время выполнения: ~{{ 1.5 }} минуты</li>
           <li>Варианты ответа: ЧЕТ / НЕЧЕТ </li>
           <li>Диапазон чисел: от 100 до 1000 </li>
         </ul>
@@ -193,9 +193,9 @@
         <p>Поздравляем Вас с прохождением теста на проверку скорости реакции на сложный звуковой сигнал! Ваши результаты:</p>
         <ul>
           <li>Кол-во вопросов: {{ questionsCount }}</li>
-          <li>Время выполнения: ~{{ 5 }}</li>
           <li>Правильные ответы: {{ score }} / {{ questionsCount }} </li>
           <li>Среднее время ответа: {{ averageResponse }} сек</li>
+          <li>Среднее стандартное отклонение: {{ calculateDispersion(answers.map(answer => answer.elapsedTime)).toFixed(2) }} сек</li>
         </ul>
         <a href="#">Посмотреть рейтинг и оценку результатов</a>
       </div>
