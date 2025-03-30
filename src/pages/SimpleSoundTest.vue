@@ -50,7 +50,7 @@ export default defineComponent({
       };
     }
     ,
-    SimpleSoundTestResultObject(): {
+    simpleSoundTestResultObject(): {
       userId: number;
       test:string;
       averageCallbackTime: number;
@@ -78,7 +78,7 @@ export default defineComponent({
         const response = await fetch('/api', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.SimpleSoundTestResultObject)
+          body: JSON.stringify(this.simpleSoundTestResultObject)
         });
         if (!response.ok) {
           return Promise.reject(new Error('Ошибка отправки'));
