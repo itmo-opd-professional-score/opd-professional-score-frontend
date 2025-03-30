@@ -4,6 +4,7 @@ import type {ChangePasswordSecondStepOutputDto} from "./dto/output/change-passwo
 import type {UserDataInputDto} from "./dto/input/user-data-input.dto.ts";
 import {usePopupStore} from "../../../store/popup.store.ts";
 import type {DefaultErrorDto} from "../../dto/common/default-error.dto.ts";
+import type {UpdateUserOutputDto} from "./dto/output/update-user-output.dto.ts";
 
 export class UserResolver {
   private apiResolver = new ApiResolver("user");
@@ -33,6 +34,14 @@ export class UserResolver {
       "changePasswordSecondStep",
       "PATCH",
       data
+    )
+  }
+
+  public async updateUser(data: UpdateUserOutputDto) {
+    return await this.apiResolver.request<UpdateUserOutputDto, DefaultInputDto<string>>(
+        "update",
+        "PATCH",
+        data
     )
   }
 }

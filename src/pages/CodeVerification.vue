@@ -20,10 +20,14 @@ export default {
       <slot name="header">Подтверждение электронной почты</slot>
     </h1>
 
-    <div class="input">
-      <CustomInput :type="'number'" v-model="code" :min-number="0" :max-number="999999" :max-length="6"
-                   :placeholder="'Введите код с почты'"/>
-    </div>
+    <CustomInput
+        :type="'number'"
+        v-model="code"
+        :min-number="0"
+        :max-number="999999"
+        :max-length="6"
+        :placeholder="'Введите код с почты'"
+    />
 
     <div class="code-links-container">
       <p @click="$emit('sendCode')">Отправить код еще раз</p>

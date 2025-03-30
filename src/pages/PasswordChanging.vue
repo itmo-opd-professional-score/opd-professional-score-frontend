@@ -60,7 +60,7 @@ export default {
       this.userResolver.changePasswordSecondStep(data).then((result) => {
         if (result.status == 200) {
           localStorage.removeItem("token");
-          router.push('/');
+          router.push('/profile');
           this.popupStore.activateInfoPopup(result.body)
         }
       }).catch((err) => {
@@ -116,10 +116,12 @@ export default {
 <template>
   <div class="container" v-if="step == 1">
     <h1 class="header">Изменение пароля</h1>
-    <label class="email-label">Введите электронную почту, на которую зарегистрирован Ваш аккаунт</label>
-    <div class="input-block">
-      <CustomInput v-model="email" :placeholder="'Эл. почта'"/>
-    </div>
+    <CustomInput
+        label-text="Введите электронную почту, на которую зарегистрирован Ваш аккаунт"
+        v-model="email"
+        placeholder="Эл. почта"
+        type="email"
+    />
     <CommonButton class="button" @click="goToSecondStep" @keyup.enter="goToSecondStep">
       <template v-slot:placeholder>Продолжить</template>
     </CommonButton>
@@ -132,10 +134,10 @@ export default {
     </div>
     <div class="input-wrapper">
       <div class="input-block">
-        <CustomInput :placeholder="'Введите новый пароль'" v-model="password" :type="'password'"/>
+        <CustomInput :placeholder="'Введите новый пароль'" v-model="password" type="password"/>
       </div>
       <div class="input-block">
-        <CustomInput :placeholder="'Подтвердите новый пароль'" v-model="passwordCheck" :type="'password'"/>
+        <CustomInput :placeholder="'Подтвердите новый пароль'" v-model="passwordCheck" type="password"/>
       </div>
     </div>
     <CommonButton class="button" @click="checkPassword">
@@ -182,6 +184,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  align-items: center;
 }
 
 .input-block {

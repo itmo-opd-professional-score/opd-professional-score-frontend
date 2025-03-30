@@ -9,6 +9,7 @@ import PasswordChanging from "../pages/PasswordChanging.vue";
 import LogInPage from "../pages/LogInPage.vue";
 import RegistrationPage from "../pages/RegistrationPage.vue";
 import SimpleSoundTest from "../pages/SimpleSoundTest.vue";
+import PersonalAccountChanging from "../pages/PersonalAccountChanging.vue";
 
 const routes = [
   {
@@ -44,6 +45,11 @@ const routes = [
     meta: {requiresAuth: true, ruName: "Профиль"}
   },
   {
+    path: `/profile/change`,
+    component: PersonalAccountChanging,
+    meta: {requiresAuth: true, ruName: "Изменение профиля"}
+  },
+  {
     path: '/auth/login',
     component: LogInPage,
     meta: {ruName: "Вход"}
@@ -72,8 +78,8 @@ const router = createRouter({
 });
 
 
-router.beforeEach((to, from, next) => {
-  if ((to.meta.requiresAuth && UserState.status != "authorized") || from.meta.requiresAuth && UserState.status != "authorized") {
+router.beforeEach((to, _, next) => {
+  if ((to.meta.requiresAuth && UserState.status != "authorized")) {
     next({path: '/auth/login/'})
   } else {
     next()

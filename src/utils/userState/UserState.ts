@@ -1,5 +1,5 @@
 import { reactive } from "vue";
-import type {UserRole, UserStateInterface} from "./UserState.types.ts";
+import type {UserRole, UserSex, UserStateInterface} from "./UserState.types.ts";
 import {jwtDecode} from "jwt-decode";
 
 export const UserState = reactive<UserStateInterface>({
@@ -11,6 +11,8 @@ interface UserJwt {
     username: string;
     email: string;
     role: UserRole;
+    birth: string;
+    sex: UserSex;
     isBanned: boolean;
     iat: number;
     exp: number;
@@ -27,6 +29,9 @@ export const updateUserState = () => {
             UserState.status = "authorized";
             UserState.username = userData.username;
             UserState.email = userData.email;
+            UserState.birth = userData.birth;
+            UserState.sex = userData.sex;
+
             if (userData.role) {
                 UserState.role = userData.role;
             } else {
@@ -42,11 +47,6 @@ export const updateUserState = () => {
         UserState.role = userToVerify.role;
     } else {
         UserState.status = "unauthorized"
-        UserState.id = null
-        UserState.username = null
-        UserState.password = null
-        UserState.email = null
-        UserState.role = null
     }
 }
 
