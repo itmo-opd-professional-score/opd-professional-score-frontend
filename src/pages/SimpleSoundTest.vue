@@ -14,7 +14,7 @@ export default defineComponent({
       audioContext: null as AudioContext | null,
       reactionTimes: [] as number[],
       timeoutIds: [] as number[],
-      TRIAL_COUNT: 120 as number,
+      TRIAL_COUNT: 120,
       currentTrial: 0,
       startTime: 0,
       inactivityTimeout: null as number | null,
@@ -103,7 +103,7 @@ export default defineComponent({
     },
     playSound(audioVolume: number) {
       try {
-        const context = this.audioContext || new (window.AudioContext);
+        const context = this.audioContext || new window.AudioContext();
         this.audioContext = context;
         const oscillator = this.audioContext.createOscillator();
         oscillator.type = 'sine';
