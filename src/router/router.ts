@@ -8,7 +8,7 @@ import PvkSetupPage from "../pages/PvkSetupPage.vue";
 import PasswordChanging from "../pages/PasswordChanging.vue";
 import LogInPage from "../pages/LogInPage.vue";
 import RegistrationPage from "../pages/RegistrationPage.vue";
-import SimpleSoundTest from "../pages/tests/sound/simple/SimpleSoundTest.vue";
+import SimpleSoundTest from "../pages/SimpleSoundTest.vue";
 
 const routes = [
   {
@@ -61,7 +61,7 @@ const routes = [
   {
     path: '/test/sound/simple',
     component: SimpleSoundTest,
-    meta: {ruName: "SoundSimpleTest"}
+    meta: {ruName: "Простой звуковой тест"}
   }
 
 ];

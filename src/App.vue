@@ -5,7 +5,7 @@ import ErrorPopup from "./components/UI/popups/ErrorPopup.vue";
 import {usePopupStore} from "./store/popup.store.ts";
 import LogInPage from "./pages/LogInPage.vue";
 import CodeVerification from "./pages/CodeVerification.vue";
-import SimpleSoundTest from "./pages/tests/sound/simple/SimpleSoundTest.vue";
+import SimpleSoundTest from "./pages/SimpleSoundTest.vue";
 
 const popupStore = usePopupStore();
 </script>

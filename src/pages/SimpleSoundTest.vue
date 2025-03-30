@@ -1,37 +1,43 @@
-<script>
-import { defineComponent } from 'vue';
-import { usePopupStore } from "../../../../store/popup.store.js";
-import CommonButton from "../../../../components/UI/CommonButton.vue";
+<script lang="ts">
+import {defineComponent} from 'vue';
+import {usePopupStore} from "../store/popup.store.ts";
+import CommonButton from "../components/UI/CommonButton.vue";
+
+type TestState = 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
   name: 'SimpleSoundTest',
-  components: { CommonButton },
+  components: {CommonButton},
   data() {
     return {
-      testState: 'ready',
-      audioContext: null,
-      reactionTimes: [],
-      timeoutIds: [],
-      TRIAL_COUNT: 120,
+      testState: 'ready' as TestState,
+      audioContext: null as AudioContext | null,
+      reactionTimes: [] as number[],
+      timeoutIds: [] as number[],
+      TRIAL_COUNT: 120 as number,
       currentTrial: 0,
       startTime: 0,
-      inactivityTimeout: null,
+      inactivityTimeout: null as number | null,
       popupStore: usePopupStore(),
       missedCount: 0,
     };
   },
   computed: {
-    buttonText() {
-      switch(this.testState) {
-        case 'ready': return 'Начать тест';
-        case 'reacting': return 'Ждите сигнала';
-        case 'completed': return 'Тест окончен';
-        default: return '';
+    buttonText(): string {
+      switch (this.testState) {
+        case 'ready':
+          return 'Начать тест';
+        case 'reacting':
+          return 'Ждите сигнала';
+        case 'completed':
+          return 'Тест окончен';
+        default:
+          return '';
       }
     },
-    results() {
+    results(): { average: number; deviation: number; best: number; worst: number } {
       const times = this.reactionTimes;
-      if (!times.length) return { average: 0, deviation: 0, best: 0, worst: 0 };
+      if (!times.length) return {average: 0, deviation: 0, best: 0, worst: 0};
       const average = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
       const variance = times.reduce((acc, val) => acc + Math.pow(val - average, 2), 0) / times.length;
       const deviation = Math.round(Math.sqrt(variance));
@@ -45,17 +51,18 @@ export default defineComponent({
   },
   methods: {
     handleClick() {
-      if (this.testState === 'ready') {
+      if (this.testState == 'ready') {
         this.startTest();
-      } else if (this.testState === 'reacting') {
-        if (this.startTime === 0) {
-          this.failTest('Слишком раннее нажатие!');
+      } else if (this.testState == 'reacting') {
+        if (this.startTime == 0) {
+          this.missedCount++;
+          this.currentTrial++;
           return;
         }
         const reactionTime = Date.now() - this.startTime;
         this.reactionTimes.push(reactionTime);
         this.currentTrial++;
-        clearTimeout(this.inactivityTimeout);
+        clearTimeout(this.inactivityTimeout!);
         if (this.currentTrial < this.TRIAL_COUNT) {
           this.scheduleNextTrial();
         } else {
@@ -74,8 +81,8 @@ export default defineComponent({
     scheduleNextTrial() {
       this.clearTimeouts();
       this.startTime = 0;
-      const delay = Math.random() * 500 + 1000;
-      const audioVolume=Math.random()* 0.8 + 0.1;
+      const delay = Math.random() * 700 + 300;
+      const audioVolume = Math.random() * 0.8 + 0.1;
       const timerId = setTimeout(() => {
         this.playSound(audioVolume);
         this.startTime = Date.now();
@@ -84,7 +91,7 @@ export default defineComponent({
       this.timeoutIds.push(timerId);
     },
     setupInactivityTimeout() {
-      this.inactivityTimeout = setTimeout(() => {
+      this.inactivityTimeout = window.setTimeout(() => {
         this.missedCount++;
         this.currentTrial++;
         if (this.currentTrial < this.TRIAL_COUNT) {
@@ -94,22 +101,24 @@ export default defineComponent({
         }
       }, 1000);
     },
-    playSound(audioVolume) {
+    playSound(audioVolume: number) {
       try {
-        if (!this.audioContext) {
-          this.audioContext = new (window.AudioContext)();
-        }
+        const context = this.audioContext || new (window.AudioContext);
+        this.audioContext = context;
         const oscillator = this.audioContext.createOscillator();
         oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(1000, this.audioContext.currentTime);
-        const gainNode = this.audioContext.createGain();
-        gainNode.gain.setValueAtTime(audioVolume, this.audioContext.currentTime);
+        oscillator.frequency.setValueAtTime(1000, context.currentTime);
+        const gainNode = context.createGain();
+        gainNode.gain.setValueAtTime(audioVolume, context.currentTime);
         oscillator.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
+        gainNode.connect(context.destination);
         oscillator.start();
-        oscillator.stop(this.audioContext.currentTime + 0.3);
+        oscillator.stop(context.currentTime + 0.3);
       } catch (error) {
-        console.error('Ошибка воспроизведения звука:', error);
+        const message = error instanceof Error
+            ? error.message
+            : 'Неизвестная ошибка воспроизведения';
+        this.popupStore.activateErrorPopup(`Ошибка воспроизведения звука: ${message}`);
         this.finishTest();
       }
     },
@@ -117,13 +126,9 @@ export default defineComponent({
       this.clearTimeouts();
       this.testState = 'completed';
     },
-    failTest(reason) {
-      this.popupStore.activateErrorPopup(`Тест провален: ${reason}`);
-      this.resetTest();
-    },
     resetTest() {
       this.clearTimeouts();
-      clearTimeout(this.inactivityTimeout);
+      clearTimeout(this.inactivityTimeout!);
       this.testState = 'ready';
       this.reactionTimes = [];
       this.currentTrial = 0;
@@ -137,35 +142,34 @@ export default defineComponent({
   },
   beforeUnmount() {
     this.clearTimeouts();
-    clearTimeout(this.inactivityTimeout);
+    clearTimeout(this.inactivityTimeout!);
   }
 });
 </script>
 
 <template>
   <div class="container">
-    <h2>Тест на скорость реакции</h2>
+    <h2 class="title">Тест на скорость реакции</h2>
     <p class="description">
       Этот тест измеряет время вашей реакции на звуковой сигнал.
-      После начала теста вы услышите 120 звуковых сигналов
-      с интервалами 2-5 секунд. Как только услышите сигнал -
+      После начала теста вы услышите 120 звуковых сигналов. Как только услышите сигнал -
       как можно быстрее нажмите большую кнопку.
       Старайтесь не нажимать кнопку до сигнала!
     </p>
 
     <div class="button-wrapper">
-      <button
+      <CommonButton
           class="reaction-button"
-          :class="{ active: testState === 'reacting' }"
+          :class="{ active: testState == 'reacting' }"
           @click="handleClick"
-          :disabled="testState === 'completed'"
+          :disabled="testState == 'completed'"
       >
-        {{ buttonText }}
-      </button>
+        <template v-slot:placeholder> {{ buttonText }}</template>
+      </CommonButton>
     </div>
 
-    <div v-if="testState === 'completed'" class="results">
-      <h2>Результаты:</h2>
+    <div v-if="testState == 'completed'" class="results">
+      <h2 class="title">Результаты:</h2>
       <p>Среднее время: <strong>{{ results.average }} мс</strong></p>
       <p>Стандартное отклонение: <strong>{{ results.deviation }} мс</strong></p>
       <p>Лучшее время: <strong>{{ results.best }} мс</strong></p>
@@ -179,7 +183,7 @@ export default defineComponent({
     <CommonButton
         class="reset-button"
         @click="resetTest"
-        v-if="testState === 'reacting'"
+        v-if="testState == 'reacting'"
     >
       <template v-slot:placeholder>Прервать тест</template>
     </CommonButton>
@@ -187,19 +191,13 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.sound-test {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  color: white;
-  font-family: Arial, sans-serif;
-}
 
-h2{
+.title {
   font-size: 46px;
   margin-bottom: 20px;
   color: #fff;
 }
+
 .container {
   max-width: 800px;
   padding: 2rem;
@@ -232,13 +230,11 @@ h2{
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   box-shadow: 0 10px 20px rgba(128, 0, 128, 0.2);
   outline: none;
+  margin: auto;
 }
 
 .reaction-button.active {
-  background: darkblue;
-  color: white;
   transform: scale(1.1);
-  box-shadow: 0 15px 40px rebeccapurple;
 }
 
 .reaction-button:disabled {
@@ -254,12 +250,10 @@ h2{
   margin: 3rem auto auto;
 }
 
-
 .retry-button {
   margin: auto;
   font-size: 1.2rem;
 }
-
 
 .results {
   margin-top: 2rem;
@@ -274,24 +268,7 @@ h2{
 
 .results p {
   margin: 0.5rem 0;
+  color: white;
 }
 </style>
 
-
-<!--
-testState - текущий этап теста=
-1 ready - готовность к началу
-2 reacting - активный тест
-3 completed - завершенный тест
-reactionTimes - массив для хранения результатов
-TRIAL_COUNT - количество испытаний
-currentTrial - текущее испытание
-startTime - время начала текущего сигнала
-inactivityTimeout - таймер бездействия
-
-scheduleNextTrial():
-- Создает случайную задержку (2-5 сек)
-- Воспроизводит звук после задержки
-- Запоминает время начала сигнала
-- Устанавливает таймер бездействия (3 сек)
--->
