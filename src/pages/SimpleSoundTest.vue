@@ -103,7 +103,7 @@ export default defineComponent({
     },
     playSound(audioVolume: number) {
       try {
-        const context = this.audioContext || new window.AudioContext();
+        const context = this.audioContext || new window.AudioContext;
         this.audioContext = context;
         const oscillator = this.audioContext.createOscillator();
         oscillator.type = 'sine';
