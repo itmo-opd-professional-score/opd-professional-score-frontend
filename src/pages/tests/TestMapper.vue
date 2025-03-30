@@ -1,20 +1,29 @@
 <script setup lang="ts">
 import {computed} from "vue";
-  import {jwtDecode} from "jwt-decode";
+import {InvalidTokenError, jwtDecode} from "jwt-decode";
 import SoundHardTest from "./sound/hard/SoundHardTest.vue";
 import type {TestJwt} from "./types";
+import {usePopupStore} from "../../store/popup.store.ts";
+import NotFound from "../NotFound.vue";
 
   const props = defineProps<{
     token: string
   }>()
-  const testComponent = computed(() => {
-    const data = jwtDecode(props.token) as TestJwt
-    switch (data.testType) {
-      case "SOUND_ADDITION":
-        return SoundHardTest
-      default:
-        return null
-        //TODO default not found component
+  const testComponent = computed( () => {
+    try {
+      const data = jwtDecode(props.token) as TestJwt
+      switch (data.testType) {
+        case "SOUND_ADDITION":
+          return SoundHardTest
+        default:
+          return NotFound
+      }
+    } catch (error: unknown) {
+      if (error instanceof InvalidTokenError) {
+        const usePopUp = usePopupStore()
+        usePopUp.activateErrorPopup(error.message)
+      }
+      return NotFound
     }
   })
 </script>
