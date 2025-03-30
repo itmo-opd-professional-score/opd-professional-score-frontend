@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { SimpleSoundTestOutputDto } from "../api/resolvers/test/dto/input/simple-sound-test-output.dto";
 import {defineComponent} from 'vue';
 import {usePopupStore} from "../store/popup.store.ts";
 import CommonButton from "../components/UI/CommonButton.vue";
@@ -10,7 +11,7 @@ export default defineComponent({
   components: {CommonButton},
   data() {
     return {
-      userId: 1,
+      userId: -1,
       testState: 'ready' as TestState,
       audioContext: null as AudioContext | null,
       reactionTimes: [] as number[],
@@ -50,44 +51,19 @@ export default defineComponent({
       };
     }
     ,
-    simpleSoundTestResultObject(): {
-      userId: number;
-      test:string;
-      averageCallbackTime: number;
-      allSignals: number;
-      mistakes: number;
-      deviation: number;
-      best: number;
-      worst: number;
-    } {
+    testResultDto(): SimpleSoundTestOutputDto {
       return {
         userId: this.userId,
-        test: "SimpleSoundTest",
         averageCallbackTime: this.results.average,
         allSignals: this.TRIAL_COUNT,
         mistakes: this.missedCount,
         deviation: this.results.deviation,
         best: this.results.best,
-        worst: this.results.worst,
+        worst: this.results.worst
       };
     }
   },
   methods: {
-    async submitResults() {
-      try {
-        const response = await fetch('/api', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.simpleSoundTestResultObject)
-        });
-        if (!response.ok) {
-          return Promise.reject(new Error('Ошибка отправки'));
-        }
-        this.popupStore.activateInfoPopup('Результаты отправлены');
-      } catch (error: unknown) {
-        this.popupStore.activateErrorPopup(`Ошибка отправки данных: ${error}`);
-      }
-    },
     handleClick() {
       if (this.testState == 'ready') {
         this.startTest();
@@ -214,14 +190,9 @@ export default defineComponent({
       <p>Лучшее время: <strong>{{ results.best }} мс</strong></p>
       <p>Худшее время: <strong>{{ results.worst }} мс</strong></p>
       <p>Количество пропусков: <strong>{{ missedCount }}</strong></p>
-      <div class="result-button-wrapper">
-        <CommonButton class="retry-button" @click="resetTest">
-          <template v-slot:placeholder>Пройти заново</template>
-        </CommonButton>
-        <CommonButton class="submit-button" @click="submitResults">
-          <template v-slot:placeholder>Сохранить результаты</template>
-        </CommonButton>
-      </div>
+      <CommonButton class="retry-button" @click="resetTest">
+        <template v-slot:placeholder>Пройти заново</template>
+      </CommonButton>
 
     </div>
 
@@ -263,8 +234,8 @@ export default defineComponent({
 }
 
 .reaction-button {
-  width: 25rem;
-  height: 25rem;
+  width: 40vh;
+  height: 40vh;
   border-radius: 50%;
   background: rgba(128, 0, 128, 0.6);
   border: none;
@@ -308,23 +279,11 @@ export default defineComponent({
 }
 
 .results p {
-  margin: auto;
   color: white;
 }
 
-.result-button-wrapper {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
+.retry-button {
   margin: 1rem auto;
-  max-width: 25rem;
 }
-
-.retry-button,
-.submit-button {
-  flex: 1 1 45%;
-  margin: auto;
-}
-
 </style>
 
