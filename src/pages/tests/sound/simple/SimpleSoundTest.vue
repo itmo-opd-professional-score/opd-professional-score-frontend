@@ -1,24 +1,23 @@
-
 <script>
 import { defineComponent } from 'vue';
-import {usePopupStore} from "../../../../store/popup.store.js";
+import { usePopupStore } from "../../../../store/popup.store.js";
 import CommonButton from "../../../../components/UI/CommonButton.vue";
 
 export default defineComponent({
   name: 'SimpleSoundTest',
-  components: {CommonButton},
+  components: { CommonButton },
   data() {
     return {
-      testState: 'ready', // ready  reacting  completed
+      testState: 'ready',
       audioContext: null,
       reactionTimes: [],
       timeoutIds: [],
-      TRIAL_COUNT: 1, //TODO увеличить
+      TRIAL_COUNT: 120,
       currentTrial: 0,
       startTime: 0,
       inactivityTimeout: null,
       popupStore: usePopupStore(),
-
+      missedCount: 0,
     };
   },
   computed: {
@@ -32,8 +31,13 @@ export default defineComponent({
     },
     results() {
       const times = this.reactionTimes;
+      if (!times.length) return { average: 0, deviation: 0, best: 0, worst: 0 };
+      const average = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+      const variance = times.reduce((acc, val) => acc + Math.pow(val - average, 2), 0) / times.length;
+      const deviation = Math.round(Math.sqrt(variance));
       return {
-        average: Math.round(times.reduce((a, b) => a + b, 0) / times.length),
+        average,
+        deviation,
         best: Math.min(...times),
         worst: Math.max(...times)
       };
@@ -48,12 +52,10 @@ export default defineComponent({
           this.failTest('Слишком раннее нажатие!');
           return;
         }
-
         const reactionTime = Date.now() - this.startTime;
         this.reactionTimes.push(reactionTime);
         this.currentTrial++;
         clearTimeout(this.inactivityTimeout);
-
         if (this.currentTrial < this.TRIAL_COUNT) {
           this.scheduleNextTrial();
         } else {
@@ -61,78 +63,73 @@ export default defineComponent({
         }
       }
     },
-
     startTest() {
-      this.popupStore.errorPopupVisible=false;
+      this.popupStore.errorPopupVisible = false;
       this.testState = 'reacting';
       this.currentTrial = 0;
       this.reactionTimes = [];
-      this.startTime = 0;
+      this.missedCount = 0;
       this.scheduleNextTrial();
     },
-
-     scheduleNextTrial() {
+    scheduleNextTrial() {
       this.clearTimeouts();
-       this.startTime = 0;
-      const delay = Math.random() * 3000 + 2000;
+      this.startTime = 0;
+      const delay = Math.random() * 500 + 1000;
+      const audioVolume=Math.random()* 0.8 + 0.1;
       const timerId = setTimeout(() => {
-        this.playSound();
+        this.playSound(audioVolume);
         this.startTime = Date.now();
         this.setupInactivityTimeout();
       }, delay);
-
       this.timeoutIds.push(timerId);
     },
-
     setupInactivityTimeout() {
       this.inactivityTimeout = setTimeout(() => {
-        this.failTest('Время вышло!');
-      }, 3000);
+        this.missedCount++;
+        this.currentTrial++;
+        if (this.currentTrial < this.TRIAL_COUNT) {
+          this.scheduleNextTrial();
+        } else {
+          this.finishTest();
+        }
+      }, 1000);
     },
-
-    playSound() {
+    playSound(audioVolume) {
       try {
         if (!this.audioContext) {
           this.audioContext = new (window.AudioContext)();
         }
-
         const oscillator = this.audioContext.createOscillator();
         oscillator.type = 'sine';
         oscillator.frequency.setValueAtTime(1000, this.audioContext.currentTime);
-
         const gainNode = this.audioContext.createGain();
-        gainNode.gain.setValueAtTime(0.5, this.audioContext.currentTime);
-
+        gainNode.gain.setValueAtTime(audioVolume, this.audioContext.currentTime);
         oscillator.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
-
         oscillator.start();
-        oscillator.stop(this.audioContext.currentTime + 0.5);
+        oscillator.stop(this.audioContext.currentTime + 0.3);
       } catch (error) {
         console.error('Ошибка воспроизведения звука:', error);
         this.finishTest();
       }
     },
-
     finishTest() {
       this.clearTimeouts();
       this.testState = 'completed';
     },
-
     failTest(reason) {
       this.popupStore.activateErrorPopup(`Тест провален: ${reason}`);
       this.resetTest();
     },
-
     resetTest() {
       this.clearTimeouts();
       clearTimeout(this.inactivityTimeout);
       this.testState = 'ready';
       this.reactionTimes = [];
       this.currentTrial = 0;
+      this.missedCount = 0;
       this.startTime = 0;
     },
-
     clearTimeouts() {
       this.timeoutIds.forEach(id => clearTimeout(id));
       this.timeoutIds = [];
@@ -146,42 +143,47 @@ export default defineComponent({
 </script>
 
 <template>
-  <main class="sound-test">
-    <div class="container">
-      <h2>Тест на скорость реакции</h2>
-      <p class="description">
-        Этот тест измеряет время вашей реакции на звуковой сигнал.
-        После начала теста вы услышите 5 случайных звуковых сигналов
-        с интервалами 2-5 секунд. Как только услышите сигнал -
-        как можно быстрее нажмите большую кнопку.
-        <br>Старайтесь не нажимать кнопку до сигнала!
-      </p>
+  <div class="container">
+    <h2>Тест на скорость реакции</h2>
+    <p class="description">
+      Этот тест измеряет время вашей реакции на звуковой сигнал.
+      После начала теста вы услышите 120 звуковых сигналов
+      с интервалами 2-5 секунд. Как только услышите сигнал -
+      как можно быстрее нажмите большую кнопку.
+      Старайтесь не нажимать кнопку до сигнала!
+    </p>
 
-      <div class="button-wrapper">
-        <button
-            class="reaction-button"
-            :class="{ active: testState === 'reacting' }"
-            @click="handleClick"
-            :disabled="testState === 'completed'">
-          {{ buttonText }}
-        </button>
-      </div>
+    <div class="button-wrapper">
+      <button
+          class="reaction-button"
+          :class="{ active: testState === 'reacting' }"
+          @click="handleClick"
+          :disabled="testState === 'completed'"
+      >
+        {{ buttonText }}
+      </button>
+    </div>
 
-      <div v-if="testState === 'completed'" class="results">
-        <h2>Результаты:</h2>
-        <p>Среднее время: <strong>{{ results.average }} мс</strong></p>
-        <p>Лучшее время: <strong>{{ results.best }} мс</strong></p>
-        <p>Худшее время: <strong>{{ results.worst }} мс</strong></p>
-        <CommonButton class="retry-button" @click="resetTest" >
-          <template v-slot:placeholder>Пройти заново</template>
-        </CommonButton>
-      </div>
-
-      <CommonButton class="reset-button" @click="resetTest" v-if="testState === 'reacting'">
-        <template v-slot:placeholder>Прервать тест</template>
+    <div v-if="testState === 'completed'" class="results">
+      <h2>Результаты:</h2>
+      <p>Среднее время: <strong>{{ results.average }} мс</strong></p>
+      <p>Стандартное отклонение: <strong>{{ results.deviation }} мс</strong></p>
+      <p>Лучшее время: <strong>{{ results.best }} мс</strong></p>
+      <p>Худшее время: <strong>{{ results.worst }} мс</strong></p>
+      <p>Количество пропусков: <strong>{{ missedCount }}</strong></p>
+      <CommonButton class="retry-button" @click="resetTest">
+        <template v-slot:placeholder>Пройти заново</template>
       </CommonButton>
     </div>
-  </main>
+
+    <CommonButton
+        class="reset-button"
+        @click="resetTest"
+        v-if="testState === 'reacting'"
+    >
+      <template v-slot:placeholder>Прервать тест</template>
+    </CommonButton>
+  </div>
 </template>
 
 <style scoped>
@@ -228,7 +230,7 @@ h2{
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 20px rgba(128, 0, 128, 0.2);
   outline: none;
 }
 
