@@ -7,6 +7,8 @@
   import {usePopupStore} from "../../../../store/popup.store.ts";
   import {UserState} from "../../../../utils/userState/UserState.ts";
   import type {CreateSoundAdditionOutputDto} from "../../../../api/resolvers/test/dto/output/create-sound-addition-output.dto.ts";
+  import {jwtDecode} from "jwt-decode";
+  import type {TestJwt} from "../../types";
 
   const questionsCount = 10
   const step = ref<number>(0);
@@ -135,10 +137,13 @@
     if (resultsData) {
       completedTestsResults.push(...JSON.parse(resultsData))
     }
-    if (props.token) {
-      if (completedTestsLinks.length != 0 && completedTestsLinks.indexOf(props.token) != -1) {
-        step.value = -1
-      }
+    if (props.token && completedTestsLinks.length != 0) {
+      completedTestsLinks.forEach(link => {
+        const data = jwtDecode(link) as TestJwt
+        if (data.testType == "SOUND_ADDITION") {
+          step.value = -1
+        }
+      })
     }
   })
 </script>
