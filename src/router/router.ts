@@ -67,7 +67,7 @@ const routes = [
   {
     path: '/test/sound/simple',
     component: SimpleSoundTest,
-    meta: {ruName: "Простой звуковой тест"}
+    meta: {ruName: "Простой звуковой тест", requiresAuth: true}
   }
 
 ];
