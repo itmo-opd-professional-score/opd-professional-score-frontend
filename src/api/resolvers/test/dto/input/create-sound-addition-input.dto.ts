@@ -1,6 +1,6 @@
 export type CreateSoundAdditionInputDto = {
     status: number,
     body: {
-        token: string,
+        testToken: string,
     }
 }

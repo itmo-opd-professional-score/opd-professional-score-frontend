@@ -20,7 +20,7 @@ import type {TestJwt} from "./types";
 </script>
 
 <template>
-  <component :is="testComponent"></component>
+  <component :token="token" :is="testComponent"></component>
 </template>
 
 <style scoped>

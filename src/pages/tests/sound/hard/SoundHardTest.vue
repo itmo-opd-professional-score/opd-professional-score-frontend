@@ -42,6 +42,7 @@
       if (!str) return;
       utterance.text = str;
       utterance.voice = voice;
+      utterance.rate = 2
       utterance.lang = voice.lang;
       speechSynthesis.speak(utterance);
     })
@@ -114,7 +115,7 @@
     }
     testResolver.createSoundAddition(data).then(result => {
       localStorage.setItem("completedTestsLinks", JSON.stringify(props.token))
-      localStorage.setItem("completedTestsResults", JSON.stringify(result.body.token))
+      localStorage.setItem("completedTestsResults", JSON.stringify(result.body.testToken))
       popUpStore.activateInfoPopup("Results were saved successfully!")
     }).catch(error => {
       popUpStore.activateErrorPopup(`Error code: ${error.status}. ${error.response.data.message}`)
@@ -198,11 +199,8 @@
         <p>Если ни один из вариантов Вам не подходит, то можете связаться с нами</p>
       </div>
       <div class="controls">
-        <CommonButton v-if="UserState.id" class="button" @click="router.go">
-          <template v-slot:placeholder>Пройти заново</template>
-        </CommonButton>
-        <CommonButton v-else class="button" @click="router.push('/auth/login')">
-          <template v-slot:placeholder>Сохранить результаты</template>
+        <CommonButton class="button" @click="router.push('/auth/login')">
+          <template v-slot:placeholder>Список доступных тестов</template>
         </CommonButton>
       </div>
     </div>
