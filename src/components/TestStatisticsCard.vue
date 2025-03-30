@@ -10,7 +10,7 @@ export default defineComponent({
     },
     userName: {
       type: String,
-      default: 'Anonimus'
+      default: 'Anonymous'
     },
     testCategory: {
       type: String,
@@ -52,11 +52,11 @@ export default defineComponent({
 <template>
   <div class="statistics-card">
     <h4 class="title">{{ testName }}</h4>
-    <p class="category">Категория: {{ testCategory }}</p>
-    <p class="user">Респондент: {{ userName }}</p>
+    <p class="category fields">Категория: {{ testCategory }}</p>
+    <p class="user fields">Респондент: {{ userName }}</p>
     <div class="result">
       <div class="score-result">
-        <p class="score">
+        <p class="score fields">
           Результат: {{ score }} / {{ maxScore }} ({{ scorePercentage }})
        </p>
         <div class="progress-bar">
@@ -64,11 +64,11 @@ export default defineComponent({
         </div>
       </div>
       <div class="time-result">
-        <p class="text">Затраченное время:</p>
-        <p class="time">{{time}}</p>
+        <p class="text fields">Затраченное время:</p>
+        <p class="time fields">{{time}}</p>
       </div>
       <div class="level-result">
-        <p class="level">Оценка: </p>
+        <p class="level fields">Оценка: </p>
       </div>
     </div>
     <p class="date">Дата: {{ date }}</p>
@@ -109,12 +109,7 @@ export default defineComponent({
   gap: 20px;
 }
 
-.category,
-.user,
-.score,
-.time,
-.level,
-.text
+.fields
 {
   font-size: 16px;
   color: rgb(237, 227, 227, 0.9);
