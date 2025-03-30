@@ -147,7 +147,7 @@
       </div>
       <div class="controls">
         <CommonButton class="button submit_button" @click="changeStep">
-          <template v-slot:placeholder>Start</template>
+          <template v-slot:placeholder>Начать тестирование</template>
         </CommonButton>
       </div>
     </div>
@@ -156,13 +156,12 @@
         <h4 class="score">Score: {{ score }} / {{ questionsCount }}</h4>
         <h4 class="question">Question: {{ questionNumber + 1 }} / {{ questionsCount }}</h4>
       </div>
-      <h3 class="question">{{ questions[questionNumber].question }}</h3>
       <div class="controls">
         <CommonButton :disabled="isSpeaking" class="button" @click="submitAnswer('ODD')">
-          <template v-slot:placeholder>ODD</template>
+          <template v-slot:placeholder>НЕЧЕТ</template>
         </CommonButton>
         <CommonButton :disabled="isSpeaking" class="button" @click="submitAnswer('EVEN')">
-          <template v-slot:placeholder>EVEN</template>
+          <template v-slot:placeholder>ЧЕТ</template>
         </CommonButton>
       </div>
     </div>
