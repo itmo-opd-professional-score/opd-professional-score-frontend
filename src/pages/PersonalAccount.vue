@@ -13,8 +13,10 @@ import {usePopupStore} from "../store/popup.store.ts";
 import type {DefaultErrorDto} from "../api/dto/common/default-error.dto.ts";
 import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
 import router from "../router/router.ts";
+import {TestResolver} from "../api/resolvers/test/test.resolver.ts";
 
 const authResolver = new AuthResolver();
+const testResolver = new TestResolver();
 const popupStore = usePopupStore();
 const users = ref([]);
 
@@ -53,6 +55,17 @@ const reloadProfessions = async () => {
     }
   } catch (e) {
     popupStore.activateErrorPopup((e as DefaultErrorDto).message)
+  }
+}
+
+const connectLocalTestsResults = () => {
+  const resultsData = localStorage.getItem("completedTestsResults")
+  if (resultsData && UserState.id) {
+    const completedTestsResults: string[] = JSON.parse(resultsData)
+    testResolver.updateUserIDs({
+      userId: UserState.id,
+      tokens: completedTestsResults,
+    })
   }
 }
 
@@ -297,6 +310,7 @@ onMounted(() => {
   if (UserState.role == "ADMIN") {
     reloadUsers()
   }
+  connectLocalTestsResults()
   reloadProfessions()
 })
 </script>
