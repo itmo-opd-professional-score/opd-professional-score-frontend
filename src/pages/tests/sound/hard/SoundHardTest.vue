@@ -20,6 +20,8 @@
   const answers: SoundHardTestAnswerDto[] = []
   const utterance = new SpeechSynthesisUtterance()
   let voices = speechSynthesis.getVoices()
+  let completedTestsLinks = []
+  let completedTestsResults = []
   const props = defineProps<{
     token?: string
   }>()
@@ -114,18 +116,27 @@
       mistakes: questionsCount - score.value,
     }
     testResolver.createSoundAddition(data).then(result => {
-      localStorage.setItem("completedTestsLinks", JSON.stringify(props.token))
-      localStorage.setItem("completedTestsResults", JSON.stringify(result.body.testToken))
+      completedTestsLinks.push(props.token)
+      completedTestsResults.push(result.body.testToken)
+      localStorage.setItem("completedTestsLinks", JSON.stringify(completedTestsLinks))
+      localStorage.setItem("completedTestsResults", JSON.stringify(completedTestsResults))
       popUpStore.activateInfoPopup("Results were saved successfully!")
     }).catch(error => {
       popUpStore.activateErrorPopup(`Error code: ${error.status}. ${error.response.data.message}`)
     })
   }
-
   onMounted(async () => {
+    const linksData = localStorage.getItem("completedTestsLinks")
+    const resultsData = localStorage.getItem("completedTestsResults")
+    if (linksData) {
+      completedTestsLinks.push(...JSON.parse(linksData))
+    }
+
+    if (resultsData) {
+      completedTestsResults.push(...JSON.parse(resultsData))
+    }
     if (props.token) {
-      const completedTestsLinks = localStorage.getItem("completedTestsLinks")
-      if (completedTestsLinks != null && completedTestsLinks.indexOf(props.token) != -1) {
+      if (completedTestsLinks.length != 0 && completedTestsLinks.indexOf(props.token) != -1) {
         step.value = -1
       }
     }
