@@ -213,7 +213,7 @@ export default defineComponent({
 }
 
 .container {
-  max-width: 50rem;
+  max-width: 35vw;
   padding: 2rem;
   text-align: center;
 }
