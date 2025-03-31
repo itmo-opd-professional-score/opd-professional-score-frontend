@@ -57,9 +57,7 @@ export default defineComponent({
         averageCallbackTime: this.results.average,
         allSignals: this.TRIAL_COUNT,
         mistakes: this.missedCount,
-        deviation: this.results.deviation,
-        best: this.results.best,
-        worst: this.results.worst
+        dispersion: this.results.deviation,
       };
     }
   },

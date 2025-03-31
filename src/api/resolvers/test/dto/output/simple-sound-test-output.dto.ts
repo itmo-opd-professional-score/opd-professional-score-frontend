@@ -3,7 +3,5 @@ export interface SimpleSoundTestOutputDto {
     averageCallbackTime: number;
     allSignals: number;
     mistakes: number;
-    deviation: number;
-    best: number;
-    worst: number;
+    dispersion: number;
 }
