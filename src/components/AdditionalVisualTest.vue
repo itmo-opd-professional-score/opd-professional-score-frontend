@@ -1,5 +1,6 @@
-<script>
+<script lang="ts">
 export default {
+    name: 'AdditionalVisualTest';
     data() {
         return {
             number1: 0,
@@ -39,10 +40,10 @@ export default {
                     this.generateRandomNumbers();
                 }, 1000);
             } else {
-                this.testCompleted = true; // Устанавливаем флаг завершения теста
+                this.testCompleted = true;
                 this.status = `Тест завершен! Правильные ответы: ${this.score} из ${this.totalAttempts}`;
-                this.calculateStandardDeviation(); // Вызываем метод для расчета стандартного отклонения
-                console.log("Времена ответов:", this.responseTimes);
+                this.calculateStandardDeviation(); 
+                
             }
         },
         startTest() {
@@ -66,9 +67,9 @@ export default {
             <p>В этом тесте вам будет предложено определить, является ли сумма двух случайных чисел четным или нечетным числом.</p>
             <p>Перед вами появится сумма двух чисел, и вам нужно будет выбрать, четная она или нет, нажав на соответствующую кнопку.</p>
             <p>Готовы начать? Нажмите кнопку ниже, чтобы пройти тест!</p>
-            <div class="buttons">
-                <button @click="startTest">Начать тест</button>
-            </div>
+            <CommonButton class="button" @click="startTest">
+                <template v-slot:placeholder>Начать</template>
+            </CommonButton>
         </div>
 
         <div v-else>
@@ -78,10 +79,12 @@ export default {
                 <span> + </span> 
                 <span>{{ number2 }}</span>
             </div>
-            <div class="buttons">
-                <button @click="checkEvenOdd(true)" :disabled="testCompleted">Четное</button>
-                <button @click="checkEvenOdd(false)" :disabled="testCompleted">Нечетное</button>
-            </div>
+            <CommonButton class="button" @click="checkEvenOdd(true)">
+                <template v-slot:placeholder>Четное</template>
+            </CommonButton>
+            <CommonButton class="button" @click="checkEvenOdd(false)">
+                <template v-slot:placeholder>Нечетное</template>
+            </CommonButton>
             <div class="results">
                 <p>Правильные ответы: {{ score }}</p>
                 <p>Попытки: {{ attempts }}</p>
@@ -94,29 +97,17 @@ export default {
 
 
 <style>
-body {
-    font-family: 'Segoe UI', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-image: url("general-bg.webp");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
 .container {
     text-align: center;
     background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 1.25rem;
+    border-radius: 0.625rem;
+    box-shadow: 0 0 0.625rem rgba(0, 0, 0, 0.1);
 }
 
 .numbers {
-    font-size: 2em;
-    margin: 20px 0;
+    font-size: 2rem;
+    margin: 1.25rem 0;
 }
 
 .buttons {
@@ -125,18 +116,14 @@ body {
 }
 
 button {
-    padding: 10px 20px;
-    font-size: 1.2em;
+    padding: 0.625rem 1.25rem;
+    font-size: 1.2rem;
     cursor: pointer;
     border: none;
-    border-radius: 5px;
+    border-radius: 0.3125rem;
     background-color: #4127e4;
     color: white;
     transition: background-color 0.3s;
-}
-
-button:hover {
-    background-color: #9a8bf8;
 }
 
 button.correct {
@@ -148,8 +135,6 @@ button.incorrect {
 }
 
 .results {
-    margin: 20px 0;
+    margin: 1.25rem 0;
 }
-
-.hidden { display: none; }
 </style>
