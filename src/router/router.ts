@@ -9,6 +9,7 @@ import PasswordChanging from "../pages/PasswordChanging.vue";
 import LogInPage from "../pages/LogInPage.vue";
 import RegistrationPage from "../pages/RegistrationPage.vue";
 import PersonalAccountChanging from "../pages/PersonalAccountChanging.vue";
+import AdditionalVisualTest from "../components/AdditionalVisualTest"
 
 const routes = [
   {
@@ -62,6 +63,11 @@ const routes = [
     path: '/auth/changePassword',
     component: PasswordChanging,
     meta: {ruName: "Изменение пароля"}
+  },
+  {
+    path: '/test/additon/visual',
+    component: AdditionalVisualTest,
+    meta: {requiresAuth: true, ruName: "Тест на определение четности"}
   },
 ];
 

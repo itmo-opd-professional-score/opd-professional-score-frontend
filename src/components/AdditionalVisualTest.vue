@@ -96,7 +96,7 @@ export default {
 </template>
 
 
-<style>
+<style scoped>
 .container {
     text-align: center;
     background: white;
