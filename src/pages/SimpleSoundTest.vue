@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { SimpleSoundTestOutputDto } from "../api/resolvers/test/dto/input/simple-sound-test-output.dto";
+import type { SimpleSoundTestOutputDto } from "../api/resolvers/test/dto/output/simple-sound-test-output.dto";
 import {defineComponent} from 'vue';
 import {usePopupStore} from "../store/popup.store.ts";
 import CommonButton from "../components/UI/CommonButton.vue";
