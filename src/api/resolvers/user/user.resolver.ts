@@ -10,11 +10,14 @@ import type {SetUserRoleOutputDto} from "./dto/output/set-user-role-output.dto.t
 export class UserResolver {
   private apiResolver = new ApiResolver("user");
   private popupStore = usePopupStore();
+  private token = localStorage.getItem("token");
 
   public async getAll() {
     return await this.apiResolver.request<null, DefaultInputDto<UserDataInputDto[]>>(
         "getAll",
-        "GET"
+        "GET",
+        null,
+        this.token ? this.token : undefined,
     ).catch((err)=> {
       const error = err as DefaultErrorDto
       this.popupStore.activateErrorPopup(`Error code: ${error.status}. ${error.message}`);
@@ -24,8 +27,10 @@ export class UserResolver {
 
   public async getByEmail(email: string) {
     return await this.apiResolver.request<null, DefaultInputDto<UserDataInputDto>>(
-      `getUserByEmail/${email}`,
-      "GET",
+        `getUserByEmail/${email}`,
+        "GET",
+        null,
+        this.token ? this.token : undefined,
     ).catch((err) => {
       const e = (err.response.data) as DefaultErrorDto;
       this.popupStore.activateErrorPopup(`Error code: ${e.status}. ${e.message}`);
@@ -35,9 +40,10 @@ export class UserResolver {
 
   public async changePasswordFirstStep(email: string) {
     return await this.apiResolver.request<{ email: string }, DefaultInputDto<string>>(
-      "changePasswordFirstStep",
-      "POST",
-      { email: email }
+        "changePasswordFirstStep",
+        "POST",
+        { email: email },
+        this.token ? this.token : undefined
     )
   }
 
@@ -45,7 +51,8 @@ export class UserResolver {
     return await this.apiResolver.request<ChangePasswordSecondStepOutputDto, DefaultInputDto<string>>(
       "changePasswordSecondStep",
       "PATCH",
-      data
+      data,
+      this.token ? this.token : undefined,
     )
   }
 
@@ -53,7 +60,8 @@ export class UserResolver {
     return await this.apiResolver.request<UpdateUserOutputDto, DefaultInputDto<string>>(
         "update",
         "PATCH",
-        data
+        data,
+        this.token ? this.token : undefined,
     )
   }
 
@@ -61,7 +69,8 @@ export class UserResolver {
     return await this.apiResolver.request<SetUserRoleOutputDto, DefaultInputDto<string>>(
         "setRole",
         "PATCH",
-        data
+        data,
+        this.token ? this.token : undefined,
     )
   }
 }

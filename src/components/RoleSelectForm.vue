@@ -26,8 +26,8 @@ const updateRole = async () => {
     emit("role-update");
     popupStore.activateInfoPopup(result.body);
   } else {
-    const error = result as DefaultErrorDto
-    popupStore.activateErrorPopup(result.message)
+    const error = result as unknown as DefaultErrorDto;
+    popupStore.activateErrorPopup(error.message)
   }
 }
 </script>
