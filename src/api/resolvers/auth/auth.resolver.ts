@@ -72,7 +72,7 @@ export class AuthResolver {
   }
 
   public async sendCodeAgain(data: SendCodeAgainDto) {
-    return await this.apiResolver.request<SendCodeAgainDto, void>(
+    return await this.apiResolver.request<SendCodeAgainDto, null>(
       "sendCodeAgain",
       "POST",
       data,

@@ -1,6 +1,14 @@
 export type UserStatus = "unauthorized" | "unverified" | "authorized";
-export type UserRole = "USER" | "EXPERT" | "CONSULTANT" | "MODERATOR" | "ADMIN"
 export type UserSex = "MALE" | "FEMALE"
+
+export enum UserRole {
+    USER = "USER",
+    ADMIN = "ADMIN",
+    EXPERT = "EXPERT",
+    MODERATOR = "MODERATOR",
+    CONSULTANT = "CONSULTANT",
+}
+
 export interface UserStateInterface {
     /**
      * id of User in system
