@@ -126,7 +126,7 @@ export default defineComponent({
   margin-bottom: 15px;
 }
 .progress-bar {
-  max-width: 500px;
+  max-width: 30rem;
   height: 10px;
   color: rgb(237, 227, 227, 0.9);
   border-radius: 5px;
