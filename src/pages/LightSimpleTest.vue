@@ -59,10 +59,10 @@ export default defineComponent({
 
 <template>
   <div class="container">
-    <h2 class="title">Тест на скорость реакции</h2>
+    <h2 class="title1">Простой тест на свет</h2>
     <p class="description">
       Этот тест измеряет время вашей реакции на визуальный сигнал.
-      Как только кнопка станет зелёной, нажмите на неё как можно быстрее.
+      Как только кнопка станет красной, нажмите на неё как можно быстрее.
       Старайтесь не нажимать кнопку до сигнала!
     </p>
 
@@ -84,7 +84,6 @@ export default defineComponent({
         Пройти заново
       </button>
     </div>
-
     <button
         class="reset-button"
         @click="resetTest"
@@ -97,26 +96,80 @@ export default defineComponent({
 
 
 <style scoped>
-
-.title {
-  font-size: 46px;
-  margin-bottom: 20px;
+.title1 {
+  font-size: 3rem;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
   color: #fff;
+}
+.title {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #fff;
+}
+.retry-button{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: #000000;
+  background-color: #ffffff;
+  opacity: 0.8;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+.retry-button:hover {
+  background-color: #a598ff;
+}
+
+.retry-button:active {
+  background-color: #7c6fb5;
+}
+
+.reset-button {
+  font-size: 2.875rem;
+  margin-bottom: 1.25rem;
+  color: #000000;
+  background-color: #ffffff;
+  opacity: 0.8;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.reset-button:hover {
+  background-color: #a598ff;
+}
+
+.reset-button:active {
+  background-color: #7c6fb5;
 }
 
 .container {
-  max-width: 35vw;
-  padding: 2rem;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding-bottom: 2rem;
 }
 
 .description {
   background: rgba(255, 255, 255, 0.9);
-  padding: 20px;
-  border-radius: 15px;
-  margin: 20px 0;
+  opacity: 0.85;
+  padding: 0.7rem;
+  border-radius: 1rem;
+  margin: 0.8rem 0;
   color: black;
+  max-width: 60rem;
+  min-height: 3rem;
+  text-align: center;
 }
+
 
 .button-wrapper {
   margin: 2rem 0;
@@ -140,7 +193,7 @@ export default defineComponent({
 }
 
 .reaction-button.active {
-  background-color: green;
+  background-color: #cf1a1a;
 }
 
 .reaction-button:disabled {
@@ -157,10 +210,11 @@ export default defineComponent({
 }
 
 .results {
-  margin-top: 2rem;
-  padding: 1.5rem;
+  margin-top: 1rem;
+  padding: 1rem 1.5rem;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 1rem;
+  text-align: center;
 }
 
 .results h2 {
