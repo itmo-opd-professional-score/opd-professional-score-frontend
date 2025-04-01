@@ -5,10 +5,22 @@ import type {UserDataInputDto} from "./dto/input/user-data-input.dto.ts";
 import {usePopupStore} from "../../../store/popup.store.ts";
 import type {DefaultErrorDto} from "../../dto/common/default-error.dto.ts";
 import type {UpdateUserOutputDto} from "./dto/output/update-user-output.dto.ts";
+import type {SetUserRoleOutputDto} from "./dto/output/set-user-role-output.dto.ts";
 
 export class UserResolver {
   private apiResolver = new ApiResolver("user");
   private popupStore = usePopupStore();
+
+  public async getAll() {
+    return await this.apiResolver.request<null, DefaultInputDto<UserDataInputDto[]>>(
+        "getAll",
+        "GET"
+    ).catch((err)=> {
+      const error = err as DefaultErrorDto
+      this.popupStore.activateErrorPopup(`Error code: ${error.status}. ${error.message}`);
+      return null
+    })
+  }
 
   public async getByEmail(email: string) {
     return await this.apiResolver.request<null, DefaultInputDto<UserDataInputDto>>(
@@ -40,6 +52,14 @@ export class UserResolver {
   public async updateUser(data: UpdateUserOutputDto) {
     return await this.apiResolver.request<UpdateUserOutputDto, DefaultInputDto<string>>(
         "update",
+        "PATCH",
+        data
+    )
+  }
+
+  public async setRole(data: SetUserRoleOutputDto) {
+    return await this.apiResolver.request<SetUserRoleOutputDto, DefaultInputDto<string>>(
+        "setRole",
         "PATCH",
         data
     )
