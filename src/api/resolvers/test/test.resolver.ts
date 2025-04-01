@@ -11,12 +11,34 @@ export class TestResolver {
     private token = localStorage.getItem("token");
     private usePopUp = usePopupStore()
 
-    public async getSoundAdditionByUserId(userId: number) {
-        return await this.apiResolver.request<null, TestDataInputDto>(
+    public async getSimpleLightByUserId(userId: number) {
+        return await this.apiResolver.request<null, TestDataInputDto[]>(
             `at/getByUserId/${userId}`,
             "GET",
         )
     }
+
+    public async getSimpleSoundByUserId(userId: number) {
+        return await this.apiResolver.request<null, TestDataInputDto[]>(
+            `at/getByUserId/${userId}`,
+            "GET",
+        )
+    }
+
+    public async getHardLightByUserId(userId: number) {
+        return await this.apiResolver.request<null, TestDataInputDto[]>(
+            `at/getByUserId/${userId}`,
+            "GET",
+        )
+    }
+
+    public async getAdditionByUserId(userId: number) {
+        return await this.apiResolver.request<null, TestDataInputDto[]>(
+            `at/getByUserId/${userId}`,
+            "GET",
+        )
+    }
+
 
     public async createSoundAddition(data: CreateSoundAdditionOutputDto) {
         return await this.apiResolver.request<CreateSoundAdditionOutputDto, CreateSoundAdditionInputDto>(

@@ -29,7 +29,7 @@ const totalPages = computed(() => {
 });
 
 const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
+  if (totalPages.value != null && currentPage.value < totalPages.value) {
     currentPage.value++;
   }
 };

@@ -14,12 +14,25 @@ import type {DefaultErrorDto} from "../api/dto/common/default-error.dto.ts";
 import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
 import router from "../router/router.ts";
 import {TestResolver} from "../api/resolvers/test/test.resolver.ts";
+import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
 
 const authResolver = new AuthResolver();
 const testResolver = new TestResolver();
 const popupStore = usePopupStore();
 const users = ref([]);
-const tests = ref([])
+const tests = ref<{
+  additionSound: TestDataInputDto[],
+  additionVisual: TestDataInputDto[],
+  simpleLight: TestDataInputDto[],
+  simpleSound: TestDataInputDto[],
+  hardLight: TestDataInputDto[],
+}>({
+  additionSound: [],
+  additionVisual: [],
+  simpleLight: [],
+  simpleSound: [],
+  hardLight: [],
+});
 
 const reloadUsers = async () => {
   const result = await getAllUsers();
@@ -33,9 +46,15 @@ const reloadUsers = async () => {
 const reloadTests = async () => {
   if (UserState.id) {
     switch(UserState.role) {
-      default:
-        tests.value.push(await testResolver.getSoundAdditionByUserId(UserState.id))
-        break
+      default: {
+        const additionTests = await testResolver.getAdditionByUserId(UserState.id)
+        tests.value.additionSound = additionTests.flatMap((test) =>
+          test.testTypeId == 1 ? [test as TestDataInputDto] : []
+        )
+        tests.value.additionVisual = additionTests.flatMap((test) =>
+            test.testTypeId == 2 ? [test as TestDataInputDto] : []
+        )
+      }
     }
   }
 }
@@ -300,7 +319,7 @@ onMounted(() => {
       <div class="tests-info" v-if="UserState.role == 'EXPERT' || UserState.role == 'ADMIN'">
         <p class="block_header">Все тесты</p>
         <div class="test_data_block">
-          <TestsManagerList :tests="tests" :max-elements-count="5"/>
+          <TestsManagerList :tests="tests.additionSound" :max-elements-count="5"/>
         </div>
       </div>
 
