@@ -4,11 +4,19 @@ import type {CreateSoundAdditionInputDto} from "./dto/input/create-sound-additio
 import type {UpdateUserIdsOutputDto} from "./dto/output/update-user-ids-output.dto.ts";
 import type {DefaultInputDto} from "../../dto/common/default-input.dto";
 import {usePopupStore} from "../../../store/popup.store.ts";
+import type {TestDataInputDto} from "./dto/input/test-data-input.dto.ts";
 
 export class TestResolver {
     private apiResolver = new ApiResolverUtil('test')
     private token = localStorage.getItem("token");
     private usePopUp = usePopupStore()
+
+    public async getSoundAdditionByUserId(userId: number) {
+        return await this.apiResolver.request<null, TestDataInputDto>(
+            `at/getByUserId/${userId}`,
+            "GET",
+        )
+    }
 
     public async createSoundAddition(data: CreateSoundAdditionOutputDto) {
         return await this.apiResolver.request<CreateSoundAdditionOutputDto, CreateSoundAdditionInputDto>(

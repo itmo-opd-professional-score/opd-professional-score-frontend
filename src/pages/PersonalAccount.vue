@@ -19,6 +19,7 @@ const authResolver = new AuthResolver();
 const testResolver = new TestResolver();
 const popupStore = usePopupStore();
 const users = ref([]);
+const tests = ref([])
 
 const reloadUsers = async () => {
   const result = await getAllUsers();
@@ -26,6 +27,16 @@ const reloadUsers = async () => {
     users.value = result.body
   } else {
     popupStore.activateErrorPopup(result.message)
+  }
+}
+
+const reloadTests = async () => {
+  if (UserState.id) {
+    switch(UserState.role) {
+      default:
+        tests.value.push(await testResolver.getSoundAdditionByUserId(UserState.id))
+        break
+    }
   }
 }
 
@@ -68,79 +79,6 @@ const connectLocalTestsResults = () => {
     })
   }
 }
-
-const tests = ref([
-  {id: 1, name: "Тест по основам Python", header: "Проверка знаний основ языка Python", createdAt: "15.03.2024",},
-  {
-    id: 2,
-    name: "SQL для аналитиков",
-    header: "Тест на знание SQL запросов для анализа данных",
-    createdAt: "20.04.2024",
-  },
-  {id: 3, name: "Основы JavaScript", header: "Проверка базовых знаний JavaScript", createdAt: "05.05.2024",},
-  {
-    id: 4,
-    name: "Тестирование REST API",
-    header: "Тест по методам и инструментам тестирования API",
-    createdAt: "10.06.2024",
-  },
-  {
-    id: 5,
-    name: "Введение в машинное обучение",
-    header: "Проверка знаний основных концепций машинного обучения",
-    createdAt: "22.07.2024",
-  },
-  {
-    id: 6,
-    name: "Безопасность веб-приложений",
-    header: "Тест на знание уязвимостей и методов защиты веб-приложений",
-    createdAt: "01.08.2024",
-  },
-  {
-    id: 7,
-    name: "Git для начинающих",
-    header: "Проверка знаний основных команд и принципов работы с Git",
-    createdAt: "18.09.2024",
-  },
-  {
-    id: 8,
-    name: "Docker: основы контейнеризации",
-    header: "Тест на понимание принципов работы Docker и контейнеров",
-    createdAt: "25.10.2024",
-  },
-  {id: 9, name: "Agile Scrum", header: "Проверка знаний принципов и практик Agile Scrum", createdAt: "03.11.2024",},
-  {id: 10, name: "Основы Kubernetes", header: "Тест на знание основных концепций Kubernetes", createdAt: "12.12.2024",},
-  {
-    id: 11,
-    name: "Коммуникативные навыки",
-    header: "Оценка навыков эффективного общения в команде",
-    createdAt: "19.01.2025",
-  },
-  {
-    id: 12,
-    name: "Управление временем",
-    header: "Тест на знание техник и методов тайм-менеджмента",
-    createdAt: "02.02.2025",
-  },
-  {
-    id: 13,
-    name: "Лидерство и мотивация",
-    header: "Оценка лидерских качеств и способности мотивировать команду",
-    createdAt: "10.02.2025",
-  },
-  {
-    id: 14,
-    name: "Разрешение конфликтов",
-    header: "Тест на знание стратегий и методов разрешения конфликтных ситуаций",
-    createdAt: "17.02.2025",
-  },
-  {
-    id: 15,
-    name: "Навыки презентации",
-    header: "Оценка умения проводить эффективные презентации",
-    createdAt: "24.02.2025",
-  }
-]);
 
 const testData = ref([
   {
@@ -312,6 +250,7 @@ onMounted(() => {
   }
   connectLocalTestsResults()
   reloadProfessions()
+  reloadTests()
 })
 </script>
 

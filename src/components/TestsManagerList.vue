@@ -1,30 +1,31 @@
 <script setup lang="ts">
-import {computed, type PropType, ref} from "vue";
+import {computed, ref} from "vue";
 import CommonButton from "./UI/CommonButton.vue";
-import type {TestsManagerInput} from "../api/dto/tests-manager.input.dto.ts";
 import TestManagerElement from "./UI/TestManagerElement.vue";
+import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
 
-const props = defineProps({
-  maxElementsCount: {
-    type: Number,
-    default: 5,
-  },
-  tests: {
-    type: Array as PropType<TestsManagerInput[]>,
-    required: true,
-  }
-});
+const props = withDefaults(defineProps<{
+  maxElementsCount: number;
+  tests: TestDataInputDto[]
+}>(), {
+  maxElementsCount: 5
+})
 
 const currentPage = ref(1);
-
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * props.maxElementsCount;
   const end = start + props.maxElementsCount;
-  return props.tests.slice(start, end);
+  if (props.tests) {
+    return props.tests.slice(start, end);
+  }
+  return null
 });
 
 const totalPages = computed(() => {
-  return Math.ceil(props.tests.length / props.maxElementsCount);
+  if (props.tests) {
+    return Math.ceil(props.tests.length / props.maxElementsCount);
+  }
+  return null
 });
 
 const nextPage = () => {
@@ -58,8 +59,8 @@ const prevPage = () => {
         :key="item.id"
     >
       <template #id>{{ item.id }}</template>
-      <template #test_name>{{ item.name }}</template>
-      <template #test_header>{{ item.header }}</template>
+      <template #test_name>{{ item.dispersion }}</template>
+      <template #test_header>{{ item.misclicks }}</template>
       <template #created>{{ item.createdAt }}</template>
     </TestManagerElement>
 
