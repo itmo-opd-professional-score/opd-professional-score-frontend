@@ -11,6 +11,7 @@ import RegistrationPage from "../pages/RegistrationPage.vue";
 import PersonalAccountChanging from "../pages/PersonalAccountChanging.vue";
 import SoundHardTest from "../pages/tests/sound/hard/SoundHardTest.vue";
 import TestMapper from "../pages/tests/TestMapper.vue";
+import LightSimpleTest from "../pages/LightSimpleTest.vue";
 
 const routes = [
   {
@@ -69,6 +70,11 @@ const routes = [
     path: `/test/addition/sound`,
     component: SoundHardTest,
     meta: {requiresAuth: true, ruName: "Оценка скорости реакции на сложный звуковой сигнал - сложение в уме"}
+  },
+  {
+    path: '/test',
+    component: LightSimpleTest,
+    meta: {ruName: "Просто тест на свет", requiresAuth: true}
   },
   {
     path: `/invitation/test/:token`,
