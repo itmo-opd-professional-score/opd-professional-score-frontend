@@ -8,6 +8,7 @@ import PvkSetupPage from "../pages/PvkSetupPage.vue";
 import PasswordChanging from "../pages/PasswordChanging.vue";
 import LogInPage from "../pages/LogInPage.vue";
 import RegistrationPage from "../pages/RegistrationPage.vue";
+import SimpleSoundTest from "../pages/SimpleSoundTest.vue";
 import PersonalAccountChanging from "../pages/PersonalAccountChanging.vue";
 import SoundHardTest from "../pages/tests/sound/hard/SoundHardTest.vue";
 import TestMapper from "../pages/tests/TestMapper.vue";
@@ -66,6 +67,11 @@ const routes = [
     meta: {ruName: "Изменение пароля"}
   },
   {
+    path: '/test/sound/simple',
+    component: SimpleSoundTest,
+    meta: {ruName: "Простой звуковой тест", requiresAuth: true}
+  },
+  {
     path: `/test/addition/sound`,
     component: SoundHardTest,
     meta: {requiresAuth: true, ruName: "Оценка скорости реакции на сложный звуковой сигнал - сложение в уме"}
@@ -74,7 +80,7 @@ const routes = [
     path: `/invitation/test/:token`,
     props: true,
     component: TestMapper,
-  }
+  },
 ];
 
 const router = createRouter({
