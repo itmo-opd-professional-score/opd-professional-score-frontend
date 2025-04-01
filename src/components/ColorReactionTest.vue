@@ -19,13 +19,13 @@
       <div class="color-display" :style="{ backgroundColor: currentColor }"></div>
 
       <div class="buttons">
-        <button
+        <CommonButton
             v-for="color in colors"
             :key="color"
             class="color-btn"
             :style="{ backgroundColor: colorMap[color] }"
             @click="handleColorClick(color)"
-        ></button>
+        ></CommonButton>
       </div>
 
       <div class="stats">
@@ -46,6 +46,7 @@
 
 <script setup>
 import { ref, computed, onUnmounted } from 'vue'
+import CommonButton from './CommonButton.vue'
 
 const colors = ['red', 'blue', 'green', 'yellow']
 const colorMap = {
