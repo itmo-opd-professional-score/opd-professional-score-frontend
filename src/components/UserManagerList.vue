@@ -42,10 +42,12 @@ const lastEl = ref()
 
 defineEmits(['users-list-update'])
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   maxElementsCount: number;
   users: UserDataInputDto[]
-}>()
+}>(), {
+  maxElementsCount: 5,
+})
 
 const currentPage = ref(1);
 
