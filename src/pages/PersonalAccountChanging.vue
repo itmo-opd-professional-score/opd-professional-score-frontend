@@ -13,8 +13,8 @@ const updateProfile = async () => {
     id: UserState.id,
     updatedData: {
       username: UserState.username,
-      birth: UserState.birth,
-      sex: UserState.sex
+      age: UserState.age ? new Date(UserState.age) : undefined,
+      gender: UserState.gender
     }
   }).then(res => {
     if (res.status == 200) {
@@ -43,19 +43,19 @@ const updateProfile = async () => {
         <h3>Дата Рождения</h3>
         <CustomInput
             type="date"
-            v-model="UserState.birth"
+            v-model="UserState.age"
         />
       </div>
       <div class="field sex">
         <h3>Пол</h3>
         <div class="radios">
           <input
-              :checked="UserState.sex == 'MALE'"
+              :checked="UserState.gender == 'MALE'"
               type="radio"
               name="sex"
-              value="male"
+              value="MALE"
               id="input-sex-male"
-              v-model="UserState.sex"
+              v-model="UserState.gender"
           >
           <div class="radio-sex">
             <label for="input-sex-male">
@@ -63,12 +63,12 @@ const updateProfile = async () => {
             </label>
           </div>
           <input
-              :checked="UserState.sex == 'FEMALE'"
+              :checked="UserState.gender == 'FEMALE'"
               type="radio"
               name="sex"
-              value="female"
+              value="FEMALE"
               id="input-sex-female"
-              v-model="UserState.sex"
+              v-model="UserState.gender"
           >
           <div class="radio-sex">
             <label for="input-sex-female">

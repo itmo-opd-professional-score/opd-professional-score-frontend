@@ -15,8 +15,8 @@ interface UserJwt {
   username: string;
   email: string;
   role: UserRole;
-  birth: string;
-  sex: UserSex;
+  age: string;
+  gender: UserSex;
   isBanned: boolean;
   iat: number;
   exp: number;
@@ -33,8 +33,8 @@ export const updateUserState = () => {
       UserState.status = 'authorized';
       UserState.username = userData.username;
       UserState.email = userData.email;
-      UserState.birth = userData.birth;
-      UserState.sex = userData.sex;
+      UserState.age = userData.age;
+      UserState.gender = userData.gender;
 
       if (userData.role) {
         UserState.role = userData.role;
