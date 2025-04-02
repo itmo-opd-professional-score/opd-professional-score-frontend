@@ -1,5 +1,4 @@
 <script lang="ts">
-//import CommonButton from "../components/UI/CommonButton.vue";
 import { defineComponent } from 'vue'
 
 interface TestData {
