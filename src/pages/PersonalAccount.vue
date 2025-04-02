@@ -166,7 +166,10 @@ onMounted(() => {
       <div class="tests-info" v-if="UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN">
         <p class="block_header">Все тесты</p>
         <div class="test_data_block">
-          <TestsManagerList :tests="tests.additionSound" :max-elements-count="5"/>
+          <TestsManagerList
+            :tests="tests.additionSound"
+            :max-elements-count="5"
+          />
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import {computed, ref} from "vue";
 import CommonButton from "./UI/CommonButton.vue";
 import TestManagerElement from "./UI/TestManagerElement.vue";
 import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
+import { checkTestType } from '../utils/testTypeState/TestTypeState.ts';
 
 const props = withDefaults(defineProps<{
   maxElementsCount: number;
@@ -44,24 +45,21 @@ const prevPage = () => {
 <template>
   <div class="component_container">
     <div class="header">
-      <div class="id" id="id">
-        Id
-      </div>
-      <div class="test_name" id="test_name">
-        Name
-      </div>
-      <div class="score">Header</div>
-      <div class="time">Created</div>
-      <div class="valid">Delete</div>
+      <div class="id">Id</div>
+      <div class="test_type">Тип теста</div>
+      <div class="test_type">Время ответа</div>
+      <div class="test_type">Пройден</div>
+      <div class="test_type">Дата</div>
     </div>
     <TestManagerElement
         v-for="item in paginatedData"
         :key="item.id"
     >
       <template #id>{{ item.id }}</template>
-      <template #test_name>{{ item.dispersion }}</template>
-      <template #test_header>{{ item.misclicks }}</template>
-      <template #created>{{ item.createdAt }}</template>
+      <template #test_type>{{ checkTestType(item) }}</template>
+      <template #average_callback>{{ item.averageCallbackTime.toFixed(2) }}</template>
+      <template #valid>{{ item.valid }}</template>
+      <template #created_at>{{ item.createdAt.substring(0, 10) }}</template>
     </TestManagerElement>
 
     <div class="pagination_controls">
@@ -104,7 +102,7 @@ const prevPage = () => {
   justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 2fr 7fr 7fr 2fr 1fr;
+  grid-template-columns: 1fr 3fr 3fr 2fr 2fr;
   margin-bottom: 1rem;
 }
 
