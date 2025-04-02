@@ -23,9 +23,11 @@ const updateRole = async () => {
     emit("role-update");
     popupStore.activateInfoPopup(result.body);
   } else {
-    const error = result as unknown as DefaultErrorDto;
-    popupStore.activateErrorPopup(error.message)
-  }
+    if ('message' in result) {
+      popupStore.activateErrorPopup(result.message);
+    } else {
+      popupStore.activateErrorPopup("An unknown error occurred.");
+    }
 }
 </script>
 
