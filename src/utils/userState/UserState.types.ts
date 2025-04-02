@@ -37,12 +37,12 @@ export interface UserStateInterface {
   /**
    * User's age (for tests)
    */
-  birth?: string;
+  age?: string;
 
   /**
    * User's sex (for tests)
    */
-  sex?: UserSex | undefined;
+  gender?: UserSex;
 
   /**
    * User's role on website
