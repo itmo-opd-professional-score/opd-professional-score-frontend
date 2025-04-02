@@ -1,66 +1,64 @@
 <script lang="ts">
+import CommonButton from "./UI/CommonButton.vue";
+
 export default {
-  name: 'AdditionalVisualTest',
-  props: {
-    token: {
-      type: String,
-      required: false,
-    }
-  },
-  data() {
-    return {
-      number1: 0,
-      number2: 0,
-      score: 0,
-      attempts: 0,
-      currentAttempt: 0,
-      totalAttempts: 10,
-      status: '',
-      testStarted: false,
-      testCompleted: false,
-      startTime: 0,
-      responseTimes: [] as number[],
-      standardDeviation: 0
-    };
-  },
-  methods: {
-    generateRandomNumbers() {
-      this.number1 = Math.floor(Math.random() * 50) + 1;
-      this.number2 = Math.floor(Math.random() * 50) + 1;
-      this.startTime = Date.now();
+    name: 'AdditionalVisualTest',
+  components: {CommonButton},
+    data() {
+        return {
+            number1: 0,
+            number2: 0,
+            score: 0,
+            attempts: 0,
+            currentAttempt: 0,
+            totalAttempts: 10,
+            status: '',
+            testStarted: false,
+            testCompleted: false,
+            startTime: null,
+            responseTimes: [],
+            standardDeviation: 0
+        };
     },
-    checkEvenOdd(isEven: boolean) {
-      const sum = this.number1 + this.number2;
-      const isSumEven = sum % 2 === 0;
-      this.attempts++;
-      this.currentAttempt++;
-      const responseTime = (Date.now() - this.startTime) / 1000;
-      this.responseTimes.push(responseTime);
+    methods: {
+        generateRandomNumbers() {
+            this.number1 = Math.floor(Math.random() * 50) + 1;
+            this.number2 = Math.floor(Math.random() * 50) + 1;
+            this.startTime = Date.now();
+        },
+        checkEvenOdd(isEven) {
+            const sum = this.number1 + this.number2;
+            const isSumEven = sum % 2 === 0;
+            this.attempts++;
+            this.currentAttempt++;
+            const responseTime = (Date.now() - this.startTime) / 1000; 
+            this.responseTimes.push(responseTime); 
 
-      if ((isEven && isSumEven) || (!isEven && !isSumEven)) {
-        this.score++;
-      }
-      if (this.currentAttempt < this.totalAttempts) {
-        setTimeout(() => {
-          this.generateRandomNumbers();
-        }, 1000);
-      } else {
-        this.testCompleted = true;
-        this.status = `Тест завершен! Правильные ответы: ${this.score} из ${this.totalAttempts}`;
-        this.calculateStandardDeviation();
+            if ((isEven && isSumEven) || (!isEven && !isSumEven)) {
+                this.score++;
+            }
 
-      }
-    },
-    startTest() {
-      this.testStarted = true;
-      this.generateRandomNumbers();
-    },
-    calculateStandardDeviation() {
-      const mean = this.responseTimes.reduce((a, b) => a + b, 0) / this.responseTimes.length;
-      const variance = this.responseTimes.reduce((sum, time) => sum + Math.pow(time - mean, 2), 0) / this.responseTimes.length;
-      this.standardDeviation = Math.sqrt(variance);
+            if (this.currentAttempt < this.totalAttempts) {
+                setTimeout(() => {
+                    this.generateRandomNumbers();
+                }, 1000);
+            } else {
+                this.testCompleted = true;
+                this.status = `Тест завершен! Правильные ответы: ${this.score} из ${this.totalAttempts}`;
+                this.calculateStandardDeviation(); 
+                
+            }
+        },
+        startTest() {
+            this.testStarted = true;
+            this.generateRandomNumbers();
+        },
+        calculateStandardDeviation() {
+            const mean = this.responseTimes.reduce((a, b) => a + b, 0) / this.responseTimes.length;
+                        const variance = this.responseTimes.reduce((sum, time) => sum + Math.pow(time - mean, 2), 0) / this.responseTimes.length;
+            this.standardDeviation = Math.sqrt(variance);
+        }
     }
-  }
 };
 </script>
 
