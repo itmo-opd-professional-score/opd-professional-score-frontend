@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import {computed, type PropType, ref} from "vue";
+import {computed, ref} from "vue";
 import CommonButton from "./UI/CommonButton.vue";
-import type {UserManagerInput} from "../api/dto/user-manager.input.dto.ts";
 import UserManagerElement from "./UI/UserManagerElement.vue";
 import {autoUpdate, hide, useFloating} from "@floating-ui/vue";
 import RoleSelectForm from "./RoleSelectForm.vue";
 import {UserState} from "../utils/userState/UserState.ts";
 import type {UserRole} from "../utils/userState/UserState.types.ts";
+import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
 
 interface CurrentUser {
   id: number;
@@ -42,16 +42,12 @@ const lastEl = ref()
 
 defineEmits(['users-list-update'])
 
-const props = defineProps({
-  maxElementsCount: {
-    type: Number,
-    default: 5,
-  },
-  users: {
-    type: Array as PropType<UserManagerInput[]>,
-    required: true,
-  }
-});
+const props = withDefaults(defineProps<{
+  maxElementsCount: number;
+  users: UserDataInputDto[]
+}>(), {
+  maxElementsCount: 5,
+})
 
 const currentPage = ref(1);
 

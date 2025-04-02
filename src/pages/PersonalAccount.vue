@@ -6,7 +6,6 @@ import UserManagerList from "../components/UserManagerList.vue";
 import ProfessionsManagerList from "../components/ProfessionsManagerList.vue";
 import TestScoreList from "../components/TestsScoreList.vue";
 import {UserState} from "../utils/userState/UserState.ts";
-import {getAllUsers} from "../services/user.ts";
 import {ProfessionResolver} from "../api/resolvers/profession/profession.resolver.ts";
 import type {GetProfessionOutputDto} from "../api/resolvers/profession/dto/output/get-profession-output.dto.ts";
 import {usePopupStore} from "../store/popup.store.ts";
@@ -14,18 +13,19 @@ import type {DefaultErrorDto} from "../api/dto/common/default-error.dto.ts";
 import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
 import router from "../router/router.ts";
 import {TestResolver} from "../api/resolvers/test/test.resolver.ts";
+import {UserResolver} from "../api/resolvers/user/user.resolver.ts";
+import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
 
 const authResolver = new AuthResolver();
+const userResolver = new UserResolver()
 const testResolver = new TestResolver();
 const popupStore = usePopupStore();
-const users = ref([]);
+const users = ref<UserDataInputDto[]>([]);
 
 const reloadUsers = async () => {
-  const result = await getAllUsers();
-  if (result.status == 200) {
+  const result = await userResolver.getAll()
+  if (result != null) {
     users.value = result.body
-  } else {
-    popupStore.activateErrorPopup(result.message)
   }
 }
 

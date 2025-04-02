@@ -1,5 +1,5 @@
 import { reactive } from "vue";
-import type {UserRole, UserSex, UserStateInterface} from "./UserState.types.ts";
+import {UserRole, type UserSex, type UserStateInterface} from "./UserState.types.ts";
 import {jwtDecode} from "jwt-decode";
 
 export const UserState = reactive<UserStateInterface>({
@@ -20,7 +20,7 @@ interface UserJwt {
 
 export const updateUserState = () => {
     const token = localStorage.getItem("token");
-    const userToVerify = JSON.parse(<string>localStorage.getItem("userToVerify"))
+    const userToVerify = JSON.parse(localStorage.getItem("userToVerify")!)
     if (token) {
         const userData = jwtDecode(token) as UserJwt;
 
@@ -35,7 +35,7 @@ export const updateUserState = () => {
             if (userData.role) {
                 UserState.role = userData.role;
             } else {
-                UserState.role = "USER"
+                UserState.role = UserRole.USER
             }
         }
     } else if (userToVerify) {
