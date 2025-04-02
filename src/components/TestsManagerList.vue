@@ -48,6 +48,7 @@ const prevPage = () => {
       <div class="id">Id</div>
       <div class="test_type">Тип теста</div>
       <div class="test_type">Время ответа</div>
+      <div class="test_type">Пользователь</div>
       <div class="test_type">Пройден</div>
       <div class="test_type">Дата</div>
     </div>
@@ -58,6 +59,7 @@ const prevPage = () => {
       <template #id>{{ item.id }}</template>
       <template #test_type>{{ checkTestType(item) }}</template>
       <template #average_callback>{{ item.averageCallbackTime.toFixed(2) }}</template>
+      <template #user>{{ item.userId ? item.userId : 'Аноним'}}</template>
       <template #valid>{{ item.valid }}</template>
       <template #created_at>{{ item.createdAt.substring(0, 10) }}</template>
     </TestManagerElement>
@@ -79,6 +81,7 @@ const prevPage = () => {
 <style scoped>
 .component_container {
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -89,7 +92,7 @@ const prevPage = () => {
   display: flex;
   justify-content: space-between;
   width: 95%;
-  margin-top: 1rem;
+  margin-top: auto;
   user-select: none;
 }
 
@@ -102,7 +105,7 @@ const prevPage = () => {
   justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 1fr 3fr 3fr 2fr 2fr;
+  grid-template-columns: 1fr 3fr 3fr 3fr 2fr 2fr;
   margin-bottom: 1rem;
 }
 

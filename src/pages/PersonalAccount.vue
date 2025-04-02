@@ -39,6 +39,7 @@ const tests = ref<{
   simpleLight: [],
   hardLight: [],
 })
+const allTests = ref<TestDataInputDto[]>([]);
 const professionsArchive = ref<GetProfessionOutputDto[] | null>(null)
 const professionsPublished = ref<GetProfessionOutputDto[] | null>(null)
 
@@ -74,28 +75,26 @@ const reloadProfessions = async () => {
 }
 
 const reloadTests = async () => {
-  let additionTests: TestDataInputDto[] = []
-  switch (UserState.role) {
-    case UserRole.ADMIN:
-      additionTests = await testResolver.getAllByType('at');
-      tests.value.simpleSound.push(...await testResolver.getAllByType('sst'))
-      tests.value.simpleLight.push(...await testResolver.getAllByType('slt'))
-      tests.value.hardLight.push(...await testResolver.getAllByType('hlt'))
-      break
-    case UserRole.USER:
-      additionTests = await testResolver.getTestsByTypeByUserId(UserState.id!, 'at')
-      tests.value.simpleSound.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst'))
-      tests.value.simpleLight.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'slt'))
-      tests.value.hardLight.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'hlt'))
-      break
-  }
-  if (additionTests) {
-    tests.value.additionSound = additionTests.filter(test =>
-      checkTestType(test) == "SOUND_ADDITION" ? test : null
-    )
-    tests.value.additionVisual = additionTests.filter(test =>
-      checkTestType(test) == "VISUAL_ADDITION" ? test : null
-    )
+  if (UserState.role) {
+    let additionTests: TestDataInputDto[]
+    if (UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT) {
+      allTests.value.push(...await testResolver.getAllByType('at'))
+      allTests.value.push(...await testResolver.getAllByType('sst'))
+      allTests.value.push(...await testResolver.getAllByType('slt'))
+      allTests.value.push(...await testResolver.getAllByType('hlt'))
+    }
+    additionTests = await testResolver.getTestsByTypeByUserId(UserState.id!, 'at')
+    if (additionTests) {
+      tests.value.additionSound = additionTests.filter(test =>
+        checkTestType(test) == "SOUND_ADDITION" ? test : null
+      )
+      tests.value.additionVisual = additionTests.filter(test =>
+        checkTestType(test) == "VISUAL_ADDITION" ? test : null
+      )
+    }
+    tests.value.simpleSound.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst'))
+    tests.value.simpleLight.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'slt'))
+    tests.value.hardLight.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'hlt'))
   }
 }
 
@@ -164,16 +163,18 @@ onMounted(() => {
       </div>
 
       <div class="tests-info" v-if="UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN">
-        <p class="block_header">Все тесты</p>
-        <div class="test_data_block">
-          <TestsManagerList
-            :tests="tests.additionSound"
-            :max-elements-count="5"
-          />
+        <div class="test-info-all">
+          <p class="block_header">Все тесты</p>
+          <div class="test_data_block">
+            <TestsManagerList
+              :tests="allTests"
+              :max-elements-count="5"
+            />
+          </div>
         </div>
       </div>
 
-      <div class="tests-info" v-if="UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN">
+      <div class="tests-info" v-if="UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN && professionsPublished != null && professionsPublished.length > 0">
         <p class="block_header">Опубликованные профессии</p>
         <div class="profession_data_block">
           <ProfessionsManagerList
@@ -185,7 +186,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="tests-info" v-if="(UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN) && professions != null">
+      <div class="tests-info" v-if="(UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN) && professionsPublished != null && professionsPublished.length > 0">
         <p class="block_header">Архивные профессии</p>
         <div class="profession_data_block">
           <ProfessionsManagerList
@@ -257,10 +258,22 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   background-color: var(--background-primary);
-  padding: 0.75rem;
+  padding: 1rem;
   border-radius: 15px;
   min-height: 75vh;
   overflow: scroll;
+
+  .test-info {
+    height: 80%;
+  }
+
+  .user_data_block {
+    height: 100%;
+  }
+
+  .test-info-all, .profession_data_block {
+    height: 90%;
+  }
 }
 
 .user-info {
@@ -272,7 +285,8 @@ onMounted(() => {
   overflow-y: scroll;
   display: flex;
   flex-direction: column;
-  gap: 1.3rem;
+  gap: 1.2rem;
+  height: 75vh;
 }
 
 .user-data-block {
@@ -311,7 +325,7 @@ onMounted(() => {
 .test_data_block {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  height: 100%;
 }
 </style>
