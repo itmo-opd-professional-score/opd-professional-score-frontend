@@ -1,13 +1,11 @@
 import * as eslint from "typescript-eslint";
 import * as tseslint from "typescript-eslint";
-import * as prettier from "typescript-eslint";
 
 export default tseslint.config({
   ignores: ['**/dist/**', 'commitlint.config.ts', 'eslint.config.js'],
   extends: [
     eslint.configs.stylistic,
     tseslint.configs.stylistic,
-    prettier.configs.stylistic,
     {
       languageOptions: {
         parserOptions: {
