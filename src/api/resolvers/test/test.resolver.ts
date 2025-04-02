@@ -11,44 +11,13 @@ export class TestResolver {
   private token = localStorage.getItem('token');
   private usePopUp = usePopupStore();
 
-  public async getSimpleLightByUserId(userId: number) {
+  public async getTestsByTypeByUserId(userId: number, typeEndpoint: string) {
     return await this.apiResolver.request<null, TestDataInputDto[]>(
-      `slt/getByUserId/${userId}`,
-      'GET',
+      `${typeEndpoint}/getByUserId/${userId}`,
+      "GET",
       null,
       this.token ? this.token : undefined,
-    );
-  }
-
-  public async getSimpleSoundByUserId(userId: number) {
-    return await this.apiResolver.request<null, TestDataInputDto[]>(
-      `sst/getByUserId/${userId}`,
-      'GET',
-      null,
-      this.token ? this.token : undefined,
-    );
-  }
-
-  public async getHardLightByUserId(userId: number) {
-    return await this.apiResolver.request<null, TestDataInputDto[]>(
-      `hlt/getByUserId/${userId}`,
-      'GET',
-      null,
-      this.token ? this.token : undefined,
-    );
-  }
-
-  public async getAdditionByUserId(userId: number) {
-    return await this.apiResolver
-      .request<null, TestDataInputDto[]>(
-        `at/getByUserId/${userId}`,
-        'GET',
-        null,
-        this.token ? this.token : undefined
-      ).catch((err) => {
-        this.usePopUp.activateErrorPopup(err.message);
-        return null;
-      });
+    )
   }
 
   public async createSoundAddition(data: CreateSoundAdditionOutputDto) {

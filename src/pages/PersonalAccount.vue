@@ -79,7 +79,7 @@ const reloadTests = async () => {
     case UserRole.ADMIN:
       break
     case UserRole.USER:
-      additionTests = await testResolver.getAdditionByUserId(UserState.id!)
+      additionTests = await testResolver.getTestsByTypeByUserId(UserState.id!, 'at')
       if (additionTests) {
         tests.value.additionSound = additionTests.filter(test =>
             checkTestType(test) == "SOUND_ADDITION" ? test : null
@@ -88,9 +88,9 @@ const reloadTests = async () => {
             checkTestType(test) == "VISUAL_ADDITION" ? test : null
         )
       }
-      tests.value.simpleSound.push(...await testResolver.getSimpleSoundByUserId(UserState.id!))
-      tests.value.simpleLight.push(...await testResolver.getSimpleLightByUserId(UserState.id!))
-      tests.value.hardLight.push(...await testResolver.getHardLightByUserId(UserState.id!))
+      tests.value.simpleSound.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst'))
+      tests.value.simpleLight.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'slt'))
+      tests.value.hardLight.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'hlt'))
       break
   }
 }
@@ -178,7 +178,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="tests-info" v-if="(UserState.role == 'EXPERT' || UserState.role == 'ADMIN') && professions != null">
+      <div class="tests-info" v-if="(UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN) && professions != null">
         <p class="block_header">Архивные профессии</p>
         <div class="profession_data_block">
           <ProfessionsManagerList
