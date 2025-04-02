@@ -1,4 +1,5 @@
 <script lang="ts">
+//import CommonButton from "../components/UI/CommonButton.vue";
 import { defineComponent } from 'vue'
 
 interface TestData {
@@ -59,7 +60,7 @@ export default defineComponent({
 
 <template>
   <div class="container">
-    <h2 class="title1">Простой тест на свет</h2>
+    <h2 class="title1">Оценка скорости простых реакции на свет</h2>
     <p class="description">
       Этот тест измеряет время вашей реакции на визуальный сигнал.
       Как только кнопка станет красной, нажмите на неё как можно быстрее.
@@ -67,30 +68,30 @@ export default defineComponent({
     </p>
 
     <div class="button-wrapper">
-      <button
+      <CommonButton
           class="reaction-button"
           :class="{ active: isButtonActive }"
           @click="handleClick"
           :disabled="isButtonDisabled"
       >
         {{ buttonText }}
-      </button>
+      </CommonButton>
     </div>
 
     <div v-if="showResults" class="results">
       <h2 class="title">Результаты:</h2>
       <p>Ваша скорость реакции: <strong>{{ reactionTime }} мс</strong></p>
-      <button class="retry-button" @click="resetTest">
+      <CommonButton class="retry-button" @click="resetTest">
         Пройти заново
-      </button>
+      </CommonButton>
     </div>
-    <button
+    <CommonButton
         class="reset-button"
         @click="resetTest"
         v-if="isTestRunning"
     >
       Прервать тест
-    </button>
+    </CommonButton>
   </div>
 </template>
 
@@ -116,7 +117,6 @@ export default defineComponent({
   background-color: #ffffff;
   opacity: 0.8;
   padding: 1rem 2rem;
-  border: none;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
@@ -136,7 +136,6 @@ export default defineComponent({
   background-color: #ffffff;
   opacity: 0.8;
   padding: 1rem 2rem;
-  border: none;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
@@ -164,32 +163,33 @@ export default defineComponent({
   padding: 0.7rem;
   border-radius: 1rem;
   margin: 0.8rem 0;
-  color: black;
+  color: #000000;
   max-width: 60rem;
   min-height: 3rem;
   text-align: center;
 }
 
-
 .button-wrapper {
   margin: 2rem 0;
-  perspective: 1000px;
+  perspective: 10px;
+  display: flex;
+  justify-content: center;
 }
 
 .reaction-button {
   width: 40vh;
   height: 40vh;
   border-radius: 50%;
-  background: rgba(128, 0, 128, 0.6);
-  border: none;
-  color: white;
+  background: #80008099;
+  color: #ffffff;
   font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  box-shadow: 0 10px 20px rgba(128, 0, 128, 0.2);
-  outline: none;
-  margin: auto;
+  box-shadow: 0 10px 20px #80008033;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .reaction-button.active {
@@ -200,6 +200,7 @@ export default defineComponent({
   opacity: 0.6;
   cursor: not-allowed;
 }
+
 
 .reset-button {
   font-size: 1.2rem;
@@ -212,7 +213,7 @@ export default defineComponent({
 .results {
   margin-top: 1rem;
   padding: 1rem 1.5rem;
-  background: rgba(255, 255, 255, 0.2);
+  background: #FFFFFF33;
   border-radius: 1rem;
   text-align: center;
 }
@@ -222,7 +223,7 @@ export default defineComponent({
 }
 
 .results p {
-  color: white;
+  color: #ffffff;
 }
 
 .retry-button {
