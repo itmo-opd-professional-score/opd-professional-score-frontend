@@ -2,7 +2,7 @@
   import CommonButton from "../../../../components/UI/CommonButton.vue";
   import {onMounted, ref} from "vue";
   import router from "../../../../router/router.ts";
-  import type {SoundHardTestAnswerDto, SoundHardTestQuestionDto, SoundHardTestSumType} from "./SoundHardTest.types.ts";
+  import type {SoundHardTestAnswerDto, SoundHardTestQuestionDto, SoundHardTestSumType} from "./AdditionSoundTest.types.ts";
   import {TestResolver} from "../../../../api/resolvers/test/test.resolver.ts";
   import {usePopupStore} from "../../../../store/popup.store.ts";
   import {UserState} from "../../../../utils/userState/UserState.ts";

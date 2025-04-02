@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import {computed} from "vue";
 import {InvalidTokenError, jwtDecode} from "jwt-decode";
-import SoundHardTest from "./sound/hard/SoundHardTest.vue";
 import type {TestJwt} from "./types";
 import {usePopupStore} from "../../store/popup.store.ts";
 import NotFound from "../NotFound.vue";
+import AdditionSoundTest from "./addition/sound/AdditionSoundTest.vue";
+import AdditionVisualTest from "./addition/visual/AdditionVisualTest.vue";
 
   const props = defineProps<{
     token: string
@@ -14,7 +15,9 @@ import NotFound from "../NotFound.vue";
       const data = jwtDecode(props.token) as TestJwt
       switch (data.testType) {
         case "SOUND_ADDITION":
-          return SoundHardTest
+          return AdditionSoundTest
+        case "VISUAL_ADDITION":
+          return AdditionVisualTest;
         default:
           return NotFound
       }

@@ -1,7 +1,7 @@
 export interface SimpleSoundTestOutputDto {
-    userId: number;
-    averageCallbackTime: number;
-    allSignals: number;
-    mistakes: number;
-    dispersion: number;
+  userId: number;
+  averageCallbackTime: number;
+  allSignals: number;
+  mistakes: number;
+  dispersion: number;
 }

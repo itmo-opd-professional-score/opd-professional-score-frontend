@@ -1,5 +1,5 @@
 const apiConf = {
-  endpoint: "",
-  socketEndpoint: "",
-}
-export default apiConf
+  endpoint: '',
+  socketEndpoint: '',
+};
+export default apiConf;

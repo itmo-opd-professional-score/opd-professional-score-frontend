@@ -1,4 +1,4 @@
-import type {UserRole} from "../../../../../utils/userState/UserState.types.ts";
+import type { UserRole } from '../../../../../utils/userState/UserState.types.ts';
 
 export interface UserDataInputDto {
   id: number;

@@ -1,4 +1,4 @@
-export type CreateProfessionDto = {
+export interface CreateProfessionDto {
   name: string;
   description: string;
   requirements: string;

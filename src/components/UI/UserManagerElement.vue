@@ -11,10 +11,10 @@ defineProps<{ isDisabled: boolean }>()
     <div class="id" id="id">#
       <slot name="id">12345</slot>
     </div>
-    <div class="username" id="username">
+    <div class="username">
       <slot name="username">Ivanov Ivan Ivanovich</slot>
     </div>
-    <div class="email" id="email">
+    <div class="email">
       <slot name="email">example@mail.com</slot>
     </div>
     <div class="role">
@@ -43,7 +43,7 @@ defineProps<{ isDisabled: boolean }>()
   justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 2fr 7fr 7fr 3fr 2fr;
+  grid-template-columns: 2fr 7fr 7fr 3fr 3fr;
 }
 
 .wrapper:hover {

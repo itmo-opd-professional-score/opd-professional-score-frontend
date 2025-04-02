@@ -1,7 +1,7 @@
-export type CreateSoundAdditionOutputDto = {
-    userId: number | null,
-    averageCallbackTime: number,
-    dispersion: number,
-    allSignals: number,
-    mistakes: number
+export interface CreateSoundAdditionOutputDto {
+  userId: number | null;
+  averageCallbackTime: number;
+  dispersion: number;
+  allSignals: number;
+  mistakes: number;
 }
