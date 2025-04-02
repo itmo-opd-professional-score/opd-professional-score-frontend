@@ -74,24 +74,28 @@ const reloadProfessions = async () => {
 }
 
 const reloadTests = async () => {
-  let additionTests: TestDataInputDto[] | null
+  let additionTests: TestDataInputDto[] = []
   switch (UserState.role) {
     case UserRole.ADMIN:
+      additionTests = await testResolver.getAllByType('at');
+      tests.value.simpleSound.push(...await testResolver.getAllByType('sst'))
+      tests.value.simpleLight.push(...await testResolver.getAllByType('slt'))
+      tests.value.hardLight.push(...await testResolver.getAllByType('hlt'))
       break
     case UserRole.USER:
       additionTests = await testResolver.getTestsByTypeByUserId(UserState.id!, 'at')
-      if (additionTests) {
-        tests.value.additionSound = additionTests.filter(test =>
-            checkTestType(test) == "SOUND_ADDITION" ? test : null
-        )
-        tests.value.additionVisual = additionTests.filter(test =>
-            checkTestType(test) == "VISUAL_ADDITION" ? test : null
-        )
-      }
       tests.value.simpleSound.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst'))
       tests.value.simpleLight.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'slt'))
       tests.value.hardLight.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'hlt'))
       break
+  }
+  if (additionTests) {
+    tests.value.additionSound = additionTests.filter(test =>
+      checkTestType(test) == "SOUND_ADDITION" ? test : null
+    )
+    tests.value.additionVisual = additionTests.filter(test =>
+      checkTestType(test) == "VISUAL_ADDITION" ? test : null
+    )
   }
 }
 

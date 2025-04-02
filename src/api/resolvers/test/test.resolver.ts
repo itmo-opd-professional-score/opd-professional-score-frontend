@@ -11,6 +11,15 @@ export class TestResolver {
   private token = localStorage.getItem('token');
   private usePopUp = usePopupStore();
 
+  public async getAllByType(typeEndpoint: string) {
+    return await this.apiResolver.request<null, TestDataInputDto[]>(
+      `${typeEndpoint}/getAll`,
+      "GET",
+      null,
+      this.token ? this.token : undefined
+    )
+  }
+
   public async getTestsByTypeByUserId(userId: number, typeEndpoint: string) {
     return await this.apiResolver.request<null, TestDataInputDto[]>(
       `${typeEndpoint}/getByUserId/${userId}`,
