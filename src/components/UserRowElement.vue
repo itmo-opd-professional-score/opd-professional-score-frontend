@@ -49,34 +49,41 @@ export default {
 </script>
 
 <template>
-  <div class="wrapper">
+  <div class="user-row-wrapper">
     <p class="wrapper-block user-id"> {{ userId }} </p>
     <p class="wrapper-block user-name"> {{ userName }} </p>
     <p class="wrapper-block user-email"> {{ userEmail }} </p>
-    <CommonButton class="wrapper-block btn" :class="buttonClass" @click="applyTest">
-      <template v-slot:placeholder>
+    <CommonButton class="user-button" :class="buttonClass" @click="applyTest">
+      <template v-slot:placeholder class="user-button">
         {{ buttonText }}
-      </template>
+      </template>x
     </CommonButton>
   </div>
 </template>
 
 <style scoped>
-.wrapper {
+.user-row-wrapper {
   width: 100%;
   padding: 0.5rem 1rem;
   border-radius: 10px;
   border: 1px solid var(--input-border);
   background: white;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 3fr 4fr 2fr;
   align-items: center;
+  justify-items: center;
+  gap: 0.5rem;
 }
 
-.btn, .btn:hover {
-  width: 20%;
-  background-color: #4127e4;
-  color: white;
+.wrapper-block {
+  text-align: left;
+  overflow-x: unset;
+  width: 100%;
+}
+
+.user-button, .user-button:hover {
+  padding: 0.5rem 0;
+  width: 100%;
 }
 
 .add-user, .add-user:hover {
@@ -86,5 +93,6 @@ export default {
 
 .remove-user, .remove-user:hover {
   background-color: #e13a3a;
+  color: white;
 }
 </style>
