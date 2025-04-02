@@ -2,6 +2,7 @@
 
 import {updateUserState, UserState} from "../../utils/userState/UserState.ts";
 import {AuthResolver} from "../../api/resolvers/auth/auth.resolver.ts";
+import {UserRole} from "../../utils/userState/UserState.types.ts";
 
 updateUserState()
 const authResolver = new AuthResolver();
@@ -25,7 +26,9 @@ const authResolver = new AuthResolver();
           </router-link>
         </div>
         <div class="auth-buttons" v-if="UserState.status == 'authorized'">
-          <router-link to="/testBlock/create" class="btn login">Создать блок</router-link>
+          <router-link to="/testBlock/create" class="btn login"
+                       v-if="UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT">Создать блок
+          </router-link>
           <router-link to="" class="btn login" @click="authResolver.logout">Выход</router-link>
           <router-link to="/profile" class="btn register">Личный кабинет</router-link>
         </div>
