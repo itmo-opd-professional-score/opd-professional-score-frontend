@@ -36,7 +36,10 @@ export class TestResolver {
         return await this.apiResolver.request<null, TestDataInputDto[]>(
             `at/getByUserId/${userId}`,
             "GET",
-        )
+        ).catch(err => {
+            this.usePopUp.activateErrorPopup(err.message)
+            return null
+        })
     }
 
 
