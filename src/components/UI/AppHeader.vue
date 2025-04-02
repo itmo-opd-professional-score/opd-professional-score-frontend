@@ -25,6 +25,7 @@ const authResolver = new AuthResolver();
           </router-link>
         </div>
         <div class="auth-buttons" v-if="UserState.status == 'authorized'">
+          <router-link to="/testBlock/create" class="btn login">Создать блок</router-link>
           <router-link to="" class="btn login" @click="authResolver.logout">Выход</router-link>
           <router-link to="/profile" class="btn register">Личный кабинет</router-link>
         </div>
