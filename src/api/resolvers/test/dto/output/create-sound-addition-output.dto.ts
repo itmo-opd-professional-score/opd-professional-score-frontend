@@ -1,4 +1,4 @@
-export type CreateSoundAdditionOutputDto = {
+export interface CreateSoundAdditionOutputDto {
     userId: number | null,
     averageCallbackTime: number,
     dispersion: number,

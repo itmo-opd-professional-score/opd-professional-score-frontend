@@ -5,6 +5,7 @@ import type {TestJwt} from "./types";
 import {usePopupStore} from "../../store/popup.store.ts";
 import NotFound from "../NotFound.vue";
 import AdditionSoundTest from "./addition/sound/AdditionSoundTest.vue";
+import AdditionVisualTest from "./addition/visual/AdditionVisualTest.vue";
 
   const props = defineProps<{
     token: string
@@ -15,6 +16,8 @@ import AdditionSoundTest from "./addition/sound/AdditionSoundTest.vue";
       switch (data.testType) {
         case "SOUND_ADDITION":
           return AdditionSoundTest
+        case "VISUAL_ADDITION":
+          return AdditionVisualTest;
         default:
           return NotFound
       }

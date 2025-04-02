@@ -1,4 +1,4 @@
-export type TestDataInputDto = {
+export interface TestDataInputDto {
     id: number,
     testTypeId: number,
     userId: number,

@@ -1,4 +1,4 @@
-export type TestsScoresDto = {
+export interface TestsScoresDto {
   id: number;
   test_name: string;
   current_points: number;

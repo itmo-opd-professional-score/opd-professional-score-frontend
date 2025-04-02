@@ -1,12 +1,12 @@
 export type SoundHardTestSumType = "ODD" | "EVEN"
 
-export type SoundHardTestQuestionDto = {
+export interface SoundHardTestQuestionDto {
     id: number
     question: string;
     answer: SoundHardTestSumType;
 }
 
-export type SoundHardTestAnswerDto = {
+export interface SoundHardTestAnswerDto {
     answer: SoundHardTestSumType;
     questionId: number
     isCorrect: boolean;

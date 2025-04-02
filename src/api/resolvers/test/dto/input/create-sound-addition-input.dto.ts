@@ -1,4 +1,4 @@
-export type CreateSoundAdditionInputDto = {
+export interface CreateSoundAdditionInputDto {
     status: number,
     body: {
         testToken: string,
