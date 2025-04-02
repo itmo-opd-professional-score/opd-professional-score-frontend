@@ -1,6 +1,6 @@
 export interface CreateTestBlockOutputDto {
   tests: {
-    tests: string[]
-  },
-  userIDs: number[]
+    tests: string[];
+  };
+  userIDs: number[];
 }
