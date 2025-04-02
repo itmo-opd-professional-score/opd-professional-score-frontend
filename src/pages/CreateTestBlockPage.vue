@@ -7,6 +7,8 @@ import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-i
 import UserRowElement from "../components/UserRowElement.vue";
 import type {CreateTestBlockOutputDto} from "../api/resolvers/testBlocks/dto/output/create-test-block-output.dto.ts";
 import {usePopupStore} from "../store/popup.store.ts";
+import {useTestTypesStore} from "../store/test-types.store.ts";
+import type {TestTypeDataInputDto} from "../api/testType/dto/input/test-type-data-input.dto.ts";
 
 export default {
   name: 'CreateTestBlockPage',
@@ -15,43 +17,28 @@ export default {
     const popupStore = usePopupStore();
     const testBlockResolver = new TestBlockResolver();
     const userResolver = new UserResolver();
-    const tests = [
-      {
-        name: "Тест на скорость реакции (свет)",
-        meta: "SIMPLE_LIGHT"
-      },
-      {
-        name: "Тест на цветовое восприятие",
-        meta: "HARD_LIGHT"
-      },
-      {
-        name: "Тест на скорость реакции (звук)",
-        meta: "SIMPLE_SOUND"
-      },
-      {
-        name: 'Тест "Сложение в уме" (визуальный)',
-        meta: "VISUAL_ADDITION"
-      },
-      {
-        name: 'Тест "Сложение в уме" (звуковой)',
-        meta: "SOUND_ADDITION"
-      }
-    ];
     const users: UserDataInputDto[] = [];
 
     return {
       approvedUsers: [] as number[],
       approvedTests: [] as string[],
+      tests: [] as TestTypeDataInputDto[],
       users,
-      tests,
       testBlockResolver,
       userResolver,
       popupStore,
     }
   },
   async mounted() {
-    const res = await this.userResolver.getAll();
-    if (res?.body) this.users = res?.body.sort((a, b) => a.id - b.id);
+    const usersFromApi = await this.userResolver.getAll();
+    const testTypesStore = useTestTypesStore();
+    await testTypesStore.loadTestTypes();
+
+    this.tests = testTypesStore.getTestTypes
+
+    if (usersFromApi?.body) {
+      this.users = usersFromApi?.body.sort((a, b) => a.id - b.id);
+    }
   },
   methods: {
     async save() {
@@ -85,8 +72,8 @@ export default {
     <div class="tests-container">
       <TestRowElement v-for="(test, index) in tests"
                       :key="index"
-                      :test-name="test.name"
-                      :test-meta="test.meta"
+                      :test-name="test.description"
+                      :test-meta="test.name"
                       @apply-test="(meta: string) => approvedTests.push(meta)"
                       @remove-test="(meta: string) => {
                         const i = approvedTests.indexOf(meta);
