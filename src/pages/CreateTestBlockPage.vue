@@ -55,19 +55,23 @@ export default {
   },
   methods: {
     async save() {
-      const data: CreateTestBlockOutputDto = {
-        tests: {
-          tests: this.approvedTests
-        },
-        userIDs: this.approvedUsers
-      }
-
-      await this.testBlockResolver.createTestBlock(data).then((res) => {
-        if (res.status == 200) {
-          this.popupStore.activateInfoPopup("Блок тестов создан успешно!")
-          this.$router.push("/");
+      if (this.approvedTests.length > 0 && this.approvedUsers.length > 0) {
+        const data: CreateTestBlockOutputDto = {
+          tests: {
+            tests: this.approvedTests
+          },
+          userIDs: this.approvedUsers
         }
-      })
+
+        await this.testBlockResolver.createTestBlock(data).then((res) => {
+          if (res.status == 200) {
+            this.popupStore.activateInfoPopup("Блок тестов создан успешно!")
+            this.$router.push("/");
+          }
+        })
+      } else {
+        this.popupStore.activateErrorPopup("Должен быть выбран хотя бы 1 тест и 1 пользователь!")
+      }
     }
   }
 }
