@@ -10,9 +10,10 @@ import LogInPage from "../pages/LogInPage.vue";
 import RegistrationPage from "../pages/RegistrationPage.vue";
 import SimpleSoundTest from "../pages/SimpleSoundTest.vue";
 import PersonalAccountChanging from "../pages/PersonalAccountChanging.vue";
-import AdditionalVisualTest from "../components/AdditionalVisualTest"
+import AdditionalVisualTest from "../components/AdditionalVisualTest.vue";
 import SoundHardTest from "../pages/tests/sound/hard/SoundHardTest.vue";
 import TestMapper from "../pages/tests/TestMapper.vue";
+import CreateTestBlockPage from "../pages/CreateTestBlockPage.vue";
 
 const routes = [
   {
@@ -87,6 +88,11 @@ const routes = [
     props: true,
     component: TestMapper,
   },
+  {
+    path: '/testBlock/create',
+    component: CreateTestBlockPage,
+    meta: {ruName: "Создание блока тестов", requiresAuth: true}
+  }
 ];
 
 const router = createRouter({
