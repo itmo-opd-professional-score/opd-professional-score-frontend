@@ -17,6 +17,8 @@ import {UserResolver} from "../api/resolvers/user/user.resolver.ts";
 import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
 import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
 import {UserRole} from "../utils/userState/UserState.types.ts";
+import {checkTestType} from "../utils/testTypeState/TestTypeState.ts";
+import * as test from "node:test";
 
 const authResolver = new AuthResolver();
 const userResolver = new UserResolver()
@@ -83,9 +85,14 @@ const reloadTests = async () => {
       break
     case UserRole.USER:
       additionTests = await testResolver.getAdditionByUserId(UserState.id!)
-      tests.value.additionSound = additionTests?.flatMap(test => {
-        if (test && test.getType)
-      })
+      if (additionTests) {
+        tests.value.additionSound = additionTests.filter(test =>
+            checkTestType(test) == "SOUND_ADDITION" ? test : null
+        )
+        tests.value.additionVisual = additionTests.filter(test =>
+            checkTestType(test) == "VISUAL_ADDITION" ? test : null
+        )
+      }
       break
   }
 }
@@ -269,11 +276,12 @@ const testData = ref([
 
 
 onMounted(() => {
-  if (UserState.role == "ADMIN") {
+  if (UserState.role == UserRole.ADMIN) {
     reloadUsers()
   }
   connectLocalTestsResults()
   reloadProfessions()
+  reloadTests()
 })
 </script>
 
@@ -323,7 +331,7 @@ onMounted(() => {
       <div class="tests-info" v-if="UserState.role == 'EXPERT' || UserState.role == 'ADMIN'">
         <p class="block_header">Все тесты</p>
         <div class="test_data_block">
-          <TestsManagerList :tests="tests" :max-elements-count="5"/>
+          <TestsManagerList :tests="tests.additionSound" :max-elements-count="5"/>
         </div>
       </div>
 
@@ -354,10 +362,9 @@ onMounted(() => {
       <div class="tests-info">
         <p class="block_header">Информация о пройденных тестах</p>
         <div class="test_data_block">
-          <TestScoreList :tests="testData" :max-elements-count="5"/>
+          <TestsManagerList :tests="tests.additionSound" :max-elements-count="5"/>
         </div>
       </div>
-
     </div>
   </div>
 </template>

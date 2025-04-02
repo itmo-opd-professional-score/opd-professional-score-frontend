@@ -1,6 +1,6 @@
 export interface CreateSoundAdditionInputDto {
-    status: number,
-    body: {
-        testToken: string,
-    }
+  status: number;
+  body: {
+    testToken: string;
+  };
 }

@@ -3,8 +3,10 @@ import Header from "./components/UI/AppHeader.vue";
 import InfoPopup from "./components/UI/popups/InfoPopup.vue";
 import ErrorPopup from "./components/UI/popups/ErrorPopup.vue";
 import {usePopupStore} from "./store/popup.store.ts";
+import {loadTestTypes} from "./utils/testTypeState/TestTypeState.ts";
 
 const popupStore = usePopupStore();
+loadTestTypes()
 </script>
 
 <template>

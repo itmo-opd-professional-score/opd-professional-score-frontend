@@ -1,4 +1,4 @@
 export interface UpdateUserIdsOutputDto {
-    userId: number,
-    tokens: string[]
+  userId: number;
+  tokens: string[];
 }
