@@ -14,19 +14,19 @@ export class TestResolver {
   public async getAllByType(typeEndpoint: string) {
     return await this.apiResolver.request<null, TestDataInputDto[]>(
       `${typeEndpoint}/getAll`,
-      "GET",
+      'GET',
       null,
-      this.token ? this.token : undefined
-    )
+      this.token ? this.token : undefined,
+    );
   }
 
   public async getTestsByTypeByUserId(userId: number, typeEndpoint: string) {
     return await this.apiResolver.request<null, TestDataInputDto[]>(
       `${typeEndpoint}/getByUserId/${userId}`,
-      "GET",
+      'GET',
       null,
       this.token ? this.token : undefined,
-    )
+    );
   }
 
   public async createSoundAddition(data: CreateSoundAdditionOutputDto) {

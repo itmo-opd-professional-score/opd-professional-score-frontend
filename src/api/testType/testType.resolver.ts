@@ -10,12 +10,11 @@ export class TestTypeResolver {
 
   public async getAll() {
     return await this.apiResolver
-      .request<null, TestTypeDataInputDto[]>(
-        `getAll`,
-        'GET',
+      .request<
         null,
-        this.token ? this.token : undefined
-      ).catch((err) => {
+        TestTypeDataInputDto[]
+      >(`getAll`, 'GET', null, this.token ? this.token : undefined)
+      .catch((err) => {
         const error = err as DefaultErrorDto;
         this.usePopUp.activateErrorPopup(error.message);
         return null;
