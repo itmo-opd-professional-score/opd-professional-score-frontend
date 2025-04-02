@@ -4,7 +4,6 @@ import {onMounted, ref} from "vue";
 import TestsManagerList from "../components/TestsManagerList.vue";
 import UserManagerList from "../components/UserManagerList.vue";
 import ProfessionsManagerList from "../components/ProfessionsManagerList.vue";
-import TestScoreList from "../components/TestsScoreList.vue";
 import {UserState} from "../utils/userState/UserState.ts";
 import {ProfessionResolver} from "../api/resolvers/profession/profession.resolver.ts";
 import type {GetProfessionOutputDto} from "../api/resolvers/profession/dto/output/get-profession-output.dto.ts";
@@ -18,7 +17,6 @@ import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-i
 import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
 import {UserRole} from "../utils/userState/UserState.types.ts";
 import {checkTestType} from "../utils/testTypeState/TestTypeState.ts";
-import * as test from "node:test";
 
 const authResolver = new AuthResolver();
 const userResolver = new UserResolver()
@@ -77,9 +75,6 @@ const reloadProfessions = async () => {
 
 const reloadTests = async () => {
   let additionTests: TestDataInputDto[] | null
-  const simpleSoundTests: TestDataInputDto[] = []
-  const simpleLightTests: TestDataInputDto[] = []
-  const hardLightTests: TestDataInputDto[] = []
   switch (UserState.role) {
     case UserRole.ADMIN:
       break
@@ -93,6 +88,9 @@ const reloadTests = async () => {
             checkTestType(test) == "VISUAL_ADDITION" ? test : null
         )
       }
+      tests.value.simpleSound.push(...await testResolver.getSimpleSoundByUserId(UserState.id!))
+      tests.value.simpleLight.push(...await testResolver.getSimpleLightByUserId(UserState.id!))
+      tests.value.hardLight.push(...await testResolver.getHardLightByUserId(UserState.id!))
       break
   }
 }
@@ -107,173 +105,6 @@ const connectLocalTestsResults = () => {
     })
   }
 }
-
-
-
-
-const testData = ref([
-  {
-    id: 1,
-    test_name: 'Test 1',
-    current_points: 80,
-    max_points: 100,
-    time: '00:10:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: true
-  },
-  {
-    id: 2,
-    test_name: 'Test 2',
-    current_points: 90,
-    max_points: 100,
-    time: '00:15:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: true
-  },
-  {
-    id: 3,
-    test_name: 'Test 3',
-    current_points: 75,
-    max_points: 100,
-    time: '00:12:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: false
-  },
-  {
-    id: 4,
-    test_name: 'Test 4',
-    current_points: 60,
-    max_points: 100,
-    time: '00:08:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: true
-  },
-  {
-    id: 5,
-    test_name: 'Test 5',
-    current_points: 95,
-    max_points: 100,
-    time: '00:20:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: true
-  },
-  {
-    id: 6,
-    test_name: 'Test 6',
-    current_points: 50,
-    max_points: 100,
-    time: '00:05:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: false
-  },
-  {
-    id: 7,
-    test_name: 'Test 7',
-    current_points: 85,
-    max_points: 100,
-    time: '00:13:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: true
-  },
-  {
-    id: 8,
-    test_name: 'Test 8',
-    current_points: 70,
-    max_points: 100,
-    time: '00:09:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: false
-  },
-  {
-    id: 9,
-    test_name: 'Test 9',
-    current_points: 100,
-    max_points: 100,
-    time: '00:25:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: true
-  },
-  {
-    id: 10,
-    test_name: 'Test 10',
-    current_points: 40,
-    max_points: 100,
-    time: '00:04:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: false
-  },
-  {
-    id: 11,
-    test_name: 'Test 11',
-    current_points: 65,
-    max_points: 100,
-    time: '00:11:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: true
-  },
-  {
-    id: 12,
-    test_name: 'Test 12',
-    current_points: 55,
-    max_points: 100,
-    time: '00:07:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: false
-  },
-  {
-    id: 13,
-    test_name: 'Test 13',
-    current_points: 78,
-    max_points: 100,
-    time: '00:14:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: true
-  },
-  {
-    id: 14,
-    test_name: 'Test 14',
-    current_points: 92,
-    max_points: 100,
-    time: '00:18:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: true
-  },
-  {
-    id: 15,
-    test_name: 'Test 15',
-    current_points: 30,
-    max_points: 100,
-    time: '00:03:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: false
-  },
-  {
-    id: 16,
-    test_name: 'Test 16',
-    current_points: 23,
-    max_points: 100,
-    time: '00:02:00',
-    username: "Фокин Владимир",
-    createdAt: "13.04.2023 13:00",
-    valid: false
-  },
-]);
-
 
 onMounted(() => {
   if (UserState.role == UserRole.ADMIN) {
@@ -315,7 +146,7 @@ onMounted(() => {
     </div>
     <div class="right-block">
 
-      <div class="tests-info" v-if="UserState.role == 'ADMIN'">
+      <div class="tests-info" v-if="UserState.role == UserRole.ADMIN">
         <p class="block_header">Все пользователи</p>
         <div class="user_data_block">
           <UserManagerList
@@ -328,14 +159,14 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="tests-info" v-if="UserState.role == 'EXPERT' || UserState.role == 'ADMIN'">
+      <div class="tests-info" v-if="UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN">
         <p class="block_header">Все тесты</p>
         <div class="test_data_block">
           <TestsManagerList :tests="tests.additionSound" :max-elements-count="5"/>
         </div>
       </div>
 
-      <div class="tests-info" v-if="UserState.role == 'EXPERT' || UserState.role == 'ADMIN'">
+      <div class="tests-info" v-if="UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN">
         <p class="block_header">Опубликованные профессии</p>
         <div class="profession_data_block">
           <ProfessionsManagerList
@@ -359,10 +190,44 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="tests-info">
-        <p class="block_header">Информация о пройденных тестах</p>
-        <div class="test_data_block">
-          <TestsManagerList :tests="tests.additionSound" :max-elements-count="5"/>
+      <div class="tests-info" v-if="Object.values(tests).reduce((acc, arr) => acc + arr.length, 0)">
+        <div class="heading">
+          <p class="block_header">Информация о пройденных тестах </p>
+        </div>
+
+        <div class="test-info" v-if="tests.simpleSound.length > 0">
+          <p class="block_header">Реакция на простой звуковой сигнал</p>
+          <div class="test_data_block">
+            <TestsManagerList :tests="tests.simpleSound" :max-elements-count="5"/>
+          </div>
+        </div>
+
+        <div class="test-info" v-if="tests.simpleLight.length > 0">
+          <p class="block_header">Реакция на простой световой сигнал</p>
+          <div class="test_data_block">
+            <TestsManagerList :tests="tests.simpleLight" :max-elements-count="5"/>
+          </div>
+        </div>
+
+        <div class="test-info" v-if="tests.hardLight.length > 0">
+          <p class="block_header">Реакция на сложный световой сигнал</p>
+          <div class="test_data_block">
+            <TestsManagerList :tests="tests.hardLight" :max-elements-count="5"/>
+          </div>
+        </div>
+
+        <div class="test-info" v-if="tests.additionSound.length > 0">
+          <p class="block_header">Реакция на сложение по звуку</p>
+          <div class="test_data_block">
+            <TestsManagerList :tests="tests.additionSound" :max-elements-count="5"/>
+          </div>
+        </div>
+
+        <div class="test-info" v-if="tests.additionVisual.length > 0">
+          <p class="block_header">Реакция на сложение визуально</p>
+          <div class="test_data_block">
+            <TestsManagerList :tests="tests.additionVisual" :max-elements-count="5"/>
+          </div>
         </div>
       </div>
     </div>
