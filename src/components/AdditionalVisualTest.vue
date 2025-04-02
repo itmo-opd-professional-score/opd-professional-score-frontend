@@ -1,6 +1,9 @@
 <script lang="ts">
+import CommonButton from "./UI/CommonButton.vue";
+
 export default {
-    name: 'AdditionalVisualTest';
+    name: 'AdditionalVisualTest',
+  components: {CommonButton},
     data() {
         return {
             number1: 0,
