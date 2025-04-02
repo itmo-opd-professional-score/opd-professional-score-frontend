@@ -1,34 +1,36 @@
 <script setup lang="ts">
-import {computed, type PropType, ref} from "vue";
+import {computed, ref} from "vue";
 import CommonButton from "./UI/CommonButton.vue";
-import type {TestsManagerInput} from "../api/dto/tests-manager.input.dto.ts";
 import TestManagerElement from "./UI/TestManagerElement.vue";
+import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
+import { checkTestType } from '../utils/testTypeState/TestTypeState.ts';
 
-const props = defineProps({
-  maxElementsCount: {
-    type: Number,
-    default: 5,
-  },
-  tests: {
-    type: Array as PropType<TestsManagerInput[]>,
-    required: true,
-  }
-});
+const props = withDefaults(defineProps<{
+  maxElementsCount: number;
+  tests: TestDataInputDto[]
+}>(), {
+  maxElementsCount: 5
+})
 
 const currentPage = ref(1);
-
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * props.maxElementsCount;
   const end = start + props.maxElementsCount;
-  return props.tests.slice(start, end);
+  if (props.tests) {
+    return props.tests.slice(start, end);
+  }
+  return null
 });
 
 const totalPages = computed(() => {
-  return Math.ceil(props.tests.length / props.maxElementsCount);
+  if (props.tests) {
+    return Math.ceil(props.tests.length / props.maxElementsCount);
+  }
+  return null
 });
 
 const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
+  if (totalPages.value != null && currentPage.value < totalPages.value) {
     currentPage.value++;
   }
 };
@@ -43,24 +45,23 @@ const prevPage = () => {
 <template>
   <div class="component_container">
     <div class="header">
-      <div class="id" id="id">
-        Id
-      </div>
-      <div class="test_name" id="test_name">
-        Name
-      </div>
-      <div class="score">Header</div>
-      <div class="time">Created</div>
-      <div class="valid">Delete</div>
+      <div class="id">Id</div>
+      <div class="test_type">Тип теста</div>
+      <div class="test_type">Время ответа</div>
+      <div class="test_type">Пользователь</div>
+      <div class="test_type">Пройден</div>
+      <div class="test_type">Дата</div>
     </div>
     <TestManagerElement
         v-for="item in paginatedData"
         :key="item.id"
     >
       <template #id>{{ item.id }}</template>
-      <template #test_name>{{ item.name }}</template>
-      <template #test_header>{{ item.header }}</template>
-      <template #created>{{ item.createdAt }}</template>
+      <template #test_type>{{ checkTestType(item) }}</template>
+      <template #average_callback>{{ item.averageCallbackTime.toFixed(2) }}</template>
+      <template #user>{{ item.userId ? item.userId : 'Аноним'}}</template>
+      <template #valid>{{ item.valid }}</template>
+      <template #created_at>{{ item.createdAt.substring(0, 10) }}</template>
     </TestManagerElement>
 
     <div class="pagination_controls">
@@ -80,6 +81,7 @@ const prevPage = () => {
 <style scoped>
 .component_container {
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -90,7 +92,7 @@ const prevPage = () => {
   display: flex;
   justify-content: space-between;
   width: 95%;
-  margin-top: 1rem;
+  margin-top: auto;
   user-select: none;
 }
 
@@ -103,7 +105,7 @@ const prevPage = () => {
   justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 2fr 7fr 7fr 2fr 1fr;
+  grid-template-columns: 1fr 3fr 3fr 3fr 2fr 2fr;
   margin-bottom: 1rem;
 }
 

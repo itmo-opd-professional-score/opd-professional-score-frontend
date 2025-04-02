@@ -132,6 +132,7 @@ const prevPage = () => {
 <style scoped>
 .component_container {
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -142,7 +143,7 @@ const prevPage = () => {
   display: flex;
   justify-content: space-between;
   width: 95%;
-  margin-top: 1rem;
+  margin-top: auto;
   user-select: none;
 }
 

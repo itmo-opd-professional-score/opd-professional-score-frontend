@@ -52,7 +52,7 @@ onMounted(async () => {
 .wrapper {
   background: var(--background-secondary);
   border-radius: 10px;
-  width: 95%;
+  width: 100%;
   padding: 1vw;
   justify-content: center;
   align-items: center;

@@ -1,5 +1,6 @@
 <script lang="ts">
-import CommonButton from "./UI/CommonButton.vue";
+
+import CommonButton from '../../../../components/UI/CommonButton.vue';
 
 export default {
     name: 'AdditionalVisualTest',
@@ -15,8 +16,8 @@ export default {
             status: '',
             testStarted: false,
             testCompleted: false,
-            startTime: null,
-            responseTimes: [],
+            startTime: 0,
+            responseTimes: [] as Array<number>,
             standardDeviation: 0
         };
     },
@@ -26,7 +27,7 @@ export default {
             this.number2 = Math.floor(Math.random() * 50) + 1;
             this.startTime = Date.now();
         },
-        checkEvenOdd(isEven) {
+        checkEvenOdd(isEven: boolean) {
             const sum = this.number1 + this.number2;
             const isSumEven = sum % 2 === 0;
             this.attempts++;

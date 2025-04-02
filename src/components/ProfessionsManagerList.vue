@@ -109,18 +109,24 @@ const prevPage = () => {
       <div class="valid">Требования</div>
       <div class="valid">Сфера</div>
     </div>
-    <ProfessionsManagerElement
+    <div class="professions">
+      <ProfessionsManagerElement
         v-for="item in paginatedData"
         :key="item.id"
         :id="item.id"
         @edit-profession="el => toggleForm(el, item.id, item.name, item.description, item.requirements, item.sphere, item.archived)"
-    >
-      <template #id>{{ item.id }}</template>
-      <template #name>{{ item.name }}</template>
-      <template #description>{{ item.description }}</template>
-      <template #requirements>{{ item.requirements }}</template>
-      <template #sphere>{{ item.sphere }}</template>
-    </ProfessionsManagerElement>
+      >
+        <template #id>{{ item.id }}</template>
+        <template #name>{{ item.name }}</template>
+        <template #description>{{ item.description }}</template>
+        <template #requirements>{{ item.requirements }}</template>
+        <template #sphere>{{ item.sphere }}</template>
+      </ProfessionsManagerElement>
+
+      <CommonButton class="new-profession" @click="router.push('/profession/new')" v-if="isArchive">
+        <template v-slot:placeholder>Добавить профессию</template>
+      </CommonButton>
+    </div>
 
     <div class="pagination_controls">
       <CommonButton @click="prevPage">
@@ -132,10 +138,6 @@ const prevPage = () => {
       <CommonButton @click="nextPage">
         <template v-slot:placeholder>Вперед</template>
       </CommonButton>
-
-      <CommonButton @click="router.push('/profession/new')" v-if="isArchive">
-        <template v-slot:placeholder>Добавить профессию</template>
-      </CommonButton>
     </div>
   </div>
 </template>
@@ -143,6 +145,7 @@ const prevPage = () => {
 <style scoped>
 .component_container {
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -153,7 +156,7 @@ const prevPage = () => {
   display: flex;
   justify-content: space-between;
   width: 95%;
-  margin-top: 1rem;
+  margin-top: auto;
   user-select: none;
 }
 
@@ -167,7 +170,19 @@ const prevPage = () => {
   align-items: center;
   display: grid;
   grid-template-columns: 1fr 2fr 4fr 3fr 1fr 1fr;
-  margin-bottom: 1rem;
+}
+
+.professions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1vw;
+  padding: 0 2.5%;
+  overflow: scroll;
+
+  .new-profession {
+    align-self: flex-end;
+  }
 }
 
 .header:hover {

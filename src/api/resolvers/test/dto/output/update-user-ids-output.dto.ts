@@ -1,4 +1,4 @@
-export type UpdateUserIdsOutputDto = {
-    userId: number,
-    tokens: string[]
+export interface UpdateUserIdsOutputDto {
+  userId: number;
+  tokens: string[];
 }
