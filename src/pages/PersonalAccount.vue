@@ -16,7 +16,7 @@ import {UserResolver} from "../api/resolvers/user/user.resolver.ts";
 import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
 import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
 import {UserRole} from "../utils/userState/UserState.types.ts";
-import {checkTestType} from "../utils/testTypeState/TestTypeState.ts";
+import {useTestTypesStore} from "../store/test-types.store.ts";
 
 const authResolver = new AuthResolver();
 const userResolver = new UserResolver()
@@ -24,6 +24,9 @@ const testResolver = new TestResolver();
 const professionResolver = new ProfessionResolver()
 
 const popupStore = usePopupStore();
+const testTypesStore = useTestTypesStore();
+testTypesStore.loadTestTypes();
+
 const users = ref<UserDataInputDto[]>([]);
 const professions = ref<GetProfessionOutputDto[] | null>(null);
 const tests = ref<{
@@ -63,8 +66,8 @@ const reloadProfessions = async () => {
           professionsPublished.value?.push(profession)
         }
       })
-      professionsArchive.value.sort((a, b) => a.id - b.id );
-      professionsPublished.value.sort((a, b) => a.id - b.id );
+      professionsArchive.value.sort((a, b) => a.id - b.id);
+      professionsPublished.value.sort((a, b) => a.id - b.id);
 
     } else {
       popupStore.activateErrorPopup("Error occurred. No one profession found.")
@@ -86,10 +89,10 @@ const reloadTests = async () => {
     additionTests = await testResolver.getTestsByTypeByUserId(UserState.id!, 'at')
     if (additionTests) {
       tests.value.additionSound = additionTests.filter(test =>
-        checkTestType(test) == "SOUND_ADDITION" ? test : null
+          testTypesStore.checkTestType(test) == "SOUND_ADDITION" ? test : null
       )
       tests.value.additionVisual = additionTests.filter(test =>
-        checkTestType(test) == "VISUAL_ADDITION" ? test : null
+          testTypesStore.checkTestType(test) == "VISUAL_ADDITION" ? test : null
       )
     }
     tests.value.simpleSound.push(...await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst'))
@@ -167,14 +170,15 @@ onMounted(() => {
           <p class="block_header">Все тесты</p>
           <div class="test_data_block">
             <TestsManagerList
-              :tests="allTests"
-              :max-elements-count="5"
+                :tests="allTests"
+                :max-elements-count="5"
             />
           </div>
         </div>
       </div>
 
-      <div class="tests-info" v-if="UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN && professionsPublished != null && professionsPublished.length > 0">
+      <div class="tests-info"
+           v-if="UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN && professionsPublished != null && professionsPublished.length > 0">
         <p class="block_header">Опубликованные профессии</p>
         <div class="profession_data_block">
           <ProfessionsManagerList
@@ -186,14 +190,15 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="tests-info" v-if="(UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN) && professionsPublished != null && professionsPublished.length > 0">
+      <div class="tests-info"
+           v-if="(UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN) && professionsPublished != null && professionsPublished.length > 0">
         <p class="block_header">Архивные профессии</p>
         <div class="profession_data_block">
           <ProfessionsManagerList
-            :professions="professionsArchive as GetProfessionOutputDto[]"
-            :max-elements-count="5"
-            :is-archive="true"
-            @professions-list-update="reloadProfessions"
+              :professions="professionsArchive as GetProfessionOutputDto[]"
+              :max-elements-count="5"
+              :is-archive="true"
+              @professions-list-update="reloadProfessions"
           />
         </div>
       </div>
