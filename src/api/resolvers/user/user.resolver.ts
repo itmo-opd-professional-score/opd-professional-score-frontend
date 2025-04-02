@@ -71,6 +71,10 @@ export class UserResolver {
         "PATCH",
         data,
         this.token ? this.token : undefined,
-    )
+    ).catch((err) => {
+      const e = (err.response.data) as DefaultErrorDto;
+      this.popupStore.activateErrorPopup(`Error code: ${e.status}. ${e.message}`);
+      return null
+    })
   }
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
 export default {
-    name: 'AdditionalVisualTest';
+    name: 'AdditionalVisualTest',
     data() {
         return {
             number1: 0,
@@ -12,8 +12,8 @@ export default {
             status: '',
             testStarted: false,
             testCompleted: false,
-            startTime: null,
-            responseTimes: [],
+            startTime: 0,
+            responseTimes: [] as number[],
             standardDeviation: 0
         };
     },
@@ -23,13 +23,13 @@ export default {
             this.number2 = Math.floor(Math.random() * 50) + 1;
             this.startTime = Date.now();
         },
-        checkEvenOdd(isEven) {
+        checkEvenOdd(isEven: boolean) {
             const sum = this.number1 + this.number2;
             const isSumEven = sum % 2 === 0;
             this.attempts++;
             this.currentAttempt++;
             const responseTime = (Date.now() - this.startTime) / 1000; 
-            this.responseTimes.push(responseTime); 
+            this.responseTimes.push(responseTime);
 
             if ((isEven && isSumEven) || (!isEven && !isSumEven)) {
                 this.score++;

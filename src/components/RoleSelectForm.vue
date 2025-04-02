@@ -2,7 +2,6 @@
 import {ref} from "vue";
 import {usePopupStore} from "../store/popup.store.ts";
 import {UserResolver} from "../api/resolvers/user/user.resolver.ts";
-import type {DefaultErrorDto} from "../api/dto/common/default-error.dto.ts";
 import {UserRole} from "../utils/userState/UserState.types.ts";
 
 const emit = defineEmits(['role-update'])
@@ -19,15 +18,10 @@ const updateRole = async () => {
     id: props.userId,
     role: selectedRole.value
   });
-  if (result.status === 200) {
+  if (result != null) {
     emit("role-update");
     popupStore.activateInfoPopup(result.body);
-  } else {
-    if ('message' in result) {
-      popupStore.activateErrorPopup(result.message);
-    } else {
-      popupStore.activateErrorPopup("An unknown error occurred.");
-    }
+  }
 }
 </script>
 

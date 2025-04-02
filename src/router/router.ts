@@ -10,7 +10,7 @@ import LogInPage from "../pages/LogInPage.vue";
 import RegistrationPage from "../pages/RegistrationPage.vue";
 import SimpleSoundTest from "../pages/SimpleSoundTest.vue";
 import PersonalAccountChanging from "../pages/PersonalAccountChanging.vue";
-import AdditionalVisualTest from "../components/AdditionalVisualTest"
+import AdditionalVisualTest from "../components/AdditionalVisualTest.vue"
 import SoundHardTest from "../pages/tests/sound/hard/SoundHardTest.vue";
 import TestMapper from "../pages/tests/TestMapper.vue";
 

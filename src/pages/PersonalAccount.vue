@@ -19,8 +19,13 @@ import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-i
 const authResolver = new AuthResolver();
 const userResolver = new UserResolver()
 const testResolver = new TestResolver();
+const professionResolver = new ProfessionResolver()
+
 const popupStore = usePopupStore();
 const users = ref<UserDataInputDto[]>([]);
+const professions = ref<GetProfessionOutputDto[] | null>(null);
+const professionsArchive = ref<GetProfessionOutputDto[] | null>(null)
+const professionsPublished = ref<GetProfessionOutputDto[] | null>(null)
 
 const reloadUsers = async () => {
   const result = await userResolver.getAll()
@@ -28,11 +33,6 @@ const reloadUsers = async () => {
     users.value = result.body
   }
 }
-
-const professions = ref<GetProfessionOutputDto[] | null>(null);
-const professionsArchive = ref<GetProfessionOutputDto[] | null>(null)
-const professionsPublished = ref<GetProfessionOutputDto[] | null>(null)
-const professionResolver = new ProfessionResolver()
 
 const reloadProfessions = async () => {
   professionsArchive.value = []
