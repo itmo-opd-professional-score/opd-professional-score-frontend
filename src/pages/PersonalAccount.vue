@@ -13,7 +13,7 @@ import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
 import router from "../router/router.ts";
 import {TestResolver} from "../api/resolvers/test/test.resolver.ts";
 import {UserResolver} from "../api/resolvers/user/user.resolver.ts";
-import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
+import type {UserDataOutputDto} from "../api/resolvers/user/dto/output/user-data-output.dto.ts";
 import type {TestDataOutputDto} from "../api/resolvers/test/dto/output/test-data-output.dto.ts";
 import {UserRole} from "../utils/userState/UserState.types.ts";
 import {useTestTypesStore} from "../store/test-types.store.ts";
@@ -31,7 +31,7 @@ const popupStore = usePopupStore();
 const testTypesStore = useTestTypesStore();
 testTypesStore.loadTestTypes();
 
-const users = ref<UserDataInputDto[]>([]);
+const users = ref<UserDataOutputDto[]>([]);
 const professions = ref<GetProfessionOutputDto[] | null>(null);
 const tests = ref<{
   additionSound: TestDataOutputDto[],

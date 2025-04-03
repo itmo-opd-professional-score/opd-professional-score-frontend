@@ -7,7 +7,7 @@ import router from "../router/router.ts";
 import {usePopupStore} from "../store/popup.store.ts";
 import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
 import type {SendCodeAgainInputDto} from "../api/resolvers/auth/dto/input/send-code-again-input.dto.ts";
-import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
+import type {UserDataOutputDto} from "../api/resolvers/user/dto/output/user-data-output.dto.ts";
 
 export default {
   name: 'PasswordChangingPage',
@@ -69,7 +69,7 @@ export default {
     },
 
     async sendCode() {
-      const user = (await this.userResolver.getByEmail(this.email))?.body as UserDataInputDto;
+      const user = (await this.userResolver.getByEmail(this.email))?.body as UserDataOutputDto;
       const data: SendCodeAgainInputDto = {
         email: this.email,
         username: user.username,

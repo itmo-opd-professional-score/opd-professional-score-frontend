@@ -6,7 +6,7 @@ import {autoUpdate, hide, useFloating} from "@floating-ui/vue";
 import RoleSelectForm from "./RoleSelectForm.vue";
 import {UserState} from "../utils/userState/UserState.ts";
 import type {UserRole} from "../utils/userState/UserState.types.ts";
-import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
+import type {UserDataOutputDto} from "../api/resolvers/user/dto/output/user-data-output.dto.ts";
 
 interface CurrentUser {
   id: number;
@@ -44,7 +44,7 @@ defineEmits(['users-list-update'])
 
 const props = withDefaults(defineProps<{
   maxElementsCount: number;
-  users: UserDataInputDto[]
+  users: UserDataOutputDto[]
 }>(), {
   maxElementsCount: 5,
 })

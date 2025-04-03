@@ -3,7 +3,7 @@ import TestRowElement from "../components/TestRowElement.vue";
 import CommonButton from "../components/UI/CommonButton.vue";
 import {TestBlockResolver} from "../api/resolvers/testBlocks/test-block.resolver.ts";
 import {UserResolver} from "../api/resolvers/user/user.resolver.ts";
-import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
+import type {UserDataOutputDto} from "../api/resolvers/user/dto/output/user-data-output.dto.ts";
 import UserRowElement from "../components/UserRowElement.vue";
 import type {CreateTestBlockInputDto} from "../api/resolvers/testBlocks/dto/input/create-test-block-input.dto.ts";
 import {usePopupStore} from "../store/popup.store.ts";
@@ -17,7 +17,7 @@ export default {
     const popupStore = usePopupStore();
     const testBlockResolver = new TestBlockResolver();
     const userResolver = new UserResolver();
-    const users: UserDataInputDto[] = [];
+    const users: UserDataOutputDto[] = [];
 
     return {
       approvedUsers: [] as number[],

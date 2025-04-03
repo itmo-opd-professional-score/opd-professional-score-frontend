@@ -1,11 +1,11 @@
 import ApiResolver from '../../../utils/ApiResolver.ts';
 import type { DefaultInputDto } from '../../dto/common/default-input.dto.ts';
-import type { ChangePasswordSecondStepOutputDto } from './dto/output/change-password-second-step-output.dto.ts';
-import type { UserDataInputDto } from './dto/input/user-data-input.dto.ts';
+import type { ChangePasswordSecondStepInputDto } from './dto/input/change-password-second-step-input.dto.ts';
+import type { UserDataOutputDto } from './dto/output/user-data-output.dto.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import type { DefaultErrorDto } from '../../dto/common/default-error.dto.ts';
-import type { UpdateUserOutputDto } from './dto/output/update-user-output.dto.ts';
-import type { SetUserRoleOutputDto } from './dto/output/set-user-role-output.dto.ts';
+import type { UpdateUserInputDto } from './dto/input/update-user-input.dto.ts';
+import type { SetUserRoleInputDto } from './dto/input/set-user-role-input.dto.ts';
 
 export class UserResolver {
   private apiResolver = new ApiResolver('user');
@@ -16,7 +16,7 @@ export class UserResolver {
     return await this.apiResolver
       .request<
         null,
-        DefaultInputDto<UserDataInputDto[]>
+        DefaultInputDto<UserDataOutputDto[]>
       >('getAll', 'GET', null, this.token ? this.token : undefined)
       .catch((err) => {
         const error = err as DefaultErrorDto;
@@ -31,7 +31,7 @@ export class UserResolver {
     return await this.apiResolver
       .request<
         null,
-        DefaultInputDto<UserDataInputDto>
+        DefaultInputDto<UserDataOutputDto>
       >(`getUserByEmail/${email}`, 'GET', null, this.token ? this.token : undefined)
       .catch((err) => {
         const e = err.response.data as DefaultErrorDto;
@@ -55,10 +55,10 @@ export class UserResolver {
   }
 
   public async changePasswordSecondStep(
-    data: ChangePasswordSecondStepOutputDto,
+    data: ChangePasswordSecondStepInputDto,
   ) {
     return await this.apiResolver.request<
-      ChangePasswordSecondStepOutputDto,
+      ChangePasswordSecondStepInputDto,
       DefaultInputDto<string>
     >(
       'changePasswordSecondStep',
@@ -68,17 +68,17 @@ export class UserResolver {
     );
   }
 
-  public async updateUser(data: UpdateUserOutputDto) {
+  public async updateUser(data: UpdateUserInputDto) {
     return await this.apiResolver.request<
-      UpdateUserOutputDto,
+      UpdateUserInputDto,
       DefaultInputDto<string>
     >('update', 'PATCH', data, this.token ? this.token : undefined);
   }
 
-  public async setRole(data: SetUserRoleOutputDto) {
+  public async setRole(data: SetUserRoleInputDto) {
     return await this.apiResolver
       .request<
-        SetUserRoleOutputDto,
+        SetUserRoleInputDto,
         DefaultInputDto<string>
       >('setRole', 'PATCH', data, this.token ? this.token : undefined)
       .catch((err) => {

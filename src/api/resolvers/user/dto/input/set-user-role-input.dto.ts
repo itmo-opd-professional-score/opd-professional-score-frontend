@@ -1,6 +1,6 @@
 import type { UserRole } from '../../../../../utils/userState/UserState.types.ts';
 
-export interface SetUserRoleOutputDto {
+export interface SetUserRoleInputDto {
   id: number;
   role: UserRole;
 }

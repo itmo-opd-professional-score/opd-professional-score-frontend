@@ -1,6 +1,6 @@
 import type { UserSex } from '../../../../../utils/userState/UserState.types.ts';
 
-export interface UpdateUserOutputDto {
+export interface UpdateUserInputDto {
   id?: number;
   updatedData?: {
     username?: string;

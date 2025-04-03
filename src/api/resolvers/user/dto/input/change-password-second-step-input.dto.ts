@@ -1,4 +1,4 @@
-export interface ChangePasswordSecondStepOutputDto {
+export interface ChangePasswordSecondStepInputDto {
   email: string;
   code: number;
   password: string;
