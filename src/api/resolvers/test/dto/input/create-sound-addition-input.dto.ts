@@ -1,6 +1,7 @@
 export interface CreateSoundAdditionInputDto {
-  status: number;
-  body: {
-    testToken: string;
-  };
+  userId: number | null;
+  averageCallbackTime: number;
+  dispersion: number;
+  allSignals: number;
+  mistakes: number;
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { SimpleSoundTestOutputDto } from "../api/resolvers/test/dto/output/simple-sound-test-output.dto";
+import type { SimpleSoundTestInputDto } from "../api/resolvers/test/dto/input/simple-sound-test-input.dto.ts";
 import {defineComponent} from 'vue';
 import {usePopupStore} from "../store/popup.store.ts";
 import CommonButton from "../components/UI/CommonButton.vue";
@@ -51,7 +51,7 @@ export default defineComponent({
       };
     }
     ,
-    testResultDto(): SimpleSoundTestOutputDto {
+    testResultDto(): SimpleSoundTestInputDto {
       return {
         userId: this.userId,
         averageCallbackTime: this.results.average,

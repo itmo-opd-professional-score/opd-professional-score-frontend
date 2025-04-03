@@ -14,7 +14,7 @@ import router from "../router/router.ts";
 import {TestResolver} from "../api/resolvers/test/test.resolver.ts";
 import {UserResolver} from "../api/resolvers/user/user.resolver.ts";
 import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
-import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
+import type {TestDataOutputDto} from "../api/resolvers/test/dto/output/test-data-output.dto.ts";
 import {UserRole} from "../utils/userState/UserState.types.ts";
 import {useTestTypesStore} from "../store/test-types.store.ts";
 import type {GetTestBlockInputDto} from "../api/resolvers/testBlocks/dto/input/get-test-block-input.dto.ts";
@@ -34,11 +34,11 @@ testTypesStore.loadTestTypes();
 const users = ref<UserDataInputDto[]>([]);
 const professions = ref<GetProfessionOutputDto[] | null>(null);
 const tests = ref<{
-  additionSound: TestDataInputDto[],
-  additionVisual: TestDataInputDto[],
-  simpleSound: TestDataInputDto[],
-  simpleLight: TestDataInputDto[],
-  hardLight: TestDataInputDto[],
+  additionSound: TestDataOutputDto[],
+  additionVisual: TestDataOutputDto[],
+  simpleSound: TestDataOutputDto[],
+  simpleLight: TestDataOutputDto[],
+  hardLight: TestDataOutputDto[],
 }>({
   additionSound: [],
   additionVisual: [],
@@ -46,7 +46,7 @@ const tests = ref<{
   simpleLight: [],
   hardLight: [],
 })
-const allTests = ref<TestDataInputDto[]>([]);
+const allTests = ref<TestDataOutputDto[]>([]);
 const professionsArchive = ref<GetProfessionOutputDto[] | null>(null)
 const professionsPublished = ref<GetProfessionOutputDto[] | null>(null)
 const testBlocks = ref<GetTestBlockInputDto[] | null>(null)
@@ -89,7 +89,7 @@ const reloadProfessions = async () => {
 
 const reloadTests = async () => {
   if (UserState.role) {
-    let additionTests: TestDataInputDto[]
+    let additionTests: TestDataOutputDto[]
     if (UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT) {
       allTests.value.push(...await testResolver.getAllByType('at'))
       allTests.value.push(...await testResolver.getAllByType('sst'))

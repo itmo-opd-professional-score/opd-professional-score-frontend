@@ -2,12 +2,12 @@
 import {computed, ref} from "vue";
 import CommonButton from "./UI/CommonButton.vue";
 import TestManagerElement from "./UI/TestManagerElement.vue";
-import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
+import type {TestDataOutputDto} from "../api/resolvers/test/dto/output/test-data-output.dto.ts";
 import {useTestTypesStore} from "../store/test-types.store.ts";
 
 const props = withDefaults(defineProps<{
   maxElementsCount: number;
-  tests: TestDataInputDto[]
+  tests: TestDataOutputDto[]
 }>(), {
   maxElementsCount: 5
 })
