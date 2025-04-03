@@ -1,6 +1,6 @@
 <script lang="ts">
 import TestBlockElement from "./UI/TestBlockElement.vue";
-import type {GetTestBlockInputDto} from "../api/resolvers/testBlocks/dto/input/get-test-block-input.dto.ts";
+import type {GetTestBlockOutputDto} from "../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts";
 import CommonButton from "./UI/CommonButton.vue";
 import type {PropType} from "vue";
 
@@ -13,7 +13,7 @@ export default {
       default: 5,
     },
     testBlocks: {
-      type: Array as PropType<GetTestBlockInputDto[]> | null,
+      type: Array as PropType<GetTestBlockOutputDto[]> | null,
       required: true,
     }
   },
@@ -23,7 +23,7 @@ export default {
     }
   },
   computed: {
-    paginatedData(): GetTestBlockInputDto[] {
+    paginatedData(): GetTestBlockOutputDto[] {
       const start = (this.currentPage - 1) * this.maxElementsCount;
       const end = start + this.maxElementsCount;
 

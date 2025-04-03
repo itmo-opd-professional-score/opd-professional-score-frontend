@@ -1,4 +1,4 @@
-export interface CreateTestBlockOutputDto {
+export interface CreateTestBlockInputDto {
   tests: {
     tests: string[];
   };

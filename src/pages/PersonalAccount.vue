@@ -17,7 +17,7 @@ import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-i
 import type {TestDataOutputDto} from "../api/resolvers/test/dto/output/test-data-output.dto.ts";
 import {UserRole} from "../utils/userState/UserState.types.ts";
 import {useTestTypesStore} from "../store/test-types.store.ts";
-import type {GetTestBlockInputDto} from "../api/resolvers/testBlocks/dto/input/get-test-block-input.dto.ts";
+import type {GetTestBlockOutputDto} from "../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts";
 import {TestBlockResolver} from "../api/resolvers/testBlocks/test-block.resolver.ts";
 import TestBlocksManagerList from "../components/TestBlocksManagerList.vue";
 
@@ -49,7 +49,7 @@ const tests = ref<{
 const allTests = ref<TestDataOutputDto[]>([]);
 const professionsArchive = ref<GetProfessionOutputDto[] | null>(null)
 const professionsPublished = ref<GetProfessionOutputDto[] | null>(null)
-const testBlocks = ref<GetTestBlockInputDto[] | null>(null)
+const testBlocks = ref<GetTestBlockOutputDto[] | null>(null)
 
 const reloadTestBlocks = async () => {
   const res = await testBlockResolver.getByUserId(UserState.id ? UserState.id : 0);

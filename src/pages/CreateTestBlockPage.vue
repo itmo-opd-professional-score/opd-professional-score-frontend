@@ -5,7 +5,7 @@ import {TestBlockResolver} from "../api/resolvers/testBlocks/test-block.resolver
 import {UserResolver} from "../api/resolvers/user/user.resolver.ts";
 import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
 import UserRowElement from "../components/UserRowElement.vue";
-import type {CreateTestBlockOutputDto} from "../api/resolvers/testBlocks/dto/output/create-test-block-output.dto.ts";
+import type {CreateTestBlockInputDto} from "../api/resolvers/testBlocks/dto/input/create-test-block-input.dto.ts";
 import {usePopupStore} from "../store/popup.store.ts";
 import {useTestTypesStore} from "../store/test-types.store.ts";
 import type {TestTypeDataInputDto} from "../api/resolvers/testType/dto/input/test-type-data-input.dto.ts";
@@ -43,7 +43,7 @@ export default {
   methods: {
     async save() {
       if (this.approvedTests.length > 0 && this.approvedUsers.length > 0) {
-        const data: CreateTestBlockOutputDto = {
+        const data: CreateTestBlockInputDto = {
           tests: {
             tests: this.approvedTests
           },
