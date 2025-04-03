@@ -197,8 +197,4 @@ export default {
   background-color: #4127e4;
   color: white;
 }
-
-.email-label {
-  text-align: center;
-}
 </style>

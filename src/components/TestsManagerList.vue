@@ -126,10 +126,6 @@ const prevPage = () => {
   text-align: center;
 }
 
-#id, #test_name {
-  text-align: left;
-}
-
 .header > div:last-child {
   border-right: none;
 }
