@@ -7,13 +7,13 @@ import type { PvkOptionStructureDto } from '../api/dto/pvk-option-structure.dto.
 import type { PvkOptionSelectedStructureDto} from '../api/dto/pvk-option-selected-structure.dto.ts';
 import { PvkResolver } from '../api/resolvers/pvk/pvk.resolver.ts';
 import type {
-  CreateProfessionStatsOutputDto
-} from '../api/resolvers/professionStatistic/dto/output/create-profession-stats-output.dto.ts';
+  CreateProfessionStatsInputDto
+} from '../api/resolvers/professionStatistic/dto/input/create-profession-stats-input.dto.ts';
 import { UserState } from '../utils/userState/UserState.ts';
 import { ProfessionStatisticResolver } from '../api/resolvers/professionStatistic/professionStatistic.resolver.ts';
 import router from '../router/router.ts';
 import { usePopupStore } from '../store/popup.store.ts';
-import type { GetOldStatsOutputDto } from '../api/resolvers/professionStatistic/dto/output/get-old-stats-output.dto.ts';
+import type { GetOldStatsInputDto } from '../api/resolvers/professionStatistic/dto/input/get-old-stats-input.dto.ts';
 import {AxiosError} from "axios";
 
 type Socket = ReturnType<typeof io>;
@@ -101,10 +101,10 @@ const addPvk = (newPvk: PvkOptionStructureDto, optionEl: HTMLInputElement) => {
 }
 
 const rate = async () => {
-  const statsData: CreateProfessionStatsOutputDto[] = []
+  const statsData: CreateProfessionStatsInputDto[] = []
   if (selectedPvks.value.length == 7) {
     selectedPvks.value.forEach(pvk => {
-      statsData.push(<CreateProfessionStatsOutputDto>{
+      statsData.push(<CreateProfessionStatsInputDto>{
         professionId: parseInt(props.professionId),
         pcId: pvk.id,
         userId: UserState.id,
@@ -131,7 +131,7 @@ const rate = async () => {
 onMounted(async () => {
   allPvks = await pvkResolver.getAll() as PvkOptionStructureDto[]
   pvks.value = allPvks
-  const oldPvks = await profStatsResolver.getOldStats(<GetOldStatsOutputDto>{
+  const oldPvks = await profStatsResolver.getOldStats(<GetOldStatsInputDto>{
     professionId: parseInt(props.professionId),
     userId: UserState.id
   })

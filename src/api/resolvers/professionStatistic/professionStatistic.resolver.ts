@@ -1,9 +1,8 @@
 import ApiResolverUtil from '../../../utils/ApiResolver.ts';
-import type { CreateProfessionStatsOutputDto } from './dto/output/create-profession-stats-output.dto.ts';
+import type { CreateProfessionStatsInputDto } from './dto/input/create-profession-stats-input.dto.ts';
 import type { GetOldStatsOutputDto } from './dto/output/get-old-stats-output.dto.ts';
-import type { GetOldStatsInputDto } from './dto/input/get-old-stats-input.dto.ts';
 import type { DefaultInputDto } from '../../dto/common/default-input.dto.ts';
-import type { GetProfessionStatisticsInputDto } from './dto/input/get-profession-statistics-input.dto.ts';
+import type { GetProfessionStatisticsOutputDto } from './dto/output/get-profession-statistics-output.dto.ts';
 
 export class ProfessionStatisticResolver {
   private apiResolver = new ApiResolverUtil('professionStatistic');
@@ -12,13 +11,13 @@ export class ProfessionStatisticResolver {
   public async getOldStats(data: GetOldStatsOutputDto) {
     return await this.apiResolver.request<
       GetOldStatsOutputDto,
-      GetOldStatsInputDto[]
+      GetOldStatsOutputDto[]
     >(`getStatsByUserAndProfession/${data.userId}/${data.professionId}`, 'GET');
   }
 
-  public async createStats(data: CreateProfessionStatsOutputDto[]) {
+  public async createStats(data: CreateProfessionStatsInputDto[]) {
     return await this.apiResolver.request<
-      CreateProfessionStatsOutputDto[],
+      CreateProfessionStatsInputDto[],
       DefaultInputDto<string>
     >('createStats', 'POST', data, this.token ? this.token : undefined);
   }
@@ -26,13 +25,13 @@ export class ProfessionStatisticResolver {
   public async getProfessionStatistics(id: number) {
     return await this.apiResolver.request<
       number,
-      GetProfessionStatisticsInputDto[]
+      GetProfessionStatisticsOutputDto[]
     >(`getProfessionStatistic/${id}`, 'GET');
   }
 
-  public async updateStats(data: CreateProfessionStatsOutputDto[]) {
+  public async updateStats(data: CreateProfessionStatsInputDto[]) {
     return await this.apiResolver.request<
-      CreateProfessionStatsOutputDto[],
+      CreateProfessionStatsInputDto[],
       DefaultInputDto<string>
     >('updateStats', 'PATCH', data, this.token ? this.token : undefined);
   }

@@ -6,8 +6,8 @@ import {UserState} from "../utils/userState/UserState.ts";
 import router from "../router/router.ts";
 import {ProfessionStatisticResolver} from "../api/resolvers/professionStatistic/professionStatistic.resolver.ts";
 import type {
-  GetProfessionStatisticsInputDto
-} from "../api/resolvers/professionStatistic/dto/input/get-profession-statistics-input.dto.ts";
+  GetProfessionStatisticsOutputDto
+} from "../api/resolvers/professionStatistic/dto/output/get-profession-statistics-output.dto.ts";
 import type {GetProfessionOutputDto} from "../api/resolvers/profession/dto/output/get-profession-output.dto.ts";
 import {usePopupStore} from "../store/popup.store.ts";
 import type {DefaultErrorDto} from "../api/dto/common/default-error.dto.ts";
@@ -19,7 +19,7 @@ const props = defineProps<{
 const professionStatisticsResolver = new ProfessionStatisticResolver()
 const professionResolver = new ProfessionResolver()
 
-const professionStatistics = ref<GetProfessionStatisticsInputDto[] | null>(null)
+const professionStatistics = ref<GetProfessionStatisticsOutputDto[] | null>(null)
 const profession = ref<GetProfessionOutputDto | null>(null)
 
 onMounted(async () => {
@@ -33,7 +33,7 @@ onMounted(async () => {
   profession.value = await professionResolver.getById(props.id) as GetProfessionOutputDto
 })
 
-const filteredItems = (items: GetProfessionStatisticsInputDto[]) => {
+const filteredItems = (items: GetProfessionStatisticsOutputDto[]) => {
   return items.filter(item => {
     return item.averageScore != 0
   }).sort((a, b) => b.averageScore - a.averageScore).slice(0, 5);
