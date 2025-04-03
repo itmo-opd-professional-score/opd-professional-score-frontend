@@ -7,6 +7,15 @@ export class TestBlockResolver {
   private apiResolver = new ApiResolverUtil('testBlock');
   private token = localStorage.getItem('token');
 
+  public async getAll() {
+    return await this.apiResolver.request<null, CreateTestBlockInputDto[]>(
+      "getAll",
+      "GET",
+      null,
+      this.token ? this.token : undefined
+    )
+  }
+
   public async createTestBlock(data: CreateTestBlockOutputDto) {
     return await this.apiResolver.request<
       CreateTestBlockOutputDto,
