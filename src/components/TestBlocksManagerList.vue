@@ -1,12 +1,12 @@
 <script lang="ts">
-import TestBlockElement from "./UI/TestBlockElement.vue";
-import type {GetTestBlockOutputDto} from "../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts";
-import CommonButton from "./UI/CommonButton.vue";
-import type {PropType} from "vue";
+import TestBlockElement from './UI/TestBlockElement.vue';
+import type { GetTestBlockOutputDto } from '../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
+import CommonButton from './UI/CommonButton.vue';
+import type { PropType } from 'vue';
 
 export default {
   name: 'TestBlocksManagerList',
-  components: {CommonButton, TestBlockElement},
+  components: { CommonButton, TestBlockElement },
   props: {
     maxElementsCount: {
       type: Number,
@@ -15,12 +15,12 @@ export default {
     testBlocks: {
       type: Array as PropType<GetTestBlockOutputDto[]> | null,
       required: true,
-    }
+    },
   },
   data() {
     return {
       currentPage: 1,
-    }
+    };
   },
   computed: {
     paginatedData(): GetTestBlockOutputDto[] {
@@ -30,12 +30,12 @@ export default {
       if (this.testBlocks != null) {
         return this.testBlocks.slice(start, end);
       }
-      return []
+      return [];
     },
     totalPages(): number {
-      const _ =  Math.ceil(this.testBlocks.length / this.maxElementsCount);
+      const _ = Math.ceil(this.testBlocks.length / this.maxElementsCount);
       return _ > 0 ? _ : 1;
-    }
+    },
   },
   methods: {
     nextPage() {
@@ -47,10 +47,9 @@ export default {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
-    }
-  }
-}
-
+    },
+  },
+};
 </script>
 
 <template>
@@ -61,11 +60,9 @@ export default {
       <div class="field">Открыть блок</div>
     </div>
 
-    <TestBlockElement v-for="(testBlock, index) in paginatedData"
-                      :key="index"
-    >
-      <template v-slot:id> {{testBlock.id}} </template>
-      <template v-slot:name> Блок тестов #{{testBlock.id}} </template>
+    <TestBlockElement v-for="(testBlock, index) in paginatedData" :key="index">
+      <template v-slot:id> {{ testBlock.id }} </template>
+      <template v-slot:name> Блок тестов #{{ testBlock.id }} </template>
     </TestBlockElement>
 
     <div class="pagination-controls">
@@ -132,7 +129,8 @@ export default {
   user-select: none;
 }
 
-#id, #name {
+#id,
+#name {
   text-align: left;
 }
 </style>

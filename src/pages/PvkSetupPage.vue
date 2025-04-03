@@ -1,157 +1,156 @@
 <script setup lang="ts">
-
 import CustomInput from '../components/UI/inputs/CustomInput.vue';
 import { inject, onMounted, onUnmounted, ref } from 'vue';
 import { io } from 'socket.io-client';
 import type { PvkOptionStructureDto } from '../api/dto/pvk-option-structure.dto.ts';
-import type { PvkOptionSelectedStructureDto} from '../api/dto/pvk-option-selected-structure.dto.ts';
+import type { PvkOptionSelectedStructureDto } from '../api/dto/pvk-option-selected-structure.dto.ts';
 import { PvkResolver } from '../api/resolvers/pvk/pvk.resolver.ts';
-import type {
-  CreateProfessionStatsInputDto
-} from '../api/resolvers/professionStatistic/dto/input/create-profession-stats-input.dto.ts';
+import type { CreateProfessionStatsInputDto } from '../api/resolvers/professionStatistic/dto/input/create-profession-stats-input.dto.ts';
 import { UserState } from '../utils/userState/UserState.ts';
 import { ProfessionStatisticResolver } from '../api/resolvers/professionStatistic/professionStatistic.resolver.ts';
 import router from '../router/router.ts';
 import { usePopupStore } from '../store/popup.store.ts';
 import type { GetOldStatsInputDto } from '../api/resolvers/professionStatistic/dto/input/get-old-stats-input.dto.ts';
-import {AxiosError} from "axios";
+import { AxiosError } from 'axios';
 
 type Socket = ReturnType<typeof io>;
 
-defineEmits(['search'])
+defineEmits(['search']);
 const props = defineProps<{
   professionId: string;
-}>()
+}>();
 
 const popupStore = usePopupStore();
 const socket = inject<Socket>('socket') as ReturnType<typeof io>;
 
-const isOpened = ref(false)
-const allowedToRate = ref(false)
-const searchQuery = ref("")
+const isOpened = ref(false);
+const allowedToRate = ref(false);
+const searchQuery = ref('');
 
-const pvkResolver = new PvkResolver()
-const profStatsResolver = new ProfessionStatisticResolver()
+const pvkResolver = new PvkResolver();
+const profStatsResolver = new ProfessionStatisticResolver();
 
-let allPvks: PvkOptionStructureDto[]
-const pvks = ref<PvkOptionStructureDto[] | null>(null)
+let allPvks: PvkOptionStructureDto[];
+const pvks = ref<PvkOptionStructureDto[] | null>(null);
 
 socket.on('searchResults', (data) => {
   if (data.length == 0) {
     if (searchQuery.value.length > 0) {
-      pvks.value = [{
-        id: 0,
-        name: "default",
-        description: "Ничего не найдено",
-        rating: null,
-      }]
+      pvks.value = [
+        {
+          id: 0,
+          name: 'default',
+          description: 'Ничего не найдено',
+          rating: null,
+        },
+      ];
     } else {
-      pvks.value = allPvks
+      pvks.value = allPvks;
     }
   } else {
-    pvks.value = data
+    pvks.value = data;
   }
-})
-const selectedPvks = ref<PvkOptionSelectedStructureDto[]>([])
+});
+const selectedPvks = ref<PvkOptionSelectedStructureDto[]>([]);
 
 const showOptions = () => {
-  isOpened.value = !isOpened.value
-}
+  isOpened.value = !isOpened.value;
+};
 
 const validate = (el: HTMLInputElement) => {
   if (Math.abs(Number(el.value)) > 10) {
-    el.value = ""
+    el.value = '';
   }
-}
+};
 
 const search = async (query: string) => {
   socket.emit('search', query);
   if (query.length > 0) {
-    isOpened.value = true
+    isOpened.value = true;
   } else {
-    pvks.value = allPvks
+    pvks.value = allPvks;
   }
-}
+};
 
 const addPvk = (newPvk: PvkOptionStructureDto, optionEl: HTMLInputElement) => {
-  const isDuplicate = selectedPvks.value.some(pvk => pvk.id === newPvk.id)
+  const isDuplicate = selectedPvks.value.some((pvk) => pvk.id === newPvk.id);
   if (isDuplicate) {
-    selectedPvks.value.forEach(pvk => {
+    selectedPvks.value.forEach((pvk) => {
       if (pvk.id === newPvk.id) {
-        selectedPvks.value.splice(selectedPvks.value.indexOf(pvk), 1)
+        selectedPvks.value.splice(selectedPvks.value.indexOf(pvk), 1);
       }
-    })
+    });
   } else {
     if (selectedPvks.value.length < 7) {
-      optionEl.classList.add("selected");
-      selectedPvks.value.push(newPvk.rating == null ? ({
-        id: newPvk.id,
-        name: newPvk.name,
-        description: newPvk.description,
-        rating: 0,
-      } as PvkOptionSelectedStructureDto) : ({
-        id: newPvk.id,
-        name: newPvk.name,
-        description: newPvk.description,
-        rating: newPvk.rating,
-      } as PvkOptionSelectedStructureDto))
+      optionEl.classList.add('selected');
+      selectedPvks.value.push(
+        newPvk.rating == null
+          ? ({
+              id: newPvk.id,
+              name: newPvk.name,
+              description: newPvk.description,
+              rating: 0,
+            } as PvkOptionSelectedStructureDto)
+          : ({
+              id: newPvk.id,
+              name: newPvk.name,
+              description: newPvk.description,
+              rating: newPvk.rating,
+            } as PvkOptionSelectedStructureDto),
+      );
     }
   }
-  allowedToRate.value = selectedPvks.value.length == 7
-}
+  allowedToRate.value = selectedPvks.value.length == 7;
+};
 
 const rate = async () => {
-  const statsData: CreateProfessionStatsInputDto[] = []
+  const statsData: CreateProfessionStatsInputDto[] = [];
   if (selectedPvks.value.length == 7) {
-    selectedPvks.value.forEach(pvk => {
+    selectedPvks.value.forEach((pvk) => {
       statsData.push(<CreateProfessionStatsInputDto>{
         professionId: parseInt(props.professionId),
         pcId: pvk.id,
         userId: UserState.id,
-        score: pvk.rating
-      })
-    })
+        score: pvk.rating,
+      });
+    });
     try {
-      const result = await profStatsResolver.createStats(statsData)
+      const result = await profStatsResolver.createStats(statsData);
       if (result.status == 200) {
-        await router.push(`/profession/${props.professionId}`)
+        await router.push(`/profession/${props.professionId}`);
       }
     } catch (error) {
       if ((error as AxiosError).response?.status == 409) {
-        await profStatsResolver.updateStats(statsData)
-        await router.push(`/profession/${props.professionId}`)
+        await profStatsResolver.updateStats(statsData);
+        await router.push(`/profession/${props.professionId}`);
       }
     }
   } else {
-    popupStore.activateErrorPopup("Rate 7 professional characteristics!")
+    popupStore.activateErrorPopup('Rate 7 professional characteristics!');
   }
-
-}
+};
 
 onMounted(async () => {
-  allPvks = await pvkResolver.getAll() as PvkOptionStructureDto[]
-  pvks.value = allPvks
+  allPvks = (await pvkResolver.getAll()) as PvkOptionStructureDto[];
+  pvks.value = allPvks;
   const oldPvks = await profStatsResolver.getOldStats(<GetOldStatsInputDto>{
     professionId: parseInt(props.professionId),
-    userId: UserState.id
-  })
-  oldPvks.forEach(oldPvk => {
-    allPvks.forEach(pvk => {
+    userId: UserState.id,
+  });
+  oldPvks.forEach((oldPvk) => {
+    allPvks.forEach((pvk) => {
       if (oldPvk.profCharId == pvk.id) {
-        selectedPvks.value.push({...pvk, rating: oldPvk.score})
+        selectedPvks.value.push({ ...pvk, rating: oldPvk.score });
       }
-    })
-  })
-  selectedPvks.value.sort((a,b) => a.description.localeCompare(b.description))
-  socket.connect()
-})
-
+    });
+  });
+  selectedPvks.value.sort((a, b) => a.description.localeCompare(b.description));
+  socket.connect();
+});
 
 onUnmounted(() => {
-  socket.disconnect()
-})
-
-
+  socket.disconnect();
+});
 </script>
 
 <template>
@@ -161,24 +160,34 @@ onUnmounted(() => {
       <div class="multiselect">
         <div class="search-field">
           <CustomInput
-              @search="search(searchQuery)"
-              v-model="searchQuery"
-              placeholder="Введите сюда название ПВК"
-              selector="no-borders"
-              type="text"
+            @search="search(searchQuery)"
+            v-model="searchQuery"
+            placeholder="Введите сюда название ПВК"
+            selector="no-borders"
+            type="text"
           />
-          <button type="button" :class="isOpened ? 'show-options clicked' : 'show-options'" @click="showOptions">
+          <button
+            type="button"
+            :class="isOpened ? 'show-options clicked' : 'show-options'"
+            @click="showOptions"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-              <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/>
+              <path
+                d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
+              />
             </svg>
           </button>
         </div>
         <div :class="isOpened ? 'options show' : 'options'" v-if="pvks">
           <div
             :key="index"
-            :class="selectedPvks.some(sPvk => sPvk.id == pvk.id) ? 'option selected ' : 'option'"
+            :class="
+              selectedPvks.some((sPvk) => sPvk.id == pvk.id)
+                ? 'option selected '
+                : 'option'
+            "
             v-for="(pvk, index) in pvks"
-            @click="addPvk(pvk, ($event.target as HTMLInputElement))"
+            @click="addPvk(pvk, $event.target as HTMLInputElement)"
           >
             <p>{{ pvk.description }}</p>
           </div>
@@ -189,12 +198,14 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-      <div :class="allowedToRate || selectedPvks.length == 7 ? 'ratings' : 'ratings disabled'">
-        <div
-          class="rating"
-          v-for="(pvk, index) in selectedPvks"
-          :key="index"
-        >
+      <div
+        :class="
+          allowedToRate || selectedPvks.length == 7
+            ? 'ratings'
+            : 'ratings disabled'
+        "
+      >
+        <div class="rating" v-for="(pvk, index) in selectedPvks" :key="index">
           <p>{{ pvk.description }}</p>
           <label>
             <input
@@ -205,12 +216,14 @@ onUnmounted(() => {
               step="1"
               required
               v-model="selectedPvks[index].rating"
-            >
+            />
           </label>
         </div>
       </div>
     </div>
-    <button :disabled="selectedPvks.length != 7" type="submit">Применить</button>
+    <button :disabled="selectedPvks.length != 7" type="submit">
+      Применить
+    </button>
   </form>
 </template>
 
@@ -257,7 +270,7 @@ button:hover {
 
   .search-field {
     display: flex;
-    border: solid 2px #4127e4;;
+    border: solid 2px #4127e4;
     max-height: 100%;
     border-radius: 5px;
 
@@ -272,7 +285,7 @@ button:hover {
 
       svg {
         width: 75%;
-        fill: #4127e4;;
+        fill: #4127e4;
         transition: transform 0.5s;
       }
     }
@@ -342,7 +355,7 @@ button:hover {
     }
 
     .option.selected {
-      background-color: rgb(93, 78, 255);;
+      background-color: rgb(93, 78, 255);
       color: white;
     }
   }
@@ -393,12 +406,11 @@ button:hover {
         box-sizing: border-box;
         display: flex;
         text-align: center;
-
       }
       input::-webkit-outer-spin-button,
       input::-webkit-inner-spin-button {
         -webkit-appearance: none;
-        margin: 0
+        margin: 0;
       }
     }
   }
@@ -412,7 +424,7 @@ button:hover {
   height: 100%;
   top: 0;
   left: 0;
-  background-color: rgba(103,90,152,0.6);
+  background-color: rgba(103, 90, 152, 0.6);
 }
 
 .ratings.disabled:hover {

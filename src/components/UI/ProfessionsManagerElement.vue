@@ -1,25 +1,25 @@
 <script setup lang="ts">
-
-import CommonButton from "./CommonButton.vue";
+import CommonButton from './CommonButton.vue';
 import { onMounted, ref } from 'vue';
 import { ProfessionStatisticResolver } from '../../api/resolvers/professionStatistic/professionStatistic.resolver.ts';
-const props = defineProps<{ id: number }>()
-defineEmits(['edit-profession'])
+const props = defineProps<{ id: number }>();
+defineEmits(['edit-profession']);
 
-const noStats = ref(true)
+const noStats = ref(true);
 
 onMounted(async () => {
-  const profStatsResolver = new ProfessionStatisticResolver()
-  const stats = await profStatsResolver.getProfessionStatistics(props.id)
+  const profStatsResolver = new ProfessionStatisticResolver();
+  const stats = await profStatsResolver.getProfessionStatistics(props.id);
   if (stats.length > 0) {
-    noStats.value = false
+    noStats.value = false;
   }
-})
+});
 </script>
 
 <template>
   <div class="wrapper">
-    <div class="id" id="id">#
+    <div class="id" id="id">
+      #
       <slot name="id">12345</slot>
     </div>
     <a class="prof_name" id="test_name" :href="`/profession/${id}`">
@@ -36,9 +36,9 @@ onMounted(async () => {
     </div>
     <div class="changeProfession">
       <CommonButton
-          @click="$emit('edit-profession', $event.currentTarget)"
-          :disabled="false"
-          v-if="noStats"
+        @click="$emit('edit-profession', $event.currentTarget)"
+        :disabled="false"
+        v-if="noStats"
       >
         <template v-slot:placeholder>
           <slot name="placeholder">Изменить</slot>
@@ -78,7 +78,8 @@ onMounted(async () => {
   color: black;
 }
 
-#id, #test_name{
+#id,
+#test_name {
   text-align: left;
 }
 

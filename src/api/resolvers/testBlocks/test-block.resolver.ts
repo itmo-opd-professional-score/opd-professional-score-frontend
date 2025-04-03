@@ -9,20 +9,20 @@ export class TestBlockResolver {
 
   public async getAll() {
     return await this.apiResolver.request<null, GetTestBlockOutputDto[]>(
-      "getAll",
-      "GET",
+      'getAll',
+      'GET',
       null,
-      this.token ? this.token : undefined
-    )
+      this.token ? this.token : undefined,
+    );
   }
 
   public async getByUserId(id: number) {
     return await this.apiResolver.request<null, GetTestBlockOutputDto[]>(
       `getByUserId/${id}`,
-      "GET",
+      'GET',
       null,
-      this.token ? this.token : undefined
-    )
+      this.token ? this.token : undefined,
+    );
   }
 
   public async createTestBlock(data: CreateTestBlockInputDto) {

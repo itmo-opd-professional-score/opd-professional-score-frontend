@@ -1,21 +1,19 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import TestStatisticsCard from "../components/TestStatisticsCard.vue";
-import TestScoreList from "../components/TestsScoreList.vue";
-import {UserState} from "../utils/userState/UserState.ts";
-
-
+import TestStatisticsCard from '../components/TestStatisticsCard.vue';
+import TestScoreList from '../components/TestsScoreList.vue';
+import { UserState } from '../utils/userState/UserState.ts';
 
 export default defineComponent({
-  name: "TestResultsPage",
+  name: 'TestResultsPage',
   computed: {
     UserState() {
-      return UserState
-    }
+      return UserState;
+    },
   },
   components: {
     TestStatisticsCard,
-    TestScoreList
+    TestScoreList,
   },
   data() {
     return {
@@ -26,9 +24,9 @@ export default defineComponent({
           current_points: 72,
           max_points: 120,
           time: '00:14:00',
-          username: "Слудная Виктория",
-          createdAt: "15.05.2023 10:30",
-          valid: true
+          username: 'Слудная Виктория',
+          createdAt: '15.05.2023 10:30',
+          valid: true,
         },
         {
           id: 2,
@@ -36,9 +34,9 @@ export default defineComponent({
           current_points: 88,
           max_points: 110,
           time: '00:18:00',
-          username: "Слудная Виктория",
-          createdAt: "22.06.2023 16:45",
-          valid: false
+          username: 'Слудная Виктория',
+          createdAt: '22.06.2023 16:45',
+          valid: false,
         },
         {
           id: 3,
@@ -46,9 +44,9 @@ export default defineComponent({
           current_points: 67,
           max_points: 90,
           time: '00:11:30',
-          username: "Слудная Виктория",
-          createdAt: "01.07.2023 08:15",
-          valid: true
+          username: 'Слудная Виктория',
+          createdAt: '01.07.2023 08:15',
+          valid: true,
         },
         {
           id: 4,
@@ -56,9 +54,9 @@ export default defineComponent({
           current_points: 55,
           max_points: 85,
           time: '00:09:20',
-          username: "Слудная Виктория",
-          createdAt: "10.08.2023 12:20",
-          valid: false
+          username: 'Слудная Виктория',
+          createdAt: '10.08.2023 12:20',
+          valid: false,
         },
         {
           id: 5,
@@ -66,9 +64,9 @@ export default defineComponent({
           current_points: 100,
           max_points: 130,
           time: '00:25:00',
-          username: "Слудная Виктория",
-          createdAt: "05.09.2023 14:50",
-          valid: true
+          username: 'Слудная Виктория',
+          createdAt: '05.09.2023 14:50',
+          valid: true,
         },
         {
           id: 6,
@@ -76,9 +74,9 @@ export default defineComponent({
           current_points: 45,
           max_points: 75,
           time: '00:06:40',
-          username: "Слудная Виктория",
-          createdAt: "19.10.2023 09:10",
-          valid: false
+          username: 'Слудная Виктория',
+          createdAt: '19.10.2023 09:10',
+          valid: false,
         },
         {
           id: 7,
@@ -86,9 +84,9 @@ export default defineComponent({
           current_points: 90,
           max_points: 100,
           time: '00:16:25',
-          username: "Слудная Виктория",
-          createdAt: "30.11.2023 17:30",
-          valid: true
+          username: 'Слудная Виктория',
+          createdAt: '30.11.2023 17:30',
+          valid: true,
         },
         {
           id: 8,
@@ -96,11 +94,11 @@ export default defineComponent({
           current_points: 65,
           max_points: 95,
           time: '00:10:10',
-          username: "Слудная Виктория",
-          createdAt: "12.12.2023 11:55",
-          valid: true
-        }
-      ]
+          username: 'Слудная Виктория',
+          createdAt: '12.12.2023 11:55',
+          valid: true,
+        },
+      ],
     };
   },
 });
@@ -110,19 +108,26 @@ export default defineComponent({
   <div class="test-results-page">
     <h3>Текущий тест</h3>
     <section class="current-test">
-      <TestStatisticsCard :time="2" :date="'33'" :max-score="10" :score="10" :test-name="'Проверка на скорость'"></TestStatisticsCard>
+      <TestStatisticsCard
+        :time="2"
+        :date="'33'"
+        :max-score="10"
+        :score="10"
+        :test-name="'Проверка на скорость'"
+      ></TestStatisticsCard>
     </section>
-    <section class="user-test-history" v-if="testData.length > 0 ">
+    <section class="user-test-history" v-if="testData.length > 0">
       <h4>Ваши последние результаты:</h4>
-      <TestScoreList :tests="testData" :max-elements-count="5"/>
+      <TestScoreList :tests="testData" :max-elements-count="5" />
     </section>
-    <section class="user-test-history" v-if="UserState.role == 'EXPERT' || UserState.role == 'ADMIN'">
+    <section
+      class="user-test-history"
+      v-if="UserState.role == 'EXPERT' || UserState.role == 'ADMIN'"
+    >
       <h4>Последние результаты всех пользователей:</h4>
-      <TestScoreList :tests="testData" :max-elements-count="5"/>
+      <TestScoreList :tests="testData" :max-elements-count="5" />
     </section>
-    </div>
-
-
+  </div>
 </template>
 
 <style scoped>

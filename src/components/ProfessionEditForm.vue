@@ -1,68 +1,74 @@
 <script setup lang="ts">
-import type {UpdateProfessionInputDto} from "../api/resolvers/profession/dto/input/update-profession-input.dto.ts";
+import type { UpdateProfessionInputDto } from '../api/resolvers/profession/dto/input/update-profession-input.dto.ts';
 import { computed } from 'vue';
 import { ProfessionResolver } from '../api/resolvers/profession/profession.resolver.ts';
 import { UserState } from '../utils/userState/UserState.ts';
 
-const emit = defineEmits(['profession-update'])
+const emit = defineEmits(['profession-update']);
 const props = defineProps<{
-  profession: UpdateProfessionInputDto | null,
-}>()
+  profession: UpdateProfessionInputDto | null;
+}>();
 
-const localProfession = computed(() => props.profession)
+const localProfession = computed(() => props.profession);
 const updateProfession = async () => {
   if (localProfession.value != null) {
-    const professionResolver = new ProfessionResolver()
-    await professionResolver.updateProfession(localProfession.value)
-    emit("profession-update")
+    const professionResolver = new ProfessionResolver();
+    await professionResolver.updateProfession(localProfession.value);
+    emit('profession-update');
   }
-}
-
+};
 </script>
 
 <template>
   <div class="profession-edit" v-if="localProfession != null">
     <h4>Изменить профессию</h4>
     <form @submit.prevent="updateProfession" id="profession-change-form">
-      <label><input
+      <label
+        ><input
           required
           type="text"
           id="profName"
           v-model="localProfession.updatedData.name"
-      ></label>
-      <label><textarea
+      /></label>
+      <label>
+        <textarea
           required
           id="profDesc"
           v-model="localProfession.updatedData.description"
-      ></textarea></label>
-      <label><textarea
+        ></textarea>
+      </label>
+      <label>
+        <textarea
           required
           id="profRequ"
           v-model="localProfession.updatedData.requirements"
-      ></textarea></label>
-      <label><input
+        ></textarea>
+      </label>
+      <label
+        ><input
           required
           type="text"
           id="profSphere"
           v-model="localProfession.updatedData.sphere"
-      ></label>
-      <label><input
+      /></label>
+      <label
+        ><input
           required
           type="number"
           id="profId"
           hidden="hidden"
           disabled
           v-model="localProfession.id"
-      ></label>
+      /></label>
       <label>
         Архивировать
         <input
-        type="checkbox"
-        id="profArchive"
-        :disabled="UserState.role != 'ADMIN'"
-        v-model="localProfession.updatedData.archive"
-      ></label>
-      <input type="submit" value="Изменить">
+          type="checkbox"
+          id="profArchive"
+          :disabled="UserState.role != 'ADMIN'"
+          v-model="localProfession.updatedData.archive"
+      /></label>
+      <input type="submit" value="Изменить" />
     </form>
   </div>
 </template>

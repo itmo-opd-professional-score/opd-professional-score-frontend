@@ -1,14 +1,14 @@
 <script setup lang="ts">
+import CommonButton from './CommonButton.vue';
 
-import CommonButton from "./CommonButton.vue";
-
-defineEmits(["changeRole"])
-defineProps<{ isDisabled: boolean }>()
+defineEmits(['changeRole']);
+defineProps<{ isDisabled: boolean }>();
 </script>
 
 <template>
   <div class="wrapper" ref="reference">
-    <div class="id" id="id">#
+    <div class="id" id="id">
+      #
       <slot name="id">12345</slot>
     </div>
     <div class="username">
@@ -22,8 +22,8 @@ defineProps<{ isDisabled: boolean }>()
     </div>
     <div class="changeRole">
       <CommonButton
-          @click="$emit('changeRole', $event.currentTarget)"
-          :disabled="isDisabled"
+        @click="$emit('changeRole', $event.currentTarget)"
+        :disabled="isDisabled"
       >
         <template v-slot:placeholder>
           <slot name="placeholder"></slot>
@@ -61,7 +61,9 @@ defineProps<{ isDisabled: boolean }>()
   text-align: center;
 }
 
-#id, #username, #email {
+#id,
+#username,
+#email {
   text-align: left;
 }
 

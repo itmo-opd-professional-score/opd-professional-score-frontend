@@ -1,47 +1,47 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
-import CustomInput from "../components/UI/inputs/CustomInput.vue";
-import CommonButton from "../components/UI/CommonButton.vue";
-import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
-import {usePopupStore} from "../store/popup.store.ts";
-import type {RegUserFirstStepInputDto} from "../api/resolvers/auth/dto/input/reg-user-first-step-input.dto.ts";
-import CodeVerification from "./CodeVerification.vue";
-import type {SendCodeAgainInputDto} from "../api/resolvers/auth/dto/input/send-code-again-input.dto.ts";
-import type {RegUserSecondStepInputDto} from "../api/resolvers/auth/dto/input/reg-user-second-step-input.dto.ts";
+import { defineComponent } from 'vue';
+import CustomInput from '../components/UI/inputs/CustomInput.vue';
+import CommonButton from '../components/UI/CommonButton.vue';
+import { AuthResolver } from '../api/resolvers/auth/auth.resolver.ts';
+import { usePopupStore } from '../store/popup.store.ts';
+import type { RegUserFirstStepInputDto } from '../api/resolvers/auth/dto/input/reg-user-first-step-input.dto.ts';
+import CodeVerification from './CodeVerification.vue';
+import type { SendCodeAgainInputDto } from '../api/resolvers/auth/dto/input/send-code-again-input.dto.ts';
+import type { RegUserSecondStepInputDto } from '../api/resolvers/auth/dto/input/reg-user-second-step-input.dto.ts';
 
 export default defineComponent({
-  name: "RegistrationPage",
-  components: {CodeVerification, CommonButton, CustomInput},
+  name: 'RegistrationPage',
+  components: { CodeVerification, CommonButton, CustomInput },
   data() {
     return {
-      username: "",
-      email: "",
-      password: "",
-      passwordCheck: "",
+      username: '',
+      email: '',
+      password: '',
+      passwordCheck: '',
       currentStep: 1,
       authResolver: new AuthResolver(),
       popupStore: usePopupStore(),
-    }
+    };
   },
   methods: {
     validatePassword() {
-      if (this.password == "") {
-        this.popupStore.activateErrorPopup("Passwords can't be empty")
+      if (this.password == '') {
+        this.popupStore.activateErrorPopup("Passwords can't be empty");
       } else if (this.password != this.passwordCheck) {
         this.popupStore.activateErrorPopup("Passwords don't match");
       } else {
-        this.registerFirstStep()
+        this.registerFirstStep();
       }
     },
     registerFirstStep() {
       const data: RegUserFirstStepInputDto = {
         email: this.email,
         username: this.username,
-      }
+      };
 
       this.authResolver.registrationFirstStep(data).then((res) => {
-        if (res) this.currentStep = 2
-      })
+        if (res) this.currentStep = 2;
+      });
     },
     registerSecondStep(code: number) {
       const data: RegUserSecondStepInputDto = {
@@ -50,24 +50,24 @@ export default defineComponent({
           email: this.email,
           password: this.password,
         },
-        code: code
-      }
+        code: code,
+      };
       this.authResolver.registrationSecondStep(data);
     },
     async sendCode() {
       const data: SendCodeAgainInputDto = {
         email: this.email,
         username: this.username,
-        codeType: "AUTH"
-      }
+        codeType: 'AUTH',
+      };
       return this.authResolver.sendCodeAgain(data).then(() => {
-        this.popupStore.activateInfoPopup("Verification code sent.")
+        this.popupStore.activateInfoPopup('Verification code sent.');
       });
-    }
+    },
   },
   mounted() {
     document.addEventListener('keydown', (e) => {
-      if (e.key == "Enter") {
+      if (e.key == 'Enter') {
         if (this.currentStep == 1) {
           this.validatePassword();
         }
@@ -76,14 +76,14 @@ export default defineComponent({
   },
   unmounted() {
     document.removeEventListener('keydown', (e) => {
-      if (e.key == "Enter") {
+      if (e.key == 'Enter') {
         if (this.currentStep == 1) {
           this.validatePassword();
         }
       }
     });
-  }
-})
+  },
+});
 </script>
 
 <template>
@@ -92,33 +92,33 @@ export default defineComponent({
     <div class="input-container">
       <p>Имя пользователя:</p>
       <CustomInput
-          v-model="username"
-          placeholder="Введите имя пользователя"
-          type="email"
+        v-model="username"
+        placeholder="Введите имя пользователя"
+        type="email"
       />
     </div>
     <div class="input-container">
       <p>Электронная почта:</p>
       <CustomInput
-          v-model="email"
-          placeholder="Введите электронную почту"
-          type="email"
+        v-model="email"
+        placeholder="Введите электронную почту"
+        type="email"
       />
     </div>
     <div class="input-container">
       <p>Пароль:</p>
       <CustomInput
-          v-model="password"
-          placeholder="Введите пароль"
-          type="password"
+        v-model="password"
+        placeholder="Введите пароль"
+        type="password"
       />
     </div>
     <div class="input-container">
       <p>Подтверждение пароля:</p>
       <CustomInput
-          v-model="passwordCheck"
-          placeholder="Подтвердите пароль"
-          type="password"
+        v-model="passwordCheck"
+        placeholder="Подтвердите пароль"
+        type="password"
       />
     </div>
     <div class="auth-links-container">
@@ -128,7 +128,11 @@ export default defineComponent({
       <template v-slot:placeholder>Зарегистрироваться</template>
     </CommonButton>
   </div>
-  <code-verification v-if="currentStep == 2" @approveCode="registerSecondStep" @sendCode="sendCode">
+  <code-verification
+    v-if="currentStep == 2"
+    @approveCode="registerSecondStep"
+    @sendCode="sendCode"
+  >
     <template v-slot:header>Подтверждение регистрации</template>
   </code-verification>
 </template>
@@ -166,7 +170,8 @@ export default defineComponent({
   width: 100%;
 }
 
-.auth-button, .auth-button:hover {
+.auth-button,
+.auth-button:hover {
   width: 100%;
   color: white;
   background-color: #4127e4;

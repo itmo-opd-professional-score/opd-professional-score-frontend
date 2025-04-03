@@ -1,25 +1,27 @@
 <script setup lang="ts">
-
-import {ref} from "vue";
+import { ref } from 'vue';
 
 defineProps<{
-  id: number,
-  title: string,
-  description: string,
-  requirements: string,
-  sphere: string,
-  icon?: string,
-}>()
+  id: number;
+  title: string;
+  description: string;
+  requirements: string;
+  sphere: string;
+  icon?: string;
+}>();
 
-const isFlipped = ref(false)
+const isFlipped = ref(false);
 </script>
 
 <template>
-  <div :class="isFlipped ? 'profession-card flipped' : 'profession-card'" @click="isFlipped = !isFlipped">
+  <div
+    :class="isFlipped ? 'profession-card flipped' : 'profession-card'"
+    @click="isFlipped = !isFlipped"
+  >
     <div class="card-inner">
       <div class="card-front">
         <div class="profession-icon" v-if="icon">
-          <img :src="`../assets/${icon}`" alt="">
+          <img :src="`../assets/${icon}`" alt="" />
         </div>
         <h3 class="profession-title">{{ title }}</h3>
         <p class="profession-description">

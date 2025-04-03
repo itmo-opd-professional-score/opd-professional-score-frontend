@@ -1,21 +1,19 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
-import CommonButton from "./CommonButton.vue";
+import { defineComponent } from 'vue';
+import CommonButton from './CommonButton.vue';
 
 export default defineComponent({
-  name: "TestBlockElement",
-  components: {CommonButton},
+  name: 'TestBlockElement',
+  components: { CommonButton },
   methods: {
-    open() {}
-  }
-})
+    open() {},
+  },
+});
 </script>
 
 <template>
   <div class="test-block-element-wrapper">
-    <div class="field" id="id">
-      #<slot name="id">12345</slot>
-    </div>
+    <div class="field" id="id">#<slot name="id">12345</slot></div>
     <div class="field" id="name">
       <slot name="name">Название</slot>
     </div>
@@ -62,8 +60,8 @@ export default defineComponent({
   height: 60%;
 }
 
-#id, #name {
+#id,
+#name {
   text-align: left;
 }
-
 </style>

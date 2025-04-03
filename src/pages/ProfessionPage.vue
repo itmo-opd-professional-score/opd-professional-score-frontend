@@ -1,44 +1,49 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
-import {ProfessionResolver} from "../api/resolvers/profession/profession.resolver.ts";
-import CommonButton from "../components/UI/CommonButton.vue";
-import {UserState} from "../utils/userState/UserState.ts";
-import router from "../router/router.ts";
-import {ProfessionStatisticResolver} from "../api/resolvers/professionStatistic/professionStatistic.resolver.ts";
-import type {
-  GetProfessionStatisticsOutputDto
-} from "../api/resolvers/professionStatistic/dto/output/get-profession-statistics-output.dto.ts";
-import type {GetProfessionOutputDto} from "../api/resolvers/profession/dto/output/get-profession-output.dto.ts";
-import {usePopupStore} from "../store/popup.store.ts";
-import type {DefaultErrorDto} from "../api/dto/common/default-error.dto.ts";
+import { onMounted, ref } from 'vue';
+import { ProfessionResolver } from '../api/resolvers/profession/profession.resolver.ts';
+import CommonButton from '../components/UI/CommonButton.vue';
+import { UserState } from '../utils/userState/UserState.ts';
+import router from '../router/router.ts';
+import { ProfessionStatisticResolver } from '../api/resolvers/professionStatistic/professionStatistic.resolver.ts';
+import type { GetProfessionStatisticsOutputDto } from '../api/resolvers/professionStatistic/dto/output/get-profession-statistics-output.dto.ts';
+import type { GetProfessionOutputDto } from '../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
+import { usePopupStore } from '../store/popup.store.ts';
+import type { DefaultErrorDto } from '../api/dto/common/default-error.dto.ts';
 
 const props = defineProps<{
   id: number;
-}>()
+}>();
 
-const professionStatisticsResolver = new ProfessionStatisticResolver()
-const professionResolver = new ProfessionResolver()
+const professionStatisticsResolver = new ProfessionStatisticResolver();
+const professionResolver = new ProfessionResolver();
 
-const professionStatistics = ref<GetProfessionStatisticsOutputDto[] | null>(null)
-const profession = ref<GetProfessionOutputDto | null>(null)
+const professionStatistics = ref<GetProfessionStatisticsOutputDto[] | null>(
+  null,
+);
+const profession = ref<GetProfessionOutputDto | null>(null);
 
 onMounted(async () => {
-  const popupStore = usePopupStore()
+  const popupStore = usePopupStore();
 
   try {
-    professionStatistics.value = await professionStatisticsResolver.getProfessionStatistics(props.id)
+    professionStatistics.value =
+      await professionStatisticsResolver.getProfessionStatistics(props.id);
   } catch (e) {
-      popupStore.activateErrorPopup((e as DefaultErrorDto).message)
+    popupStore.activateErrorPopup((e as DefaultErrorDto).message);
   }
-  profession.value = await professionResolver.getById(props.id) as GetProfessionOutputDto
-})
+  profession.value = (await professionResolver.getById(
+    props.id,
+  )) as GetProfessionOutputDto;
+});
 
 const filteredItems = (items: GetProfessionStatisticsOutputDto[]) => {
-  return items.filter(item => {
-    return item.averageScore != 0
-  }).sort((a, b) => b.averageScore - a.averageScore).slice(0, 5);
-}
-
+  return items
+    .filter((item) => {
+      return item.averageScore != 0;
+    })
+    .sort((a, b) => b.averageScore - a.averageScore)
+    .slice(0, 5);
+};
 </script>
 
 <template>
@@ -47,7 +52,9 @@ const filteredItems = (items: GetProfessionStatisticsOutputDto[]) => {
       <div class="short-info">
         <h3 class="name">{{ profession.name }}</h3>
         <p class="description">{{ `Описание: ${profession.description}` }}</p>
-        <p class="requirements">{{ `Требования: ${profession.requirements}` }}</p>
+        <p class="requirements">
+          {{ `Требования: ${profession.requirements}` }}
+        </p>
         <p class="sphere">{{ `Сфера деятельности: ${profession.sphere}` }}</p>
       </div>
       <div class="qualities" v-if="professionStatistics">
@@ -56,17 +63,18 @@ const filteredItems = (items: GetProfessionStatisticsOutputDto[]) => {
           <p class="name">Качество</p>
           <p class="rating">Рейтинг</p>
         </div>
-        <div class="quality"
-             v-for="(statistics) in filteredItems(professionStatistics)"
-             :key="statistics.pcId"
+        <div
+          class="quality"
+          v-for="statistics in filteredItems(professionStatistics)"
+          :key="statistics.pcId"
         >
           <p class="name">{{ statistics.pcDescription }}</p>
           <p class="rating">{{ (statistics.averageScore / 2).toFixed(1) }}</p>
         </div>
         <CommonButton
-            v-if="UserState.role == 'ADMIN' || UserState.role == 'EXPERT'"
-            @click="router.push(`/profession/setup/${id}`)"
-            :disabled="false"
+          v-if="UserState.role == 'ADMIN' || UserState.role == 'EXPERT'"
+          @click="router.push(`/profession/setup/${id}`)"
+          :disabled="false"
         >
           <template v-slot:placeholder>
             <slot name="placeholder">Изменить ПВК</slot>
@@ -93,7 +101,6 @@ main {
   width: 85vw;
   background-color: var(--background-primary);
   border-radius: 15px;
-
 }
 
 .profession button {
