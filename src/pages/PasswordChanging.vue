@@ -6,7 +6,7 @@ import CodeVerification from "./CodeVerification.vue";
 import router from "../router/router.ts";
 import {usePopupStore} from "../store/popup.store.ts";
 import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
-import type {SendCodeAgainDto} from "../api/resolvers/auth/dto/output/send-code-again-output.dto.ts";
+import type {SendCodeAgainInputDto} from "../api/resolvers/auth/dto/input/send-code-again-input.dto.ts";
 import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
 
 export default {
@@ -70,7 +70,7 @@ export default {
 
     async sendCode() {
       const user = (await this.userResolver.getByEmail(this.email))?.body as UserDataInputDto;
-      const data: SendCodeAgainDto = {
+      const data: SendCodeAgainInputDto = {
         email: this.email,
         username: user.username,
         codeType: "PASSWORD",

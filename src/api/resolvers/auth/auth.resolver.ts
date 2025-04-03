@@ -1,14 +1,14 @@
 import ApiResolver from '../../../utils/ApiResolver.ts';
-import type { LoginUserOutputDto } from './dto/output/login-user-output.dto.ts';
+import type { LoginUserInputDto } from './dto/input/login-user-input.dto.ts';
 import type { DefaultInputDto } from '../../dto/common/default-input.dto.ts';
-import type { RegUserFirstStepOutputDto } from './dto/output/reg-user-first-step-output.dto.ts';
-import type { AuthUserInputDto } from './dto/input/auth-user-input.dto.ts';
+import type { RegUserFirstStepInputDto } from './dto/input/reg-user-first-step-input.dto.ts';
+import type { AuthUserOutputDto } from './dto/output/auth-user-output.dto.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import type { DefaultErrorDto } from '../../dto/common/default-error.dto.ts';
 import { updateUserState } from '../../../utils/userState/UserState.ts';
 import { useRouter } from 'vue-router';
-import type { SendCodeAgainDto } from './dto/output/send-code-again-output.dto.ts';
-import type { RegUserSecondStepOutputDto } from './dto/output/reg-user-second-step-output.dto.ts';
+import type { SendCodeAgainInputDto } from './dto/input/send-code-again-input.dto.ts';
+import type { RegUserSecondStepInputDto } from './dto/input/reg-user-second-step-input.dto.ts';
 import router from '../../../router/router.ts';
 
 export class AuthResolver {
@@ -16,9 +16,9 @@ export class AuthResolver {
   private popupStore = usePopupStore();
   private router = useRouter();
 
-  public async login(data: LoginUserOutputDto) {
+  public async login(data: LoginUserInputDto) {
     return await this.apiResolver
-      .request<LoginUserOutputDto, DefaultInputDto<AuthUserInputDto>>(
+      .request<LoginUserInputDto, DefaultInputDto<AuthUserOutputDto>>(
         'login',
         'POST',
         data,
@@ -44,9 +44,9 @@ export class AuthResolver {
     await router.push('/');
   }
 
-  public async registrationFirstStep(data: RegUserFirstStepOutputDto) {
+  public async registrationFirstStep(data: RegUserFirstStepInputDto) {
     return await this.apiResolver
-      .request<RegUserFirstStepOutputDto, DefaultInputDto<string>>(
+      .request<RegUserFirstStepInputDto, DefaultInputDto<string>>(
         'registrationFirstStep',
         'POST',
         data,
@@ -64,9 +64,9 @@ export class AuthResolver {
       });
   }
 
-  public async registrationSecondStep(data: RegUserSecondStepOutputDto) {
+  public async registrationSecondStep(data: RegUserSecondStepInputDto) {
     return await this.apiResolver
-      .request<RegUserSecondStepOutputDto, DefaultInputDto<AuthUserInputDto>>(
+      .request<RegUserSecondStepInputDto, DefaultInputDto<AuthUserOutputDto>>(
         'register',
         'POST',
         data,
@@ -86,8 +86,8 @@ export class AuthResolver {
       });
   }
 
-  public async sendCodeAgain(data: SendCodeAgainDto) {
-    return await this.apiResolver.request<SendCodeAgainDto, null>(
+  public async sendCodeAgain(data: SendCodeAgainInputDto) {
+    return await this.apiResolver.request<SendCodeAgainInputDto, null>(
       'sendCodeAgain',
       'POST',
       data,

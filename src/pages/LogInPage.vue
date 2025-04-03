@@ -3,7 +3,7 @@ import {defineComponent} from 'vue'
 import CustomInput from "../components/UI/inputs/CustomInput.vue";
 import CommonButton from "../components/UI/CommonButton.vue";
 import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
-import type {LoginUserOutputDto} from "../api/resolvers/auth/dto/output/login-user-output.dto.ts";
+import type {LoginUserInputDto} from "../api/resolvers/auth/dto/input/login-user-input.dto.ts";
 
 export default defineComponent({
   name: "LogInPage",
@@ -17,7 +17,7 @@ export default defineComponent({
   },
   methods: {
     login() {
-      const data: LoginUserOutputDto = {
+      const data: LoginUserInputDto = {
         email: this.email,
         password: this.password
       };

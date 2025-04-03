@@ -4,10 +4,10 @@ import CustomInput from "../components/UI/inputs/CustomInput.vue";
 import CommonButton from "../components/UI/CommonButton.vue";
 import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
 import {usePopupStore} from "../store/popup.store.ts";
-import type {RegUserFirstStepOutputDto} from "../api/resolvers/auth/dto/output/reg-user-first-step-output.dto.ts";
+import type {RegUserFirstStepInputDto} from "../api/resolvers/auth/dto/input/reg-user-first-step-input.dto.ts";
 import CodeVerification from "./CodeVerification.vue";
-import type {SendCodeAgainDto} from "../api/resolvers/auth/dto/output/send-code-again-output.dto.ts";
-import type {RegUserSecondStepOutputDto} from "../api/resolvers/auth/dto/output/reg-user-second-step-output.dto.ts";
+import type {SendCodeAgainInputDto} from "../api/resolvers/auth/dto/input/send-code-again-input.dto.ts";
+import type {RegUserSecondStepInputDto} from "../api/resolvers/auth/dto/input/reg-user-second-step-input.dto.ts";
 
 export default defineComponent({
   name: "RegistrationPage",
@@ -34,7 +34,7 @@ export default defineComponent({
       }
     },
     registerFirstStep() {
-      const data: RegUserFirstStepOutputDto = {
+      const data: RegUserFirstStepInputDto = {
         email: this.email,
         username: this.username,
       }
@@ -44,7 +44,7 @@ export default defineComponent({
       })
     },
     registerSecondStep(code: number) {
-      const data: RegUserSecondStepOutputDto = {
+      const data: RegUserSecondStepInputDto = {
         userData: {
           username: this.username,
           email: this.email,
@@ -55,7 +55,7 @@ export default defineComponent({
       this.authResolver.registrationSecondStep(data);
     },
     async sendCode() {
-      const data: SendCodeAgainDto = {
+      const data: SendCodeAgainInputDto = {
         email: this.email,
         username: this.username,
         codeType: "AUTH"
