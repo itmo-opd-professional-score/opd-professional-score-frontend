@@ -1,6 +1,6 @@
 import {defineStore} from "pinia";
-import type {TestTypeDataInputDto} from "../api/testType/dto/input/test-type-data-input.dto.ts";
-import {TestTypeResolver} from "../api/testType/testType.resolver.ts";
+import type {TestTypeDataInputDto} from "../api/resolvers/testType/dto/input/test-type-data-input.dto.ts";
+import {TestTypeResolver} from "../api/resolvers/testType/testType.resolver.ts";
 import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
 
 export const useTestTypesStore = defineStore("testTypes", {

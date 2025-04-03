@@ -1,7 +1,7 @@
-import ApiResolverUtil from '../../utils/ApiResolver.ts';
-import { usePopupStore } from '../../store/popup.store.ts';
+import ApiResolverUtil from '../../../utils/ApiResolver.ts';
+import { usePopupStore } from '../../../store/popup.store.ts';
 import type { TestTypeDataInputDto } from './dto/input/test-type-data-input.dto.ts';
-import type { DefaultErrorDto } from '../dto/common/default-error.dto.ts';
+import type { DefaultErrorDto } from '../../dto/common/default-error.dto.ts';
 
 export class TestTypeResolver {
   private apiResolver = new ApiResolverUtil('testTypes');
