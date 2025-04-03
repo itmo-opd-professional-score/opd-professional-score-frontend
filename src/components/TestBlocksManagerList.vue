@@ -20,7 +20,6 @@ export default {
   data() {
     return {
       currentPage: 1,
-      totalPages: 1,
     }
   },
   computed: {
@@ -32,6 +31,10 @@ export default {
         return this.testBlocks.slice(start, end);
       }
       return []
+    },
+    totalPages(): number {
+      const _ =  Math.ceil(this.testBlocks.length / this.maxElementsCount);
+      return _ > 0 ? _ : 1;
     }
   },
   methods: {
