@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type {UpdateProfessionDto} from "../api/resolvers/profession/dto/input/update-profession.dto.ts";
+import type {UpdateProfessionInputDto} from "../api/resolvers/profession/dto/input/update-profession-input.dto.ts";
 import { computed } from 'vue';
 import { ProfessionResolver } from '../api/resolvers/profession/profession.resolver.ts';
 import { UserState } from '../utils/userState/UserState.ts';
 
 const emit = defineEmits(['profession-update'])
 const props = defineProps<{
-  profession: UpdateProfessionDto | null,
+  profession: UpdateProfessionInputDto | null,
 }>()
 
 const localProfession = computed(() => props.profession)

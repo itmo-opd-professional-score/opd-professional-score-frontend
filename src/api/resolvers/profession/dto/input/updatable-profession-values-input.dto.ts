@@ -1,4 +1,4 @@
-export interface UpdatableProfessionValuesDto {
+export interface UpdatableProfessionValuesInputDto {
   name?: string;
   description?: string;
   requirements?: string;

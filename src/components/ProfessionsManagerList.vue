@@ -6,7 +6,7 @@ import ProfessionEditForm from "./ProfessionEditForm.vue";
 import {autoUpdate, hide, useFloating} from "@floating-ui/vue";
 import router from "../router/router.ts";
 import type {GetProfessionOutputDto} from "../api/resolvers/profession/dto/output/get-profession-output.dto.ts";
-import type {UpdateProfessionDto} from "../api/resolvers/profession/dto/input/update-profession.dto.ts";
+import type {UpdateProfessionInputDto} from "../api/resolvers/profession/dto/input/update-profession-input.dto.ts";
 
 const reference = ref<HTMLElement | null>(null)
 const floating = ref(null)
@@ -30,13 +30,13 @@ const toggleForm = (el: HTMLElement, id: number, name: string, description: stri
         sphere: sphere,
         archived: archived,
       }
-    } as UpdateProfessionDto;
+    } as UpdateProfessionInputDto;
   }
   isOpen.value = !isOpen.value
   lastEl.value = el
 }
 
-const currentProfession = ref<UpdateProfessionDto | null>(null)
+const currentProfession = ref<UpdateProfessionInputDto | null>(null)
 const isOpen = ref(false)
 const lastEl = ref()
 
