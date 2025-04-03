@@ -1,4 +1,4 @@
-export interface CreateTestBlockInputDto {
+export interface GetTestBlockInputDto {
   id: number;
   testBlockToken: string;
   updatedAt: string;
