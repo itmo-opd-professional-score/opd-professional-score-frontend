@@ -1,40 +1,40 @@
 <script lang="ts">
-import TestRowElement from "../components/TestRowElement.vue";
-import CommonButton from "../components/UI/CommonButton.vue";
-import {TestBlockResolver} from "../api/resolvers/testBlocks/test-block.resolver.ts";
-import {UserResolver} from "../api/resolvers/user/user.resolver.ts";
-import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
-import UserRowElement from "../components/UserRowElement.vue";
-import type {CreateTestBlockOutputDto} from "../api/resolvers/testBlocks/dto/output/create-test-block-output.dto.ts";
-import {usePopupStore} from "../store/popup.store.ts";
-import {useTestTypesStore} from "../store/test-types.store.ts";
-import type {TestTypeDataInputDto} from "../api/testType/dto/input/test-type-data-input.dto.ts";
+import TestRowElement from '../components/TestRowElement.vue';
+import CommonButton from '../components/UI/CommonButton.vue';
+import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
+import { UserResolver } from '../api/resolvers/user/user.resolver.ts';
+import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-data-output.dto.ts';
+import UserRowElement from '../components/UserRowElement.vue';
+import type { CreateTestBlockInputDto } from '../api/resolvers/testBlocks/dto/input/create-test-block-input.dto.ts';
+import { usePopupStore } from '../store/popup.store.ts';
+import { useTestTypesStore } from '../store/test-types.store.ts';
+import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 
 export default {
   name: 'CreateTestBlockPage',
-  components: {UserRowElement, CommonButton, TestRowElement},
+  components: { UserRowElement, CommonButton, TestRowElement },
   data() {
     const popupStore = usePopupStore();
     const testBlockResolver = new TestBlockResolver();
     const userResolver = new UserResolver();
-    const users: UserDataInputDto[] = [];
+    const users: UserDataOutputDto[] = [];
 
     return {
       approvedUsers: [] as number[],
       approvedTests: [] as string[],
-      tests: [] as TestTypeDataInputDto[],
+      tests: [] as TestTypeDataOutputDto[],
       users,
       testBlockResolver,
       userResolver,
       popupStore,
-    }
+    };
   },
   async mounted() {
     const usersFromApi = await this.userResolver.getAll();
     const testTypesStore = useTestTypesStore();
     await testTypesStore.loadTestTypes();
 
-    this.tests = testTypesStore.getTestTypes
+    this.tests = testTypesStore.getTestTypes;
 
     if (usersFromApi?.body) {
       this.users = usersFromApi?.body.sort((a, b) => a.id - b.id);
@@ -43,25 +43,27 @@ export default {
   methods: {
     async save() {
       if (this.approvedTests.length > 0 && this.approvedUsers.length > 0) {
-        const data: CreateTestBlockOutputDto = {
+        const data: CreateTestBlockInputDto = {
           tests: {
-            tests: this.approvedTests
+            tests: this.approvedTests,
           },
-          userIDs: this.approvedUsers
-        }
+          userIDs: this.approvedUsers,
+        };
 
         await this.testBlockResolver.createTestBlock(data).then((res) => {
           if (res.status == 200) {
-            this.popupStore.activateInfoPopup("Блок тестов создан успешно!")
-            this.$router.push("/");
+            this.popupStore.activateInfoPopup('Блок тестов создан успешно!');
+            this.$router.push('/');
           }
-        })
+        });
       } else {
-        this.popupStore.activateErrorPopup("Должен быть выбран хотя бы 1 тест и 1 пользователь!")
+        this.popupStore.activateErrorPopup(
+          'Должен быть выбран хотя бы 1 тест и 1 пользователь!',
+        );
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <template>
@@ -70,30 +72,42 @@ export default {
 
     <h2 class="block-header">Выберите тесты для блока тестов</h2>
     <div class="tests-container">
-      <TestRowElement v-for="(test, index) in tests"
-                      :key="index"
-                      :test-name="test.description"
-                      :test-meta="test.name"
-                      @apply-test="(meta: string) => approvedTests.push(meta)"
-                      @remove-test="(meta: string) => {
-                        const i = approvedTests.indexOf(meta);
-                        approvedTests = [...approvedTests.slice(0, i), ...approvedTests.slice(i + 1)]
-                      }"
+      <TestRowElement
+        v-for="(test, index) in tests"
+        :key="index"
+        :test-name="test.description"
+        :test-meta="test.name"
+        @apply-test="(meta: string) => approvedTests.push(meta)"
+        @remove-test="
+          (meta: string) => {
+            const i = approvedTests.indexOf(meta);
+            approvedTests = [
+              ...approvedTests.slice(0, i),
+              ...approvedTests.slice(i + 1),
+            ];
+          }
+        "
       />
     </div>
 
     <h2 class="block-header">Выберите пользователей для блока тестов</h2>
     <div class="user-container">
-      <UserRowElement v-for="(user, index) in users"
-                      :key="index"
-                      :user-email="user.email"
-                      :user-id="user.id"
-                      :user-name="user.username"
-                      @apply-user="(id: number) => approvedUsers.push(id)"
-                      @remove-user="(id: number) => {
-                        const i = approvedUsers.indexOf(id);
-                        approvedUsers = [...approvedUsers.slice(0, i), ...approvedUsers.slice(i + 1)]
-                      }"
+      <UserRowElement
+        v-for="(user, index) in users"
+        :key="index"
+        :user-email="user.email"
+        :user-id="user.id"
+        :user-name="user.username"
+        @apply-user="(id: number) => approvedUsers.push(id)"
+        @remove-user="
+          (id: number) => {
+            const i = approvedUsers.indexOf(id);
+            approvedUsers = [
+              ...approvedUsers.slice(0, i),
+              ...approvedUsers.slice(i + 1),
+            ];
+          }
+        "
       />
     </div>
 
@@ -126,7 +140,7 @@ export default {
   width: 95%;
   align-items: center;
   justify-content: center;
-  margin: 1rem
+  margin: 1rem;
 }
 
 .user-container {
@@ -139,7 +153,8 @@ export default {
   margin: 1rem;
 }
 
-.approve-button, .approve-button:hover {
+.approve-button,
+.approve-button:hover {
   margin-top: 1rem;
   width: 40%;
   height: 3rem;

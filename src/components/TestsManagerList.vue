@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import {computed, ref} from "vue";
-import CommonButton from "./UI/CommonButton.vue";
-import TestManagerElement from "./UI/TestManagerElement.vue";
-import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
-import {useTestTypesStore} from "../store/test-types.store.ts";
+import { computed, ref } from 'vue';
+import CommonButton from './UI/CommonButton.vue';
+import TestManagerElement from './UI/TestManagerElement.vue';
+import type { TestDataOutputDto } from '../api/resolvers/test/dto/output/test-data-output.dto.ts';
+import { useTestTypesStore } from '../store/test-types.store.ts';
 
-const props = withDefaults(defineProps<{
-  maxElementsCount: number;
-  tests: TestDataInputDto[]
-}>(), {
-  maxElementsCount: 5
-})
+const props = withDefaults(
+  defineProps<{
+    maxElementsCount: number;
+    tests: TestDataOutputDto[];
+  }>(),
+  {
+    maxElementsCount: 5,
+  },
+);
 
 const testTypesStore = useTestTypesStore();
 testTypesStore.loadTestTypes();
@@ -22,14 +25,14 @@ const paginatedData = computed(() => {
   if (props.tests) {
     return props.tests.slice(start, end);
   }
-  return null
+  return null;
 });
 
 const totalPages = computed(() => {
   if (props.tests) {
     return Math.ceil(props.tests.length / props.maxElementsCount);
   }
-  return null
+  return null;
 });
 
 const nextPage = () => {
@@ -55,14 +58,13 @@ const prevPage = () => {
       <div class="test_type">Пройден</div>
       <div class="test_type">Дата</div>
     </div>
-    <TestManagerElement
-        v-for="item in paginatedData"
-        :key="item.id"
-    >
+    <TestManagerElement v-for="item in paginatedData" :key="item.id">
       <template #id>{{ item.id }}</template>
       <template #test_type>{{ testTypesStore.checkTestType(item) }}</template>
-      <template #average_callback>{{ item.averageCallbackTime.toFixed(2) }}</template>
-      <template #user>{{ item.userId ? item.userId : 'Аноним'}}</template>
+      <template #average_callback>{{
+        item.averageCallbackTime.toFixed(2)
+      }}</template>
+      <template #user>{{ item.userId ? item.userId : 'Аноним' }}</template>
       <template #valid>{{ item.valid }}</template>
       <template #created_at>{{ item.createdAt.substring(0, 10) }}</template>
     </TestManagerElement>
@@ -124,10 +126,6 @@ const prevPage = () => {
   flex-direction: column;
   justify-content: center;
   text-align: center;
-}
-
-#id, #test_name {
-  text-align: left;
 }
 
 .header > div:last-child {

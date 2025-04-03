@@ -1,19 +1,18 @@
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div class="wrapper">
-    <div class="id" id="id">#
+    <div class="id" id="id">
+      #
       <slot name="id">12345</slot>
     </div>
-    <div class="test_name" >
+    <div class="test_name">
       <slot name="test_type">Lorem ipsum dolor sit amet.</slot>
     </div>
-    <div class="test_header" >
+    <div class="test_header">
       <slot name="average_callback">Lorem ipsum dolor sit amet.</slot>
     </div>
-    <div class="test_header" >
+    <div class="test_header">
       <slot name="user">Lorem ipsum dolor sit amet.</slot>
     </div>
     <div class="test_header">
@@ -35,7 +34,7 @@
   justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 1fr 3fr 3fr 3fr 2fr 2fr
+  grid-template-columns: 1fr 3fr 3fr 3fr 2fr 2fr;
 }
 
 .wrapper:hover {
@@ -52,7 +51,9 @@
   text-align: center;
 }
 
-#id, #test_name, #test_header {
+#id,
+#test_name,
+#test_header {
   text-align: left;
 }
 

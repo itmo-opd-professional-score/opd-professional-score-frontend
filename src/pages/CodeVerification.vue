@@ -1,17 +1,17 @@
 <script lang="ts">
-import CustomInput from "../components/UI/inputs/CustomInput.vue";
-import CommonButton from "../components/UI/CommonButton.vue";
+import CustomInput from '../components/UI/inputs/CustomInput.vue';
+import CommonButton from '../components/UI/CommonButton.vue';
 
 export default {
-  name: "CodeVerification",
-  components: {CommonButton, CustomInput},
-  emits: ["approveCode", "sendCode"],
+  name: 'CodeVerification',
+  components: { CommonButton, CustomInput },
+  emits: ['approveCode', 'sendCode'],
   data() {
     return {
-      code: ""
-    }
-  }
-}
+      code: '',
+    };
+  },
+};
 </script>
 
 <template>
@@ -21,12 +21,12 @@ export default {
     </h1>
 
     <CustomInput
-        :type="'number'"
-        v-model="code"
-        :min-number="0"
-        :max-number="999999"
-        :max-length="6"
-        :placeholder="'Введите код с почты'"
+      :type="'number'"
+      v-model="code"
+      :min-number="0"
+      :max-number="999999"
+      :max-length="6"
+      :placeholder="'Введите код с почты'"
     />
 
     <div class="code-links-container">
@@ -57,7 +57,8 @@ export default {
   height: 2rem;
 }
 
-.button, .button:hover {
+.button,
+.button:hover {
   width: 100%;
   background-color: #4127e4;
   color: white;

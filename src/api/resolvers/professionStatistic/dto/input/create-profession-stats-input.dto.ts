@@ -1,4 +1,4 @@
-export interface CreateProfessionStatsOutputDto {
+export interface CreateProfessionStatsInputDto {
   professionId: number;
   pcId: number;
   userId: number;

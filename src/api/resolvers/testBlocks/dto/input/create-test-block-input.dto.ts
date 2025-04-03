@@ -1,6 +1,6 @@
 export interface CreateTestBlockInputDto {
-  id: number;
-  testBlockToken: string;
-  updatedAt: string;
-  createdAt: string;
+  tests: {
+    tests: string[];
+  };
+  userIDs: number[];
 }

@@ -1,16 +1,16 @@
-import {defineStore} from "pinia";
-import type {TestTypeDataInputDto} from "../api/testType/dto/input/test-type-data-input.dto.ts";
-import {TestTypeResolver} from "../api/testType/testType.resolver.ts";
-import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
+import { defineStore } from 'pinia';
+import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
+import { TestTypeResolver } from '../api/resolvers/testType/testType.resolver.ts';
+import type { TestDataOutputDto } from '../api/resolvers/test/dto/output/test-data-output.dto.ts';
 
-export const useTestTypesStore = defineStore("testTypes", {
+export const useTestTypesStore = defineStore('testTypes', {
   state: () => ({
-    types: [] as TestTypeDataInputDto[]
+    types: [] as TestTypeDataOutputDto[],
   }),
   getters: {
     getTestTypes: (state) => {
       return state.types;
-    }
+    },
   },
   actions: {
     async loadTestTypes() {
@@ -20,7 +20,7 @@ export const useTestTypesStore = defineStore("testTypes", {
         this.types = types;
       }
     },
-    checkTestType(test: TestDataInputDto) {
+    checkTestType(test: TestDataOutputDto) {
       let typeName;
       this.types.map((type) => {
         if (test.testTypeId == type.id) {
@@ -28,6 +28,6 @@ export const useTestTypesStore = defineStore("testTypes", {
         }
       });
       return typeName;
-    }
+    },
   },
-})
+});

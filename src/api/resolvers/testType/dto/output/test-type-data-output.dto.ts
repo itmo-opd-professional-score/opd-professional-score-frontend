@@ -1,4 +1,4 @@
-export interface TestTypeDataInputDto {
+export interface TestTypeDataOutputDto {
   id: number;
   name: string;
   description: string;

@@ -1,4 +1,4 @@
-export interface CreateProfessionDto {
+export interface CreateProfessionInputDto {
   name: string;
   description: string;
   requirements: string;

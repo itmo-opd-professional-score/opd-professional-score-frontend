@@ -1,42 +1,49 @@
 <script lang="ts">
-import {usePopupStore} from "../../../store/popup.store.ts";
-import eventBus from "../../../store/event-bus.ts";
+import { usePopupStore } from '../../../store/popup.store.ts';
+import eventBus from '../../../store/event-bus.ts';
 
 export default {
   name: 'InfoPopup',
   data() {
     return {
       popupStore: usePopupStore(),
-    }
+    };
   },
   methods: {
     onClick() {
       this.popupStore.deactivateInfoPopup();
-      eventBus.emit("infoPopupCallback")
-    }
+      eventBus.emit('infoPopupCallback');
+    },
   },
   mounted() {
-    document.addEventListener("keydown", (e) => {
-      if (e.key == "Escape" && this.popupStore.getInfoPopupVisible) {
+    document.addEventListener('keydown', (e) => {
+      if (e.key == 'Escape' && this.popupStore.getInfoPopupVisible) {
         this.onClick();
       }
-    })
+    });
   },
   unmounted() {
-    document.removeEventListener("keydown", (e) => {
-      if (e.key == "Escape" && this.popupStore.getInfoPopupVisible) {
+    document.removeEventListener('keydown', (e) => {
+      if (e.key == 'Escape' && this.popupStore.getInfoPopupVisible) {
         this.onClick();
       }
-    })
-  }
-}
-
+    });
+  },
+};
 </script>
 
 <template>
-  <div class="popup-wrapper" v-if="popupStore.getMessage != ''" @click="onClick">
+  <div
+    class="popup-wrapper"
+    v-if="popupStore.getMessage != ''"
+    @click="onClick"
+  >
     <div class="body-popup-wrapper">
-      <img src="../../../assets/icons/check-icon.svg" alt="Check icon" class="icon"/>
+      <img
+        src="../../../assets/icons/check-icon.svg"
+        alt="Check icon"
+        class="icon"
+      />
       <p class="popup-message">{{ popupStore.getMessage }}</p>
     </div>
   </div>

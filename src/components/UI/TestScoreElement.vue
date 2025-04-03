@@ -1,16 +1,17 @@
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div class="wrapper">
-    <div class="id" id="id">#
+    <div class="id" id="id">
+      #
       <slot name="id">0</slot>
     </div>
     <div class="test_name" id="test_name">
       <slot name="test_name">Lorem ipsum dolor sit amet.</slot>
     </div>
-    <div class="score"><slot name="current_points">0</slot>/<slot name="max_points">100</slot></div>
+    <div class="score">
+      <slot name="current_points">0</slot>/<slot name="max_points">100</slot>
+    </div>
     <div class="time"><slot name="time">00:00:00</slot></div>
     <div class="username"><slot name="username">Имя пользователя</slot></div>
     <div class="createdAt"><slot name="createdAt">2022-22-22</slot></div>
@@ -45,7 +46,8 @@
   text-align: center;
 }
 
-#id, #test_name {
+#id,
+#test_name {
   text-align: left;
 }
 

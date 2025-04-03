@@ -1,10 +1,9 @@
 <script setup lang="ts">
+import { updateUserState, UserState } from '../../utils/userState/UserState.ts';
+import { AuthResolver } from '../../api/resolvers/auth/auth.resolver.ts';
+import { UserRole } from '../../utils/userState/UserState.types.ts';
 
-import {updateUserState, UserState} from "../../utils/userState/UserState.ts";
-import {AuthResolver} from "../../api/resolvers/auth/auth.resolver.ts";
-import {UserRole} from "../../utils/userState/UserState.types.ts";
-
-updateUserState()
+updateUserState();
 const authResolver = new AuthResolver();
 </script>
 
@@ -12,25 +11,40 @@ const authResolver = new AuthResolver();
   <header class="header">
     <nav class="nav-container">
       <router-link to="/">
-        <img src="../../assets/logo_end.png" class="logo" alt="logo"/>
+        <img src="../../assets/logo_end.png" class="logo" alt="logo" />
       </router-link>
 
       <div class="nav-links">
         <div class="auth-buttons" v-if="UserState.status == 'unauthorized'">
           <router-link to="/auth/login" class="btn login">Вход</router-link>
-          <router-link to="/auth/registration" class="btn register">Регистрация</router-link>
+          <router-link to="/auth/registration" class="btn register"
+            >Регистрация</router-link
+          >
         </div>
         <div class="auth-buttons" v-if="UserState.status == 'unverified'">
-          <router-link to="/auth/registrationSecondStep" class="btn register" @click="authResolver.logout">Подтвердить
-            почту
+          <router-link
+            to="/auth/registrationSecondStep"
+            class="btn register"
+            @click="authResolver.logout"
+            >Подтвердить почту
           </router-link>
         </div>
         <div class="auth-buttons" v-if="UserState.status == 'authorized'">
-          <router-link to="/testBlock/create" class="btn login"
-                       v-if="UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT">Создать блок
+          <router-link
+            to="/testBlock/create"
+            class="btn login"
+            v-if="
+              UserState.role == UserRole.ADMIN ||
+              UserState.role == UserRole.EXPERT
+            "
+            >Создать блок
           </router-link>
-          <router-link to="" class="btn login" @click="authResolver.logout">Выход</router-link>
-          <router-link to="/profile" class="btn register">Личный кабинет</router-link>
+          <router-link to="" class="btn login" @click="authResolver.logout"
+            >Выход</router-link
+          >
+          <router-link to="/profile" class="btn register"
+            >Личный кабинет</router-link
+          >
         </div>
       </div>
     </nav>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{ disabled?: boolean }>()
+defineProps<{ disabled?: boolean }>();
 </script>
 
 <template>
@@ -30,7 +30,7 @@ defineProps<{ disabled?: boolean }>()
   transition-duration: 0.2s;
 }
 
-.wrapper[disabled="disabled"]:hover {
+.wrapper[disabled='disabled']:hover {
   cursor: wait;
 }
 

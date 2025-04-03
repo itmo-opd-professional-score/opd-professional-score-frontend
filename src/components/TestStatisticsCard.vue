@@ -1,51 +1,51 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
+import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: "StatisticsCard",
+  name: 'StatisticsCard',
   props: {
     testName: {
       type: String,
-      required: true
+      required: true,
     },
     userName: {
       type: String,
-      default: 'Anonymous'
+      default: 'Anonymous',
     },
     testCategory: {
       type: String,
-      default: 'Без категории'
+      default: 'Без категории',
     },
     score: {
       type: Number,
-      required: true
+      required: true,
     },
     maxScore: {
       type: Number,
-      required: true
+      required: true,
     },
     date: {
       type: String,
-      required: true
+      required: true,
     },
     time: {
       type: Number,
-      required: true
-  },
+      required: true,
+    },
     valid: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   computed: {
-    scorePercentage (): string {
-      return ((this.score / this.maxScore) * 100).toFixed(2) + "%";
+    scorePercentage(): string {
+      return ((this.score / this.maxScore) * 100).toFixed(2) + '%';
     },
-    cardColors (): string {
+    cardColors(): string {
       const percentage = (this.score / this.maxScore) * 100;
-      return percentage >= 80 ? "green" : percentage >= 50 ? "orange" : "red";
-    }
-  }
+      return percentage >= 80 ? 'green' : percentage >= 50 ? 'orange' : 'red';
+    },
+  },
 });
 </script>
 
@@ -58,21 +58,24 @@ export default defineComponent({
       <div class="score-result">
         <p class="score fields">
           Результат: {{ score }} / {{ maxScore }} ({{ scorePercentage }})
-       </p>
+        </p>
         <div class="progress-bar">
-          <div class="progress" :style="{ width: scorePercentage, backgroundColor: cardColors }"></div>
+          <div
+            class="progress"
+            :style="{ width: scorePercentage, backgroundColor: cardColors }"
+          ></div>
         </div>
       </div>
       <div class="time-result">
         <p class="text fields">Затраченное время:</p>
-        <p class="time fields">{{time}}</p>
+        <p class="time fields">{{ time }}</p>
       </div>
       <div class="level-result">
-        <p class="level fields">Оценка: </p>
+        <p class="level fields">Оценка:</p>
       </div>
     </div>
     <p class="date">Дата: {{ date }}</p>
-    <p class="valid">Валидность: {{valid}}</p>
+    <p class="valid">Валидность: {{ valid }}</p>
   </div>
 </template>
 
@@ -109,8 +112,7 @@ export default defineComponent({
   gap: 20px;
 }
 
-.fields
-{
+.fields {
   font-size: 16px;
   color: rgb(237, 227, 227, 0.9);
   font-weight: 500;
@@ -122,7 +124,7 @@ export default defineComponent({
 .valid {
   color: #3a3e53;
 }
-.valid{
+.valid {
   margin-bottom: 15px;
 }
 .progress-bar {

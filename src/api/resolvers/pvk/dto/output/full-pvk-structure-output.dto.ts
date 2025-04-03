@@ -1,4 +1,4 @@
-export interface FullPvkStructureInputDto {
+export interface FullPvkStructureOutputDto {
   id: number;
   name: string;
   description: string;

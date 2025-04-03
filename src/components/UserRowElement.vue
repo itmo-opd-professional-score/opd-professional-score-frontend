@@ -1,62 +1,64 @@
 <script lang="ts">
-import CommonButton from "./UI/CommonButton.vue";
+import CommonButton from './UI/CommonButton.vue';
 
 export default {
   name: 'UserRowElement',
-  components: {CommonButton},
-  emits: ["removeUser", "applyUser"],
+  components: { CommonButton },
+  emits: ['removeUser', 'applyUser'],
   props: {
     userName: {
       type: String,
       required: true,
-      default: "username"
+      default: 'username',
     },
     userId: {
       type: Number,
       required: true,
-      default: "1"
+      default: '1',
     },
     userEmail: {
       type: String,
       required: true,
-      default: "test@mail.ru"
-    }
+      default: 'test@mail.ru',
+    },
   },
   data() {
     return {
       added: false,
-      buttonClass: "add-test"
-    }
+      buttonClass: 'add-test',
+    };
   },
   computed: {
     buttonText() {
       if (this.added) {
-        this.buttonClass = "remove-user";
-        return "Удалить";
+        this.buttonClass = 'remove-user';
+        return 'Удалить';
       } else {
-        this.buttonClass = "add-user";
-        return "Добавить";
+        this.buttonClass = 'add-user';
+        return 'Добавить';
       }
-    }
+    },
   },
   methods: {
     applyTest() {
-      this.added ? this.$emit("removeUser", this.userId) : this.$emit("applyUser", this.userId);
+      this.added
+        ? this.$emit('removeUser', this.userId)
+        : this.$emit('applyUser', this.userId);
       this.added = !this.added;
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <template>
   <div class="user-row-wrapper">
-    <p class="wrapper-block user-id"> {{ userId }} </p>
-    <p class="wrapper-block user-name"> {{ userName }} </p>
-    <p class="wrapper-block user-email"> {{ userEmail }} </p>
+    <p class="wrapper-block user-id">{{ userId }}</p>
+    <p class="wrapper-block user-name">{{ userName }}</p>
+    <p class="wrapper-block user-email">{{ userEmail }}</p>
     <CommonButton class="user-button" :class="buttonClass" @click="applyTest">
       <template v-slot:placeholder class="user-button">
-        {{ buttonText }}
-      </template>x
+        {{ buttonText }} </template
+      >x
     </CommonButton>
   </div>
 </template>
@@ -81,17 +83,20 @@ export default {
   width: 100%;
 }
 
-.user-button, .user-button:hover {
+.user-button,
+.user-button:hover {
   padding: 0.5rem 0;
   width: 100%;
 }
 
-.add-user, .add-user:hover {
+.add-user,
+.add-user:hover {
   background-color: #4127e4;
   color: white;
 }
 
-.remove-user, .remove-user:hover {
+.remove-user,
+.remove-user:hover {
   background-color: #e13a3a;
   color: white;
 }

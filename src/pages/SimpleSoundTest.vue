@@ -1,14 +1,14 @@
 <script lang="ts">
-import type { SimpleSoundTestOutputDto } from "../api/resolvers/test/dto/output/simple-sound-test-output.dto";
-import {defineComponent} from 'vue';
-import {usePopupStore} from "../store/popup.store.ts";
-import CommonButton from "../components/UI/CommonButton.vue";
+import type { SimpleSoundTestInputDto } from '../api/resolvers/test/dto/input/simple-sound-test-input.dto.ts';
+import { defineComponent } from 'vue';
+import { usePopupStore } from '../store/popup.store.ts';
+import CommonButton from '../components/UI/CommonButton.vue';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
   name: 'SimpleSoundTest',
-  components: {CommonButton},
+  components: { CommonButton },
   data() {
     return {
       userId: -1,
@@ -21,7 +21,7 @@ export default defineComponent({
       startTime: 0,
       inactivityTimeout: null as number | null,
       popupStore: usePopupStore(),
-      missedCount: 0
+      missedCount: 0,
     };
   },
   computed: {
@@ -37,21 +37,29 @@ export default defineComponent({
           return '';
       }
     },
-    results(): { average: number; deviation: number; best: number; worst: number } {
+    results(): {
+      average: number;
+      deviation: number;
+      best: number;
+      worst: number;
+    } {
       const times = this.reactionTimes;
-      if (!times.length) return {average: 0, deviation: 0, best: 0, worst: 0};
-      const average = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
-      const variance = times.reduce((acc, val) => acc + Math.pow(val - average, 2), 0) / times.length;
+      if (!times.length) return { average: 0, deviation: 0, best: 0, worst: 0 };
+      const average = Math.round(
+        times.reduce((a, b) => a + b, 0) / times.length,
+      );
+      const variance =
+        times.reduce((acc, val) => acc + Math.pow(val - average, 2), 0) /
+        times.length;
       const deviation = Math.round(Math.sqrt(variance));
       return {
         average,
         deviation,
         best: Math.min(...times),
-        worst: Math.max(...times)
+        worst: Math.max(...times),
       };
-    }
-    ,
-    testResultDto(): SimpleSoundTestOutputDto {
+    },
+    testResultDto(): SimpleSoundTestInputDto {
       return {
         userId: this.userId,
         averageCallbackTime: this.results.average,
@@ -59,7 +67,7 @@ export default defineComponent({
         mistakes: this.missedCount,
         dispersion: this.results.deviation,
       };
-    }
+    },
   },
   methods: {
     handleClick() {
@@ -115,7 +123,7 @@ export default defineComponent({
     },
     playSound(audioVolume: number) {
       try {
-        const context = this.audioContext || new window.AudioContext;
+        const context = this.audioContext || new window.AudioContext();
         this.audioContext = context;
         const oscillator = this.audioContext.createOscillator();
         oscillator.type = 'sine';
@@ -127,10 +135,13 @@ export default defineComponent({
         oscillator.start();
         oscillator.stop(context.currentTime + 0.3);
       } catch (error) {
-        const message = error instanceof Error
+        const message =
+          error instanceof Error
             ? error.message
             : 'Неизвестная ошибка воспроизведения';
-        this.popupStore.activateErrorPopup(`Ошибка воспроизведения звука: ${message}`);
+        this.popupStore.activateErrorPopup(
+          `Ошибка воспроизведения звука: ${message}`,
+        );
         this.finishTest();
       }
     },
@@ -148,15 +159,14 @@ export default defineComponent({
       this.startTime = 0;
     },
     clearTimeouts() {
-      this.timeoutIds.forEach(id => clearTimeout(id));
+      this.timeoutIds.forEach((id) => clearTimeout(id));
       this.timeoutIds = [];
-    }
+    },
   },
   beforeUnmount() {
     this.clearTimeouts();
     clearTimeout(this.inactivityTimeout!);
   },
-
 });
 </script>
 
@@ -164,18 +174,18 @@ export default defineComponent({
   <div class="container">
     <h2 class="title">Тест на скорость реакции</h2>
     <p class="description">
-      Этот тест измеряет время вашей реакции на звуковой сигнал.
-      После начала теста вы услышите 120 звуковых сигналов. Как только услышите сигнал -
-      как можно быстрее нажмите большую кнопку.
-      Старайтесь не нажимать кнопку до сигнала!
+      Этот тест измеряет время вашей реакции на звуковой сигнал. После начала
+      теста вы услышите 120 звуковых сигналов. Как только услышите сигнал - как
+      можно быстрее нажмите большую кнопку. Старайтесь не нажимать кнопку до
+      сигнала!
     </p>
 
     <div class="button-wrapper">
       <CommonButton
-          class="reaction-button"
-          :class="{ active: testState == 'reacting' }"
-          @click="handleClick"
-          :disabled="testState == 'completed'"
+        class="reaction-button"
+        :class="{ active: testState == 'reacting' }"
+        @click="handleClick"
+        :disabled="testState == 'completed'"
       >
         <template v-slot:placeholder> {{ buttonText }}</template>
       </CommonButton>
@@ -183,21 +193,30 @@ export default defineComponent({
 
     <div v-if="testState == 'completed'" class="results">
       <h2 class="title">Результаты:</h2>
-      <p>Среднее время: <strong>{{ results.average }} мс</strong></p>
-      <p>Стандартное отклонение: <strong>{{ results.deviation }} мс</strong></p>
-      <p>Лучшее время: <strong>{{ results.best }} мс</strong></p>
-      <p>Худшее время: <strong>{{ results.worst }} мс</strong></p>
-      <p>Количество пропусков: <strong>{{ missedCount }}</strong></p>
+      <p>
+        Среднее время: <strong>{{ results.average }} мс</strong>
+      </p>
+      <p>
+        Стандартное отклонение: <strong>{{ results.deviation }} мс</strong>
+      </p>
+      <p>
+        Лучшее время: <strong>{{ results.best }} мс</strong>
+      </p>
+      <p>
+        Худшее время: <strong>{{ results.worst }} мс</strong>
+      </p>
+      <p>
+        Количество пропусков: <strong>{{ missedCount }}</strong>
+      </p>
       <CommonButton class="retry-button" @click="resetTest">
         <template v-slot:placeholder>Пройти заново</template>
       </CommonButton>
-
     </div>
 
     <CommonButton
-        class="reset-button"
-        @click="resetTest"
-        v-if="testState == 'reacting'"
+      class="reset-button"
+      @click="resetTest"
+      v-if="testState == 'reacting'"
     >
       <template v-slot:placeholder>Прервать тест</template>
     </CommonButton>
@@ -205,7 +224,6 @@ export default defineComponent({
 </template>
 
 <style scoped>
-
 .title {
   font-size: 46px;
   margin-bottom: 20px;
@@ -264,7 +282,6 @@ export default defineComponent({
   margin: 3rem auto auto;
 }
 
-
 .results {
   margin-top: 2rem;
   padding: 1.5rem;
@@ -284,4 +301,3 @@ export default defineComponent({
   margin: 1rem auto;
 }
 </style>
-

@@ -1,53 +1,56 @@
 <script setup lang="ts">
-import {computed, ref} from "vue";
-import CommonButton from "./UI/CommonButton.vue";
-import UserManagerElement from "./UI/UserManagerElement.vue";
-import {autoUpdate, hide, useFloating} from "@floating-ui/vue";
-import RoleSelectForm from "./RoleSelectForm.vue";
-import {UserState} from "../utils/userState/UserState.ts";
-import type {UserRole} from "../utils/userState/UserState.types.ts";
-import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-input.dto.ts";
+import { computed, ref } from 'vue';
+import CommonButton from './UI/CommonButton.vue';
+import UserManagerElement from './UI/UserManagerElement.vue';
+import { autoUpdate, hide, useFloating } from '@floating-ui/vue';
+import RoleSelectForm from './RoleSelectForm.vue';
+import { UserState } from '../utils/userState/UserState.ts';
+import type { UserRole } from '../utils/userState/UserState.types.ts';
+import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-data-output.dto.ts';
 
 interface CurrentUser {
   id: number;
   role: UserRole;
 }
 
-const reference = ref<HTMLElement | null>(null)
-const floating = ref(null)
-const {floatingStyles, middlewareData} = useFloating(reference, floating, {
+const reference = ref<HTMLElement | null>(null);
+const floating = ref(null);
+const { floatingStyles, middlewareData } = useFloating(reference, floating, {
   placement: 'bottom-end',
   whileElementsMounted: autoUpdate,
-  middleware: [hide()]
-})
+  middleware: [hide()],
+});
 
 const toggleForm = (el: HTMLElement, id: number, role: string) => {
   if (lastEl.value != el) {
-    isOpen.value = false
+    isOpen.value = false;
   }
   if (!isOpen.value) {
-    reference.value = el
+    reference.value = el;
     currentUser.value = {
       id: id,
       role: role as UserRole,
-    }
+    };
   }
-  isOpen.value = !isOpen.value
-  lastEl.value = el
-}
+  isOpen.value = !isOpen.value;
+  lastEl.value = el;
+};
 
-const currentUser = ref<CurrentUser | null>(null)
-const isOpen = ref(false)
-const lastEl = ref()
+const currentUser = ref<CurrentUser | null>(null);
+const isOpen = ref(false);
+const lastEl = ref();
 
-defineEmits(['users-list-update'])
+defineEmits(['users-list-update']);
 
-const props = withDefaults(defineProps<{
-  maxElementsCount: number;
-  users: UserDataInputDto[]
-}>(), {
-  maxElementsCount: 5,
-})
+const props = withDefaults(
+  defineProps<{
+    maxElementsCount: number;
+    users: UserDataOutputDto[];
+  }>(),
+  {
+    maxElementsCount: 5,
+  },
+);
 
 const currentPage = ref(1);
 
@@ -76,35 +79,32 @@ const prevPage = () => {
 
 <template>
   <RoleSelectForm
-      v-if="isOpen"
-      ref="floating"
-      :style="{
-        ...floatingStyles,
-        visibility: middlewareData.hide?.referenceHidden
-          ? 'hidden'
-          : 'visible',
-      }"
-      :user-id="(currentUser as CurrentUser).id"
-      :user-role="(currentUser as CurrentUser).role"
-      @role-update="$emit('users-list-update'); isOpen = false"
+    v-if="isOpen"
+    ref="floating"
+    :style="{
+      ...floatingStyles,
+      visibility: middlewareData.hide?.referenceHidden ? 'hidden' : 'visible',
+    }"
+    :user-id="(currentUser as CurrentUser).id"
+    :user-role="(currentUser as CurrentUser).role"
+    @role-update="
+      $emit('users-list-update');
+      isOpen = false;
+    "
   />
   <div class="component_container">
     <div class="header">
-      <div class="id" id="id">
-        Id
-      </div>
-      <div class="test_name" id="test_name">
-        Username
-      </div>
+      <div class="id" id="id">Id</div>
+      <div class="test_name" id="test_name">Username</div>
       <div class="score">Email</div>
       <div class="time">Role</div>
       <div class="valid">Change role</div>
     </div>
     <UserManagerElement
-        v-for="item in paginatedData"
-        :key="item.id"
-        :is-disabled="UserState.role == item.role"
-        @change-role="el => toggleForm(el, item.id, item.role)"
+      v-for="item in paginatedData"
+      :key="item.id"
+      :is-disabled="UserState.role == item.role"
+      @change-role="(el) => toggleForm(el, item.id, item.role)"
     >
       <template #id>{{ item.id }}</template>
       <template #username>{{ item.username }}</template>
@@ -174,7 +174,8 @@ const prevPage = () => {
   text-align: center;
 }
 
-#id, #test_name {
+#id,
+#test_name {
   text-align: left;
 }
 
