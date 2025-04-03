@@ -8,7 +8,7 @@ import UserRowElement from "../components/UserRowElement.vue";
 import type {CreateTestBlockInputDto} from "../api/resolvers/testBlocks/dto/input/create-test-block-input.dto.ts";
 import {usePopupStore} from "../store/popup.store.ts";
 import {useTestTypesStore} from "../store/test-types.store.ts";
-import type {TestTypeDataInputDto} from "../api/resolvers/testType/dto/input/test-type-data-input.dto.ts";
+import type {TestTypeDataOutputDto} from "../api/resolvers/testType/dto/output/test-type-data-output.dto.ts";
 
 export default {
   name: 'CreateTestBlockPage',
@@ -22,7 +22,7 @@ export default {
     return {
       approvedUsers: [] as number[],
       approvedTests: [] as string[],
-      tests: [] as TestTypeDataInputDto[],
+      tests: [] as TestTypeDataOutputDto[],
       users,
       testBlockResolver,
       userResolver,

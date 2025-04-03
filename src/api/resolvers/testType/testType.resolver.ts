@@ -1,6 +1,6 @@
 import ApiResolverUtil from '../../../utils/ApiResolver.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
-import type { TestTypeDataInputDto } from './dto/input/test-type-data-input.dto.ts';
+import type { TestTypeDataOutputDto } from './dto/output/test-type-data-output.dto.ts';
 import type { DefaultErrorDto } from '../../dto/common/default-error.dto.ts';
 
 export class TestTypeResolver {
@@ -12,7 +12,7 @@ export class TestTypeResolver {
     return await this.apiResolver
       .request<
         null,
-        TestTypeDataInputDto[]
+        TestTypeDataOutputDto[]
       >(`getAll`, 'GET', null, this.token ? this.token : undefined)
       .catch((err) => {
         const error = err as DefaultErrorDto;
