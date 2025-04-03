@@ -17,11 +17,15 @@ import type {UserDataInputDto} from "../api/resolvers/user/dto/input/user-data-i
 import type {TestDataInputDto} from "../api/resolvers/test/dto/input/test-data-input.dto.ts";
 import {UserRole} from "../utils/userState/UserState.types.ts";
 import {useTestTypesStore} from "../store/test-types.store.ts";
+import type {GetTestBlockInputDto} from "../api/resolvers/testBlocks/dto/input/get-test-block-input.dto.ts";
+import {TestBlockResolver} from "../api/resolvers/testBlocks/test-block.resolver.ts";
+import TestBlocksManagerList from "../components/TestBlocksManagerList.vue";
 
 const authResolver = new AuthResolver();
-const userResolver = new UserResolver()
+const userResolver = new UserResolver();
 const testResolver = new TestResolver();
-const professionResolver = new ProfessionResolver()
+const testBlockResolver = new TestBlockResolver();
+const professionResolver = new ProfessionResolver();
 
 const popupStore = usePopupStore();
 const testTypesStore = useTestTypesStore();
@@ -45,6 +49,12 @@ const tests = ref<{
 const allTests = ref<TestDataInputDto[]>([]);
 const professionsArchive = ref<GetProfessionOutputDto[] | null>(null)
 const professionsPublished = ref<GetProfessionOutputDto[] | null>(null)
+const testBlocks = ref<GetTestBlockInputDto[] | null>(null)
+
+const reloadTestBlocks = async () => {
+  const res = await testBlockResolver.getByUserId(UserState.id ? UserState.id : 0);
+  if (res != null) testBlocks.value = res;
+}
 
 const reloadUsers = async () => {
   const result = await userResolver.getAll()
@@ -119,6 +129,7 @@ onMounted(() => {
   connectLocalTestsResults()
   reloadProfessions()
   reloadTests()
+  reloadTestBlocks()
 })
 </script>
 
@@ -200,6 +211,13 @@ onMounted(() => {
               :is-archive="true"
               @professions-list-update="reloadProfessions"
           />
+        </div>
+      </div>
+
+      <div class="tests-info" v-if="testBlocks && testBlocks.length > 0">
+        <div class="block_header">Информация о назначенных блоках тестов</div>
+        <div class="profession_data_block">
+          <TestBlocksManagerList :test-blocks="testBlocks"/>
         </div>
       </div>
 
