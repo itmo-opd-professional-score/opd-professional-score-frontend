@@ -1,4 +1,4 @@
-export interface CreateSoundAdditionOutputDto {
+export interface CreateAdditionOutputDto {
   status: number;
   body: {
     testToken: string;

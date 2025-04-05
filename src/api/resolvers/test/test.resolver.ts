@@ -4,7 +4,7 @@ import type { DefaultInputDto } from '../../dto/common/default-input.dto';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import type { TestDataOutputDto } from './dto/output/test-data-output.dto.ts';
 import type { CreateAdditionInputDto } from './dto/input/create-addition-input.dto.ts';
-import type { CreateSoundAdditionOutputDto } from './dto/output/create-sound-addition-output.dto.ts';
+import type { CreateAdditionOutputDto } from './dto/output/create-addition-output.dto.ts';
 
 export class TestResolver {
   private apiResolver = new ApiResolverUtil('test');
@@ -32,7 +32,7 @@ export class TestResolver {
   public async createSoundAddition(data: CreateAdditionInputDto) {
     return await this.apiResolver.request<
       CreateAdditionInputDto,
-      CreateSoundAdditionOutputDto
+      CreateAdditionOutputDto
     >(
       'at/createSoundAddition',
       'POST',
