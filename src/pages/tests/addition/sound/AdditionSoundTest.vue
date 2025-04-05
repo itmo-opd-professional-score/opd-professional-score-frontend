@@ -128,7 +128,7 @@ const saveResults = () => {
     mistakes: questionsCount - score.value,
   };
   testResolver
-    .createSoundAddition(data)
+    .createAddition(data, 'Sound')
     .then((result) => {
       if (!UserState.id) {
         completedTestsLinks.push(props.token);

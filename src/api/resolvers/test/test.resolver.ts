@@ -29,12 +29,12 @@ export class TestResolver {
     );
   }
 
-  public async createSoundAddition(data: CreateAdditionInputDto) {
+  public async createAddition(data: CreateAdditionInputDto, endpoint: string) {
     return await this.apiResolver.request<
       CreateAdditionInputDto,
       CreateAdditionOutputDto
     >(
-      'at/createSoundAddition',
+      `at/create${endpoint}Addition`,
       'POST',
       data,
       this.token ? this.token : undefined,
