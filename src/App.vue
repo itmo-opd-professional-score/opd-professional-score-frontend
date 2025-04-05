@@ -3,6 +3,8 @@ import Header from './components/UI/AppHeader.vue';
 import InfoPopup from './components/UI/popups/InfoPopup.vue';
 import ErrorPopup from './components/UI/popups/ErrorPopup.vue';
 import { usePopupStore } from './store/popup.store.ts';
+import ReactionCircle from "./components/ReactionCircle.vue";
+import SimpleSoundTest from "./pages/SimpleSoundTest.vue";
 
 const popupStore = usePopupStore();
 </script>
@@ -18,6 +20,8 @@ const popupStore = usePopupStore();
     </div>
     <router-view></router-view>
   </div>
+  <SimpleSoundTest></SimpleSoundTest>
+  <ReactionCircle></ReactionCircle>
 </template>
 
 <style scoped>
