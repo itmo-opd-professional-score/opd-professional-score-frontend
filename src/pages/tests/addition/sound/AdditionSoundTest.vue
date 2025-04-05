@@ -10,7 +10,7 @@ import type {
 import { TestResolver } from '../../../../api/resolvers/test/test.resolver.ts';
 import { usePopupStore } from '../../../../store/popup.store.ts';
 import { UserState } from '../../../../utils/userState/UserState.ts';
-import type { CreateSoundAdditionInputDto } from '../../../../api/resolvers/test/dto/input/create-sound-addition-input.dto.ts';
+import type { CreateAdditionInputDto } from '../../../../api/resolvers/test/dto/input/create-addition-input.dto.ts';
 import { jwtDecode } from 'jwt-decode';
 import type { TestJwt } from '../../types';
 
@@ -116,7 +116,7 @@ const calculateDispersion = (data: number[]) => {
 const saveResults = () => {
   const testResolver = new TestResolver();
   const popUpStore = usePopupStore();
-  const data: CreateSoundAdditionInputDto = {
+  const data: CreateAdditionInputDto = {
     userId: UserState.id != undefined ? UserState.id : null,
     averageCallbackTime:
       answers.reduce((sum, answer) => sum + answer.elapsedTime, 0) /

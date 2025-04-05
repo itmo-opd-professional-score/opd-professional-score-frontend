@@ -3,7 +3,7 @@ import type { UpdateUserIdsInputDto } from './dto/input/update-user-ids-input.dt
 import type { DefaultInputDto } from '../../dto/common/default-input.dto';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import type { TestDataOutputDto } from './dto/output/test-data-output.dto.ts';
-import type { CreateSoundAdditionInputDto } from './dto/input/create-sound-addition-input.dto.ts';
+import type { CreateAdditionInputDto } from './dto/input/create-addition-input.dto.ts';
 import type { CreateSoundAdditionOutputDto } from './dto/output/create-sound-addition-output.dto.ts';
 
 export class TestResolver {
@@ -29,9 +29,9 @@ export class TestResolver {
     );
   }
 
-  public async createSoundAddition(data: CreateSoundAdditionInputDto) {
+  public async createSoundAddition(data: CreateAdditionInputDto) {
     return await this.apiResolver.request<
-      CreateSoundAdditionInputDto,
+      CreateAdditionInputDto,
       CreateSoundAdditionOutputDto
     >(
       'at/createSoundAddition',
