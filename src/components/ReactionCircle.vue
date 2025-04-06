@@ -12,9 +12,10 @@ name: "ReactionCircle",
       radius: 100,
       centerX: 150,
       centerY: 150,
-      speed: 0.005,
-      angle: Math.PI / 2,
-      startTime: performance.now(),
+      speed: 0.001,
+      angle: -Math.PI / 2,
+      initialAngle: -Math.PI / 2,
+      startTime: 0,
       deviation:  null as number | null,
       animationFrameId:   null as number | null,
       testState: 'ready' as TestState
@@ -22,10 +23,10 @@ name: "ReactionCircle",
   },
   computed: {
     circleX() {
-      return this.centerX - this.radius * Math.cos(this.angle)
+      return this.centerX + this.radius * Math.cos(this.angle)
     },
     circleY() {
-      return this.centerY - this.radius * Math.sin(this.angle)
+      return this.centerY + this.radius * Math.sin(this.angle)
     },
     buttonText():string {
       switch (this.testState) {
@@ -42,15 +43,24 @@ name: "ReactionCircle",
   },
   methods: {
     animate(time: number) {
-      const elapsed = time - this.startTime
-      this.angle = (elapsed * this.speed) % (Math.PI * 2)
-      this.animationFrameId = requestAnimationFrame(this.animate)
+      const elapsed = time - this.startTime;
+      this.angle = (this.initialAngle + elapsed * this.speed) % (Math.PI * 2);
+      this.animationFrameId = requestAnimationFrame(this.animate);
     },
     startTest() {
       this.testState = 'reacting' as TestState;
-      this.startTime = performance.now()
-      this.angle = Math.PI / 2
-      this.animationFrameId = requestAnimationFrame(this.animate)
+      this.startTime = performance.now();
+      this.initialAngle = -Math.PI / 2;
+      this.angle = this.initialAngle;
+      this.animationFrameId = requestAnimationFrame(this.animate);
+    },
+    clickButton() {
+      if(this.testState === 'ready') {
+        this.startTest();
+      } else if (this.testState === 'reacting') {
+      } else {
+
+      }
     }
   },
 })
@@ -75,6 +85,7 @@ name: "ReactionCircle",
           class="reaction-button"
           :class="{ active: testState == 'reacting' }"
           :disabled="testState == 'completed'"
+          @click="clickButton"
       >
         <template v-slot:placeholder> {{buttonText}}</template>
       </CommonButton>
