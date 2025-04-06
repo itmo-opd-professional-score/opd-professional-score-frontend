@@ -60,6 +60,13 @@ name: "ReactionCircle",
 </script>
 
 <template>
+  <div class="container">
+  <h2 class="title">Тест на скорость реакции на движущиеся объекты</h2>
+    <p class="description">
+      Этот тест измеряет время вашей реакции на движущийся объект.
+      После начала теста фиолетовый круг начнет двигаться. Как только он будет находиться в зеленой зоне - как
+      можно быстрее нажмите большую кнопку. Старайтесь не нажимать кнопку до или после этой зоны!
+    </p>
   <div class="test-container">
     <svg class="circles" width="300" height="300">
       <circle cx="150" cy="150" r="100" stroke="black" stroke-width="2" fill="none" />
@@ -75,11 +82,29 @@ name: "ReactionCircle",
       </CommonButton>
     </div>
   </div>
+  </div>
 
 </template>
 
 
 <style scoped>
+.title {
+  font-size: 46px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+.description {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 15px;
+  margin: 20px 0;
+  color: black;
+}
+.container {
+  max-width: 35vw;
+  padding: 2rem;
+  text-align: center;
+}
 .test-container {
   background: #c1b9f6;
   display: flex;
@@ -88,7 +113,6 @@ name: "ReactionCircle",
   justify-content: center;
   padding: 15px;
   border-radius: 15px;
-  width: 30vw;
   min-height: 50vh;
 }
 .circles {
