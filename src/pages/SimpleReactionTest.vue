@@ -7,7 +7,9 @@ type TestState = 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
 name: "SimpleReactionTest",
+
   components: {CommonButton, ReactionCircle},
+
   data() {
     return {
       radius: 100,
@@ -21,6 +23,28 @@ name: "SimpleReactionTest",
       animationFrameId:   null as number | null,
       testState: 'ready' as TestState
     };
+  },
+  props: {
+    time: {
+      type: Number,
+      required: true
+    },
+    showTimer: {
+      type: Boolean,
+      default: false
+    },
+    showFinalResults: {
+      type: Boolean,
+      default: false
+    },
+    showPerMinuteResults: {
+      type: Boolean,
+      default: false
+    },
+    showProgressBar: {
+      type: Boolean,
+      default: false
+    }
   },
   computed: {
     circleX() {

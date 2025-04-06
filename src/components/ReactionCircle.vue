@@ -21,6 +21,12 @@ name: "ReactionCircle",
       testState: 'ready' as TestState
     };
   },
+  props: {
+    time: {
+      type: Number,
+      required: true
+    }
+  },
   computed: {
     circleX() {
       return this.centerX + this.radius * Math.cos(this.angle)
