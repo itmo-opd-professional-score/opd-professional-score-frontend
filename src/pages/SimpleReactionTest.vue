@@ -101,7 +101,7 @@ name: "SimpleReactionTest",
       можно быстрее нажмите большую кнопку. Старайтесь не нажимать кнопку до или после этой зоны!
     </p>
   <div class="test-container">
-    <ReactionCircle/>
+    <ReactionCircle :time=0></ReactionCircle>
     <div class="button-wrapper">
       <CommonButton
           class="reaction-button"
