@@ -78,6 +78,7 @@ name: "ReactionCircle",
   <div class="test-container">
     <svg class="circles" width="300" height="300">
       <circle cx="150" cy="150" r="100" stroke="black" stroke-width="2" fill="none" />
+      <circle  cx="150" cy="50" r="10" fill="rgb( 0,128,0)"/>
       <circle :cx="circleX" :cy="circleY" r="10" fill="rgb(128, 0, 128)" />
     </svg>
     <div class="button-wrapper">
