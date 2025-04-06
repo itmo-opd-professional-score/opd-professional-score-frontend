@@ -5,6 +5,7 @@ import ErrorPopup from './components/UI/popups/ErrorPopup.vue';
 import { usePopupStore } from './store/popup.store.ts';
 import ReactionCircle from "./components/ReactionCircle.vue";
 import SimpleSoundTest from "./pages/SimpleSoundTest.vue";
+import SimpleReactionTest from "./pages/SimpleReactionTest.vue";
 
 const popupStore = usePopupStore();
 </script>
@@ -22,6 +23,7 @@ const popupStore = usePopupStore();
   </div>
   <SimpleSoundTest></SimpleSoundTest>
   <ReactionCircle></ReactionCircle>
+  <SimpleReactionTest/>
 </template>
 
 <style scoped>
