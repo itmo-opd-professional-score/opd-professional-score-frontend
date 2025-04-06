@@ -13,7 +13,7 @@ name: "ReactionCircle",
       centerX: 150,
       centerY: 150,
       speed: 0.005,
-      angle: 0,
+      angle: Math.PI / 2,
       startTime: performance.now(),
       deviation:  null as number | null,
       animationFrameId:   null as number | null,
@@ -45,16 +45,14 @@ name: "ReactionCircle",
       const elapsed = time - this.startTime
       this.angle = (elapsed * this.speed) % (Math.PI * 2)
       this.animationFrameId = requestAnimationFrame(this.animate)
+    },
+    startTest() {
+      this.testState = 'reacting' as TestState;
+      this.startTime = performance.now()
+      this.angle = Math.PI / 2
+      this.animationFrameId = requestAnimationFrame(this.animate)
     }
   },
-  mounted() {
-    this.animationFrameId = requestAnimationFrame(this.animate)
-  },
-  unmounted() {
-    if (this.animationFrameId !== null) {
-      cancelAnimationFrame(this.animationFrameId)
-    }
-  }
 })
 
 </script>
@@ -64,7 +62,7 @@ name: "ReactionCircle",
   <h2 class="title">Тест на скорость реакции на движущиеся объекты</h2>
     <p class="description">
       Этот тест измеряет время вашей реакции на движущийся объект.
-      После начала теста фиолетовый круг начнет двигаться. Как только он будет находиться в зеленой зоне - как
+      После начала теста фиолетовый круг начнет двигаться. Как только он будет находиться в начале своего пути (верхняя точка траектории) - как
       можно быстрее нажмите большую кнопку. Старайтесь не нажимать кнопку до или после этой зоны!
     </p>
   <div class="test-container">
