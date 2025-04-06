@@ -76,7 +76,7 @@ const avgTime = computed(() => {
 })
 
 const bestTime = computed(() => {
-  return reactionTimes.value.length > 0 ? Math.min(...reactionTimes.value) : '-'
+  return reactionTimes.value.length > 0 ? Math.min(...reactionTimes.value) : '0'
 })
 
 const timerStyle = computed(() => {
@@ -134,13 +134,17 @@ function flashScreen() {
   }
 
   flash()
-  setTimeout(() => {
+  flashTimeouts.push(setTimeout(() => {
     flash()
-    setTimeout(() => {
+    flashTimeouts.push(setTimeout(() => {
       flash()
-      setTimeout(() => showNextColor(), 200)
-    }, 200)
-  }, 200)
+      flashTimeouts.push(setTimeout(() => showNextColor(), 200))
+    }, 200))
+  }, 200))
+}
+function clearFlashTimeouts() {
+  flashTimeouts.forEach(timeout => clearTimeout(timeout))
+  flashTimeouts = []
 }
 
 function handleColorClick(selectedColor) {
