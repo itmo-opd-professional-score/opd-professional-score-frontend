@@ -12,6 +12,7 @@ interface TestData {
 }
 
 export default defineComponent({
+  name: "LightSimpleTest",
   data(): TestData {
     return {
       isButtonActive: false,
