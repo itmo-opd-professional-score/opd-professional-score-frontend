@@ -1,8 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-type TestState = 'ready' | 'reacting' | 'completed';
-
 export default defineComponent({
   name: "ReactionCircle",
   data() {
@@ -16,7 +14,6 @@ export default defineComponent({
       startTime: 0,
       deviation: null as number | null,
       animationFrameId: null as number | null,
-      testState: 'ready' as TestState,
       isMoving: false,
     };
   },
@@ -53,6 +50,7 @@ export default defineComponent({
         cancelAnimationFrame(this.animationFrameId);
         this.animationFrameId = null;
       }
+      this.isMoving = false;
     },
     clickButton(time: number) {
       const idealTime = this.startTime + (Math.PI / (2 * this.speed));

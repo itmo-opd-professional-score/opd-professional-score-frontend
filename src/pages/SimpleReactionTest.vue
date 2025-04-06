@@ -24,8 +24,8 @@ export default defineComponent({
       currentDeviation: null as number | null,
       animationFrameId: null as number | null,
       testState: 'ready' as TestState,
-      timerIntervalId: null as number | null, // Для отслеживания ID интервала
-      remainingTimeValue: 0, // Первоначальное значение оставшегося времени
+      timerIntervalId: null as number | null,
+      remainingTimeValue: 0,
     };
   },
   props: {
@@ -52,10 +52,10 @@ export default defineComponent({
   },
   computed: {
     circleX() {
-      return this.centerX + this.radius * Math.cos(this.angle)
+      return this.centerX + this.radius * Math.cos(this.angle);
     },
     circleY() {
-      return this.centerY + this.radius * Math.sin(this.angle)
+      return this.centerY + this.radius * Math.sin(this.angle);
     },
     buttonText(): string {
       switch (this.testState) {
@@ -75,6 +75,7 @@ export default defineComponent({
       const seconds = Math.floor((this.remainingTimeValue % 60000) / 1000);
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
+    //TODO: chang 2 * 60 to time from props!!!
     progressBarWidth(): string {
       if (this.remainingTimeValue === 0) return '0%';
       const totalSeconds = 2 * 60;
@@ -93,6 +94,7 @@ export default defineComponent({
       if (elapsed >= this.time * 1000) {
         this.testState = 'completed';
         cancelAnimationFrame(this.animationFrameId as number);
+        this.stopTest(); // <-- остановим круг
       } else {
         this.animationFrameId = requestAnimationFrame(this.animate);
       }
@@ -103,8 +105,12 @@ export default defineComponent({
       this.initialAngle = -Math.PI / 2;
       this.angle = this.initialAngle;
       this.animationFrameId = requestAnimationFrame(this.animate);
+      //TODO: chang 2 * 60 to time from props!!!
       this.startTimer(2 * 60);
       (this.$refs.reactionCircle as any).startAnimation();
+    },
+    stopTest() {
+      (this.$refs.reactionCircle as any).cancelAnimation();
     },
     clickButton() {
       if (this.testState === 'ready') {
@@ -120,8 +126,6 @@ export default defineComponent({
         reactionCircle.speed *= 1.1;
         reactionCircle.cancelAnimation();
         reactionCircle.startAnimation();
-      } else if (this.testState === 'completed') {
-        return;
       }
     },
     startTimer(totalSeconds: number) {
@@ -132,8 +136,9 @@ export default defineComponent({
           this.remainingTimeValue = 0;
           clearInterval(this.timerIntervalId as number);
           this.testState = 'completed';
+          this.stopTest(); // <-- остановим круг по таймеру
         }
-      }, 1000); // Обновлять каждую секунду
+      }, 1000);
     },
     cancelTimer() {
       if (this.timerIntervalId) {
@@ -143,9 +148,8 @@ export default defineComponent({
     },
   },
   beforeUnmount() {
-    if (this.timerIntervalId) {
-      clearInterval(this.timerIntervalId);
-    }
+    this.cancelTimer();
+    this.stopTest(); // <-- очищаем анимацию
   },
 })
 </script>
@@ -212,9 +216,6 @@ export default defineComponent({
   padding: 15px;
   border-radius: 15px;
   min-height: 50vh;
-}
-.circles {
-  display: flex;
 }
 .reaction-button {
   display: flex;
