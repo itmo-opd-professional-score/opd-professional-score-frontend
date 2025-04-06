@@ -11,19 +11,7 @@ const popupStore = usePopupStore();
 </script>
 
 <template>
-  <div class="app_container">
-    <Header class="app_header" />
-    <div class="popup-container" v-if="popupStore.getInfoPopupVisible">
-      <InfoPopup class="popup" />
-    </div>
-    <div class="popup-container" v-if="popupStore.getErrorPopupVisible">
-      <ErrorPopup class="popup" />
-    </div>
-    <router-view></router-view>
-  </div>
-  <SimpleSoundTest></SimpleSoundTest>
-  <ReactionCircle></ReactionCircle>
-  <SimpleReactionTest/>
+  <SimpleReactionTest :time="120" :showTimer="true" :show-progress-bar="true"></SimpleReactionTest>
 </template>
 
 <style scoped>

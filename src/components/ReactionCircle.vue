@@ -1,12 +1,10 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
-import CommonButton from "./UI/CommonButton.vue";
+import { defineComponent } from 'vue';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
-name: "ReactionCircle",
-  components: {CommonButton},
+  name: "ReactionCircle",
   data() {
     return {
       radius: 100,
@@ -16,9 +14,10 @@ name: "ReactionCircle",
       angle: -Math.PI / 2,
       initialAngle: -Math.PI / 2,
       startTime: 0,
-      deviation:  null as number | null,
-      animationFrameId:   null as number | null,
-      testState: 'ready' as TestState
+      deviation: null as number | null,
+      animationFrameId: null as number | null,
+      testState: 'ready' as TestState,
+      isMoving: false,
     };
   },
   props: {
@@ -29,61 +28,54 @@ name: "ReactionCircle",
   },
   computed: {
     circleX() {
-      return this.centerX + this.radius * Math.cos(this.angle)
+      return this.centerX + this.radius * Math.cos(this.angle);
     },
     circleY() {
-      return this.centerY + this.radius * Math.sin(this.angle)
+      return this.centerY + this.radius * Math.sin(this.angle);
     },
-    buttonText():string {
-      switch (this.testState) {
-        case 'ready':
-          return 'Начать тест';
-        case 'reacting':
-          return 'Жмите';
-        case 'completed':
-          return 'Тест окончен';
-        default:
-          return '';
-      }
-    }
   },
   methods: {
     animate(time: number) {
+      if (!this.isMoving) return;
       const elapsed = time - this.startTime;
       this.angle = (this.initialAngle + elapsed * this.speed) % (Math.PI * 2);
       this.animationFrameId = requestAnimationFrame(this.animate);
     },
-    startTest() {
-      this.testState = 'reacting' as TestState;
+    startAnimation() {
+      this.isMoving = true;
       this.startTime = performance.now();
       this.initialAngle = -Math.PI / 2;
       this.angle = this.initialAngle;
       this.animationFrameId = requestAnimationFrame(this.animate);
     },
-    clickButton() {
-      if(this.testState === 'ready') {
-        this.startTest();
-      } else if (this.testState === 'reacting') {
-      } else {
-
+    cancelAnimation() {
+      if (this.animationFrameId !== null) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
       }
-    }
+    },
+    clickButton(time: number) {
+      const idealTime = this.startTime + (Math.PI / (2 * this.speed));
+      const deviation = time - idealTime;
+      this.deviation = deviation;
+      console.log(`Отклонение от идеального времени: ${deviation} мс`);
+    },
   },
-})
-
+  beforeUnmount() {
+    this.cancelAnimation();
+  }
+});
 </script>
 
 <template>
   <div class="test-container">
     <svg class="circles" width="300" height="300">
       <circle cx="150" cy="150" r="100" stroke="black" stroke-width="2" fill="none" />
-      <circle  cx="150" cy="50" r="10" fill="rgb( 0,128,0)"/>
+      <circle cx="150" cy="50" r="10" fill="rgb(0,128,0)"/>
       <circle :cx="circleX" :cy="circleY" r="10" fill="rgb(128, 0, 128)" />
     </svg>
   </div>
-
 </template>
-
 
 <style scoped>
 .test-container {
