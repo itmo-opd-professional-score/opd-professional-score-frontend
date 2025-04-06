@@ -21,19 +21,19 @@ export default defineComponent({
     testName: {
       required: true,
       type: String,
-      default: "missing test name" as string,
+      default: "missing name" as string,
     }
   },
   data() {
     return {
-      selectedInterval: 900,
+      selectedInterval: 1200,
       showTimer: true,
       showMinuteResults: true,
       showTotalResults: true,
       showProgress: true,
-      accelerationAmount: 10,
+      accelerationAmount: 40,
       accelerationInterval: 60,
-      accelerationFrequency: 30
+      accelerationFrequency: 10
     }
   },
   computed: {
