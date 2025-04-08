@@ -76,11 +76,14 @@ export default defineComponent({
   justify-content: space-around;
   margin-bottom: 20px;
 }
+
 .ball-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: 0 20px;
 }
+
 .start-button {
   margin-bottom: 20px;
   padding: 10px 20px;

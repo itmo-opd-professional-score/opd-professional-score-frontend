@@ -16,6 +16,7 @@ export default defineComponent({
       animationFrameId: null as number | null,
       isMoving: false,
     };
+
   },
   props: {
     time: {
