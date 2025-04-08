@@ -33,7 +33,17 @@ export default defineComponent({
       showProgress: true,
       accelerationAmount: 40,
       accelerationInterval: 60,
-      accelerationFrequency: 10
+      accelerationFrequency: 10,
+      defaultSettings: {
+        selectedInterval: 1200,
+        showTimer: true,
+        showMinuteResults: true,
+        showTotalResults: true,
+        showProgress: true,
+        accelerationAmount: 40,
+        accelerationInterval: 60,
+        accelerationFrequency: 10,
+      }
     }
   },
   computed: {
@@ -56,6 +66,17 @@ export default defineComponent({
         accelerationFrequency: this.accelerationFrequency
       }
       this.$emit('newSettings', settings)
+    },
+    resetToDefault() {
+      this.selectedInterval = this.defaultSettings.selectedInterval;
+      this.showTimer = this.defaultSettings.showTimer;
+      this.showMinuteResults = this.defaultSettings.showMinuteResults;
+      this.showTotalResults = this.defaultSettings.showTotalResults;
+      this.showProgress = this.defaultSettings.showProgress;
+      this.accelerationAmount = this.defaultSettings.accelerationAmount;
+      this.accelerationInterval = this.defaultSettings.accelerationInterval;
+      this.accelerationFrequency = this.defaultSettings.accelerationFrequency;
+      this.saveSettings();
     }
   },
   emits: ['newSettings'],
@@ -65,8 +86,12 @@ export default defineComponent({
 <template>
   <div id="choose-settings">
     <div class="choose-settings-form">
-      <div class="section">
-        <h2>Выберите настройки теста: {{ testName }}</h2></div>
+      <div class="section header-section">
+        <h2>Выберите настройки теста: <br>{{ testName }}</h2>
+        <CommonButton class="close-btn" @click="resetToDefault">
+          <template v-slot:placeholder>×</template>
+        </CommonButton>
+      </div>
       <div class="settings-group">
         <div class="time-interval-selector">
           <label>Время прохождения теста: <strong>{{ formattedInterval }}</strong></label>
@@ -164,6 +189,8 @@ export default defineComponent({
 .choose-settings-form h2 {
   text-align: center;
   color: white;
+  width: 100%;
+  padding: 0 2rem;
 }
 
 #choose-settings button {
@@ -228,4 +255,29 @@ export default defineComponent({
   width: 3vw;
 }
 
+.header-section {
+  position: relative;
+  padding: 0.5rem 2rem 0.5rem 0.5rem !important;
+}
+
+.close-btn {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2.5rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  padding: 0 0.5rem;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  opacity: 0.8;
+  border: none;
+  background-color: transparent;
+}
 </style>
