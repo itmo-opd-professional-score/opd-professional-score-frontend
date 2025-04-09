@@ -2,8 +2,6 @@
 import {defineComponent} from 'vue'
 import CommonButton from '../components/UI/CommonButton.vue';
 
-
-
 interface TestSettings {
   testName: string
   duration: number
@@ -100,7 +98,6 @@ export default defineComponent({
               step="30"
               v-model="selectedInterval"
               class="custom-slider"
-              @change=""
           >
           <div class="slider-labels">
             <span>2 мин</span>
