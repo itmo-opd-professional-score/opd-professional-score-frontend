@@ -1,6 +1,8 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import CommonButton from "./UI/CommonButton.vue";
+import CommonButton from '../components/UI/CommonButton.vue';
+
+
 
 interface TestSettings {
   testName: string
@@ -15,15 +17,8 @@ interface TestSettings {
 }
 
 export default defineComponent({
-  name: "SelectSettingsForm",
+  name: "SelectSettingsPage",
   components: {CommonButton},
-  props: {
-    testName: {
-      required: true,
-      type: String,
-      default: "missing name" as string,
-    }
-  },
   data() {
     return {
       selectedInterval: 1200,
@@ -47,6 +42,9 @@ export default defineComponent({
     }
   },
   computed: {
+   testName() {
+        return this.$route.params.testName || "No test name";
+      },
     formattedInterval() {
       const minutes = Math.floor(this.selectedInterval / 60);
       const seconds = this.selectedInterval % 60;
@@ -165,17 +163,16 @@ export default defineComponent({
 
 <style scoped>
 #choose-settings {
-  position: absolute;
-  width: 100vw;
-  height: 100vh;
+  position: relative;
+  width: 100%;
+  height: 100%;
   z-index: 2;
-  backdrop-filter: blur(3px) saturate(50%);
   transition: all 0.3s ease-out;
 }
 
 .choose-settings-form {
   width: 40%;
-  margin: 14vh auto;
+  margin: auto;
   background: rgba(255, 255, 255, 1);
   border-radius: 1.4rem;
   color: black;
@@ -252,7 +249,7 @@ export default defineComponent({
 .acceleration-input input {
   margin-left: 0.5rem;
   padding: 0.3rem;
-  width: 3vw;
+  min-width: 2.5vw;
 }
 
 .header-section {

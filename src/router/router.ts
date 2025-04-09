@@ -14,7 +14,7 @@ import TestMapper from '../pages/tests/TestMapper.vue';
 import CreateTestBlockPage from '../pages/CreateTestBlockPage.vue';
 import AdditionVisualTest from '../pages/tests/addition/visual/AdditionVisualTest.vue';
 import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.vue';
-
+import SelectSettingsPage from '../pages/SelectSettingsPage.vue';
 const routes = [
   {
     path: '/',
@@ -97,6 +97,10 @@ const routes = [
     component: CreateTestBlockPage,
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
   },
+   {path: '/test/settings/:testName',
+      component: SelectSettingsPage,
+      meta: { ruName: 'Настройки теста', requiresAuth: true },
+    },
 ];
 
 const router = createRouter({
