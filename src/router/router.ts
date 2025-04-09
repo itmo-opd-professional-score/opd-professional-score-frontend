@@ -97,6 +97,16 @@ const routes = [
     component: CreateTestBlockPage,
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
   },
+  {
+    path: '/simple-reaction-test',
+    name: 'SimpleReactionTest',
+    component: SimpleReactionTest,
+    props: {
+      time: 120,
+      showTimer: true,
+      showProgressBar: true
+    }
+  }
 ];
 
 const router = createRouter({
