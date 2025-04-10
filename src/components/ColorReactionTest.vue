@@ -7,7 +7,7 @@
         <p>На каждый ответ у вас есть 2 секунды.</p>
         <p>Всего будет 15 попыток.</p>
       </div>
-      <button class="start-btn" @click="startTest">Начать тест</button>
+      <CommonButton class="start-btn" @click="startTest">Начать тест</CommonButton>
     </div>
 
     <div v-else-if="!testCompleted" class="test-screen">
@@ -39,12 +39,12 @@
       <p>Среднее время реакции: <strong>{{ avgTime }} мс</strong></p>
       <p>Правильных ответов: <strong>{{ correctAnswers }}</strong></p>
       <p>Лучшее время: <strong>{{ bestTime }} мс</strong></p>
-      <button class="restart-btn" @click="restartTest">Пройти снова</button>
+      <CommonButton class="restart-btn" @click="restartTest">Пройти снова</CommonButton>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue'
 import CommonButton from './CommonButton.vue'
 
@@ -188,120 +188,97 @@ onUnmounted(() => {
 })
 </script>
 
-<style>
-body {
-  font-family: 'Segoe UI', sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-  background-color: #f5f5f5;
-}
-
+<style scoped>
 .container {
   text-align: center;
   background: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
-  width: 90%;
+  padding: 5vh 3vw; /* Адаптивные отступы */
+  border-radius: 1vh; /* Относительно высоты экрана */
+  box-shadow: 0 0 2vw rgba(0, 0, 0, 0.1);
+  max-width: 80vw; /* Максимальная ширина */
+  width: 90vw;
+  margin: 0 auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Segoe UI', sans-serif;
 }
 
 .color-display {
   width: 100%;
-  height: 200px;
-  margin: 20px 0;
-  border-radius: 10px;
-  border: 2px solid #333;
+  height: 25vh; /* Относительно высоты экрана */
+  margin: 2vh 0;
+  border-radius: 1vh;
+  border: 0.3vw solid #333; /* Относительно ширины */
   transition: background-color 0.2s;
 }
 
 .buttons {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin: 20px 0;
+  gap: 1vw;
+  margin: 2vh 0;
 }
 
 .color-btn {
-  height: 50px;
+  height: 6vh;
   border: none;
-  border-radius: 5px;
+  border-radius: 0.5vw;
   cursor: pointer;
   transition: transform 0.1s;
 }
 
-.color-btn:active {
-  transform: scale(0.95);
-}
-
 .timer-container {
   width: 100%;
-  height: 10px;
+  height: 1vh;
   background-color: #eee;
-  border-radius: 5px;
-  margin-bottom: 15px;
+  border-radius: 0.5vw;
+  margin-bottom: 2vh;
 }
 
 .timer-bar {
   height: 100%;
-  border-radius: 5px;
+  border-radius: 0.5vw;
   transition: width 0.1s linear, background-color 0.3s;
 }
 
-button {
-  padding: 10px 20px;
-  font-size: 1em;
-  cursor: pointer;
-  border: none;
-  border-radius: 5px;
-  background-color: #4127e4;
-  color: white;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #5a42e8;
-}
-
 .start-btn {
-  margin-top: 20px;
-  padding: 12px 25px;
-  font-size: 1.1em;
+  margin-top: 2vh;
+  padding: 2vh 3vw;
+  font-size: 2.2vh;
 }
 
 .restart-btn {
   background-color: white;
   color: #4127e4;
-  border: 2px solid #4127e4;
+  border: 0.3vw solid #4127e4;
   font-weight: bold;
-  margin-top: 20px;
+  margin-top: 2vh;
 }
 
 .attempt-counter {
   font-weight: bold;
-  margin: 10px 0;
-  font-size: 1.1em;
+  margin: 1vh 0;
+  font-size: 2.2vh;
 }
 
 .results {
   background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 10px;
-  margin-top: 20px;
+  padding: 2vh;
+  border-radius: 1vh;
+  margin-top: 2vh;
 }
 
 .results p {
-  margin: 10px 0;
-  font-size: 1.1em;
+  margin: 1vh 0;
+  font-size: 2.2vh;
 }
 
 .instructions {
   background-color: #e9f7ef;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  padding: 1.5vh;
+  border-radius: 0.8vh;
+  margin-bottom: 2vh;
 }
 </style>
