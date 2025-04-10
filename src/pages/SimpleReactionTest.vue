@@ -70,12 +70,12 @@ export default defineComponent({
       }
     },
     remainingTime(): string | null {
-      if (this.testState === 'completed') return null;
+      if (this.testState == 'completed') return null;
       const minutes = Math.floor(this.remainingTimeValue / 60000);
       const seconds = Math.floor((this.remainingTimeValue % 60000) / 1000);
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
-    //TODO: chang 2 * 60 to time from props!!!
+    //TODO: change 2 * 60 to time from props!!!
     progressBarWidth(): string {
       if (this.remainingTimeValue === 0) return '0%';
       const totalSeconds = 2 * 60;
@@ -105,7 +105,7 @@ export default defineComponent({
       this.initialAngle = -Math.PI / 2;
       this.angle = this.initialAngle;
       this.animationFrameId = requestAnimationFrame(this.animate);
-      //TODO: chang 2 * 60 to time from props!!!
+      //TODO: change 2 * 60 to time from props!!!
       this.startTimer(2 * 60);
       (this.$refs.reactionCircle as any).startAnimation();
     },
@@ -113,9 +113,9 @@ export default defineComponent({
       (this.$refs.reactionCircle as any).cancelAnimation();
     },
     clickButton() {
-      if (this.testState === 'ready') {
+      if (this.testState == 'ready') {
         this.startTest();
-      } else if (this.testState === 'reacting') {
+      } else if (this.testState == 'reacting') {
         const currentTime = performance.now();
         const reactionCircle = this.$refs.reactionCircle as any;
         reactionCircle.clickButton(currentTime);

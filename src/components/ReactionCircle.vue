@@ -47,7 +47,7 @@ export default defineComponent({
       this.animationFrameId = requestAnimationFrame(this.animate);
     },
     cancelAnimation() {
-      if (this.animationFrameId !== null) {
+      if (this.animationFrameId != null) {
         cancelAnimationFrame(this.animationFrameId);
         this.animationFrameId = null;
       }
