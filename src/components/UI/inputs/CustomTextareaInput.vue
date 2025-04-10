@@ -9,15 +9,18 @@ export default {
       default: 5,
     },
   },
-}
+};
 </script>
 
 <template>
-  <textarea class="textarea"
-            :placeholder="placeholder"
-            :value="modelValue"
-            :rows="rows"
-            @input="$emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
+  <textarea
+    class="textarea"
+    :placeholder="placeholder"
+    :value="modelValue"
+    :rows="rows"
+    @input="
+      $emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)
+    "
   />
 </template>
 
@@ -38,7 +41,8 @@ export default {
   color: rgba(0, 0, 0, 0.7);
 }
 
-.textarea:active, .textarea:focus {
+.textarea:active,
+.textarea:focus {
   border: 1px solid var(--input-border) !important;
   transition-duration: 0.2s;
 }

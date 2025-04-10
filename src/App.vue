@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import Header from "./components/UI/AppHeader.vue";
-import InfoPopup from "./components/UI/popups/InfoPopup.vue";
-import ErrorPopup from "./components/UI/popups/ErrorPopup.vue";
-import {usePopupStore} from "./store/popup.store.ts";
+import Header from './components/UI/AppHeader.vue';
+import InfoPopup from './components/UI/popups/InfoPopup.vue';
+import ErrorPopup from './components/UI/popups/ErrorPopup.vue';
+import { usePopupStore } from './store/popup.store.ts';
 
 const popupStore = usePopupStore();
 </script>
 
 <template>
   <div class="app_container">
-    <Header class="app_header"/>
+    <Header class="app_header" />
     <div class="popup-container" v-if="popupStore.getInfoPopupVisible">
-      <InfoPopup class="popup"/>
+      <InfoPopup class="popup" />
     </div>
     <div class="popup-container" v-if="popupStore.getErrorPopupVisible">
-      <ErrorPopup class="popup"/>
+      <ErrorPopup class="popup" />
     </div>
     <router-view></router-view>
   </div>

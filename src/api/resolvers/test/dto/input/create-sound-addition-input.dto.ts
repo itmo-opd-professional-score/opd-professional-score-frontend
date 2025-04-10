@@ -1,6 +1,7 @@
-export type CreateSoundAdditionInputDto = {
-    status: number,
-    body: {
-        testToken: string,
-    }
+export interface CreateSoundAdditionInputDto {
+  userId: number | null;
+  averageCallbackTime: number;
+  dispersion: number;
+  allSignals: number;
+  mistakes: number;
 }

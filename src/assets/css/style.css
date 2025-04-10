@@ -8,7 +8,7 @@
 body {
   margin: 0;
   height: 100vh;
-  background: #f0f2f5 url("../general-bg.webp") fixed no-repeat;
+  background: #f0f2f5 url('../general-bg.webp') fixed no-repeat;
   background-size: cover;
 }
 
@@ -25,4 +25,3 @@ body {
   overflow-y: scroll;
   overflow-x: hidden;
 }
-

@@ -1,44 +1,44 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
-import CustomInput from "../components/UI/inputs/CustomInput.vue";
-import CommonButton from "../components/UI/CommonButton.vue";
-import {AuthResolver} from "../api/resolvers/auth/auth.resolver.ts";
-import type {LoginUserOutputDto} from "../api/resolvers/auth/dto/output/login-user-output.dto.ts";
+import { defineComponent } from 'vue';
+import CustomInput from '../components/UI/inputs/CustomInput.vue';
+import CommonButton from '../components/UI/CommonButton.vue';
+import { AuthResolver } from '../api/resolvers/auth/auth.resolver.ts';
+import type { LoginUserInputDto } from '../api/resolvers/auth/dto/input/login-user-input.dto.ts';
 
 export default defineComponent({
-  name: "LogInPage",
-  components: {CommonButton, CustomInput},
+  name: 'LogInPage',
+  components: { CommonButton, CustomInput },
   data() {
     return {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
       authResolver: new AuthResolver(),
-    }
+    };
   },
   methods: {
     login() {
-      const data: LoginUserOutputDto = {
+      const data: LoginUserInputDto = {
         email: this.email,
-        password: this.password
+        password: this.password,
       };
-      this.authResolver.login(data)
-    }
+      this.authResolver.login(data);
+    },
   },
   mounted() {
     document.addEventListener('keydown', (e) => {
-      if (e.key == "Enter") {
-        this.login()
+      if (e.key == 'Enter') {
+        this.login();
       }
     });
   },
   unmounted() {
     document.removeEventListener('keydown', (e) => {
-      if (e.key == "Enter") {
-        this.login()
+      if (e.key == 'Enter') {
+        this.login();
       }
-    })
-  }
-})
+    });
+  },
+});
 </script>
 
 <template>
@@ -47,17 +47,17 @@ export default defineComponent({
     <div class="input-container">
       <p>Логин:</p>
       <CustomInput
-          v-model="email"
-          :placeholder="'Введите адрес электронной почты'"
-          type="email"
+        v-model="email"
+        :placeholder="'Введите адрес электронной почты'"
+        type="email"
       />
     </div>
     <div class="input-container">
       <p>Пароль:</p>
       <CustomInput
-          v-model="password"
-          :placeholder="'Введите пароль'"
-          type="password"
+        v-model="password"
+        :placeholder="'Введите пароль'"
+        type="password"
       />
     </div>
     <div class="auth-links-container">
@@ -102,7 +102,8 @@ export default defineComponent({
   width: 100%;
 }
 
-.auth-button, .auth-button:hover {
+.auth-button,
+.auth-button:hover {
   width: 100%;
   color: white;
   background-color: #4127e4;

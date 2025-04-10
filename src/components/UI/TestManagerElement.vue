@@ -1,22 +1,25 @@
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div class="wrapper">
-    <div class="id" id="id">#
+    <div class="id" id="id">
+      #
       <slot name="id">12345</slot>
     </div>
-    <div class="test_name" id="test_name">
-      <slot name="test_name">Lorem ipsum dolor sit amet.</slot>
+    <div class="test_name">
+      <slot name="test_type">Lorem ipsum dolor sit amet.</slot>
     </div>
-    <div class="test_header" id="test_header">
-      <slot name="test_header">Lorem ipsum dolor sit amet.</slot>
+    <div class="test_header">
+      <slot name="average_callback">Lorem ipsum dolor sit amet.</slot>
+    </div>
+    <div class="test_header">
+      <slot name="user">Lorem ipsum dolor sit amet.</slot>
+    </div>
+    <div class="test_header">
+      <slot name="valid">Lorem ipsum dolor sit amet.</slot>
     </div>
     <div class="created">
-      <slot name="created">01.01.2000</slot>
-    </div>
-    <div class="remove" @click="$emit('deleteTest')"><img src="../../assets/icons/trash_icon.svg" alt="remove_test">
+      <slot name="created_at">01.01.2000</slot>
     </div>
   </div>
 </template>
@@ -31,7 +34,7 @@
   justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 2fr 7fr 7fr 2fr 1fr;
+  grid-template-columns: 1fr 3fr 3fr 3fr 2fr 2fr;
 }
 
 .wrapper:hover {
@@ -48,7 +51,9 @@
   text-align: center;
 }
 
-#id, #test_name, #test_header {
+#id,
+#test_name,
+#test_header {
   text-align: left;
 }
 

@@ -1,21 +1,21 @@
-import {defineStore} from "pinia";
+import { defineStore } from 'pinia';
 
 export const usePopupStore = defineStore('popup', {
   state: () => ({
     infoPopupVisible: false,
     errorPopupVisible: false,
-    popupMessage: "",
+    popupMessage: '',
   }),
   getters: {
-    getInfoPopupVisible: state => {
-      return state.infoPopupVisible
+    getInfoPopupVisible: (state) => {
+      return state.infoPopupVisible;
     },
-    getErrorPopupVisible: state => {
-      return state.errorPopupVisible
+    getErrorPopupVisible: (state) => {
+      return state.errorPopupVisible;
     },
-    getMessage: state => {
+    getMessage: (state) => {
       return state.popupMessage;
-    }
+    },
   },
   actions: {
     activateInfoPopup(message: string) {
@@ -26,7 +26,7 @@ export const usePopupStore = defineStore('popup', {
     },
     deactivateInfoPopup() {
       this.infoPopupVisible = false;
-      this.popupMessage = "";
+      this.popupMessage = '';
     },
 
     activateErrorPopup(message: string) {
@@ -37,7 +37,7 @@ export const usePopupStore = defineStore('popup', {
     },
     deactivateErrorPopup() {
       this.errorPopupVisible = false;
-      this.popupMessage = "";
+      this.popupMessage = '';
     },
-  }
-})
+  },
+});

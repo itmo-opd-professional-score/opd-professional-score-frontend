@@ -1,26 +1,24 @@
 <script setup lang="ts">
+import FlipCard from './UI/FlipCard.vue';
+import { ProfessionResolver } from '../api/resolvers/profession/profession.resolver.ts';
+import { onMounted, ref } from 'vue';
+import type { GetProfessionOutputDto } from '../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
 
-import FlipCard from "./UI/FlipCard.vue";
-import {ProfessionResolver} from "../api/resolvers/profession/profession.resolver.ts";
-import {onMounted, ref} from "vue";
-import type {GetProfessionOutputDto} from "../api/resolvers/profession/dto/output/get-profession-output.dto.ts";
-
-const cards = ref<GetProfessionOutputDto[] | null>(null)
-const cardsPublished = ref<GetProfessionOutputDto[] | null>(null)
+const cards = ref<GetProfessionOutputDto[] | null>(null);
+const cardsPublished = ref<GetProfessionOutputDto[] | null>(null);
 const professionResolver: ProfessionResolver = new ProfessionResolver();
-const cardsCount = ref( 0);
+const cardsCount = ref(0);
 
 onMounted(async () => {
-  cardsPublished.value = []
-  cards.value = await professionResolver.getAll()
-  cards.value.forEach(card => {
+  cardsPublished.value = [];
+  cards.value = await professionResolver.getAll();
+  cards.value.forEach((card) => {
     if (!card.archived) {
-      cardsPublished.value?.push(card)
-      cardsCount.value += 1
+      cardsPublished.value?.push(card);
+      cardsCount.value += 1;
     }
-  })
-})
-
+  });
+});
 </script>
 
 <template>
@@ -28,13 +26,13 @@ onMounted(async () => {
     <h2>Популярные профессии</h2>
     <div class="profession-cards-container" v-if="cardsCount > 0">
       <FlipCard
-          v-for="(card, index) in cardsPublished"
-          :key="index"
-          :id="card.id"
-          :title="card.name"
-          :description="card.description"
-          :requirements="card.requirements"
-          :sphere="card.sphere"
+        v-for="(card, index) in cardsPublished"
+        :key="index"
+        :id="card.id"
+        :title="card.name"
+        :description="card.description"
+        :requirements="card.requirements"
+        :sphere="card.sphere"
       />
     </div>
     <div class="no-professions-message" v-else>

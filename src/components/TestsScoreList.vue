@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import TestScore from "./UI/TestScoreElement.vue";
-import {computed, type PropType, ref} from "vue";
-import CommonButton from "./UI/CommonButton.vue";
-import type {TestsScoresDto} from "../api/dto/tests-scores.dto.ts";
+import TestScore from './UI/TestScoreElement.vue';
+import { computed, type PropType, ref } from 'vue';
+import CommonButton from './UI/CommonButton.vue';
+import type { TestsScoresDto } from '../api/dto/tests-scores.dto.ts';
 
 const props = defineProps({
   maxElementsCount: {
@@ -12,7 +12,7 @@ const props = defineProps({
   tests: {
     type: Array as PropType<TestsScoresDto[]>,
     required: true,
-  }
+  },
 });
 
 const currentPage = ref(1);
@@ -43,22 +43,15 @@ const prevPage = () => {
 <template>
   <div class="component_container">
     <div class="header">
-      <div class="id" id="id">
-        Id
-      </div>
-      <div class="test_name" id="test_name">
-        Name
-      </div>
+      <div class="id" id="id">Id</div>
+      <div class="test_name" id="test_name">Name</div>
       <div class="score">Score</div>
       <div class="time">Time</div>
       <div class="username">Username</div>
       <div class="createdAt">Pass date</div>
       <div class="valid">Valid</div>
     </div>
-    <TestScore
-        v-for="item in paginatedData"
-        :key="item.id"
-    >
+    <TestScore v-for="item in paginatedData" :key="item.id">
       <template #id>{{ item.id }}</template>
       <template #test_name>{{ item.test_name }}</template>
       <template #current_points>{{ item.current_points }}</template>
@@ -127,7 +120,8 @@ const prevPage = () => {
   text-align: center;
 }
 
-#id, #test_name {
+#id,
+#test_name {
   text-align: left;
 }
 

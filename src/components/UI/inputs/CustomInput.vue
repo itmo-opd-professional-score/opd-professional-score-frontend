@@ -1,12 +1,11 @@
 <script lang="ts">
-
 export default {
   name: 'CustomInput',
   emits: ['search', 'update:modelValue'],
   data() {
     return {
       id: `input-${Math.random().toString(36).substring(2, 9)}`,
-    }
+    };
   },
   props: {
     placeholder: String,
@@ -15,7 +14,16 @@ export default {
       default: 'text',
       required: true,
       validator: (v: string) =>
-          ['text', 'password', 'email', 'number', 'radio', 'checkbox', 'tel', 'date'].includes(v),
+        [
+          'text',
+          'password',
+          'email',
+          'number',
+          'radio',
+          'checkbox',
+          'tel',
+          'date',
+        ].includes(v),
     },
     selector: String,
     modelValue: {
@@ -46,7 +54,7 @@ export default {
     },
     labelText: {
       type: String,
-    }
+    },
   },
   methods: {
     validate(event: InputEvent) {
@@ -57,8 +65,14 @@ export default {
       }
 
       if (inputValue.length > this.maxLength) {
-        (event.target as HTMLInputElement).value = inputValue.slice(0, this.maxLength);
-        this.$emit('update:modelValue', parseFloat((event.target as HTMLInputElement).value));
+        (event.target as HTMLInputElement).value = inputValue.slice(
+          0,
+          this.maxLength,
+        );
+        this.$emit(
+          'update:modelValue',
+          parseFloat((event.target as HTMLInputElement).value),
+        );
         return;
       }
 
@@ -72,10 +86,10 @@ export default {
     },
     update(event: InputEvent) {
       this.$emit('search');
-      this.$emit('update:modelValue', (event.target as HTMLInputElement).value)
+      this.$emit('update:modelValue', (event.target as HTMLInputElement).value);
     },
   },
-}
+};
 </script>
 
 <template>
@@ -84,19 +98,19 @@ export default {
       {{ labelText }}
     </label>
     <input
-        class="input"
-        :type="type"
-        :min="minNumber"
-        :max="maxNumber"
-        :value="modelValue"
-        :placeholder="placeholder"
-        :disabled="disabled"
-        :required="required"
-        :class="selector"
-        :name="name"
-        @input="update($event as InputEvent)"
-        :id="id"
-    >
+      class="input"
+      :type="type"
+      :min="minNumber"
+      :max="maxNumber"
+      :value="modelValue"
+      :placeholder="placeholder"
+      :disabled="disabled"
+      :required="required"
+      :class="selector"
+      :name="name"
+      @input="update($event as InputEvent)"
+      :id="id"
+    />
   </div>
 </template>
 
@@ -122,7 +136,8 @@ export default {
   text-indent: 2%;
 }
 
-.input:active, .input:focus {
+.input:active,
+.input:focus {
   border: 1px solid var(--input-border);
   outline: none;
   transition-duration: 0.2s;
@@ -135,16 +150,16 @@ export default {
   text-indent: 2%;
 }
 
-input[type="number"] {
+input[type='number'] {
   text-align: center;
 }
 
-input[type="date"] {
+input[type='date'] {
   padding: 1vw;
 }
 
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
@@ -152,7 +167,9 @@ input[type="number"]::-webkit-inner-spin-button {
 .input.no-borders {
   border: none;
 
-  :focus, :active, :focus {
+  :focus,
+  :active,
+  :focus {
     border: none;
   }
 }

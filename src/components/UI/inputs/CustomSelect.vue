@@ -1,5 +1,5 @@
 <script lang="ts">
-import type {PropType} from "vue";
+import type { PropType } from 'vue';
 
 export default {
   name: 'CustomSelect',
@@ -11,16 +11,21 @@ export default {
       required: true,
     },
   },
-}
+};
 </script>
 
 <template>
-  <select class="select"
-          :value="modelValue"
-          @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
+  <select
+    class="select"
+    :value="modelValue"
+    @change="
+      $emit('update:modelValue', ($event.target as HTMLSelectElement).value)
+    "
   >
     <option value="" disabled selected hidden>{{ placeholder }}</option>
-    <option v-for="option in options" :key="option.value" :value="option.value">{{ option.text }}</option>
+    <option v-for="option in options" :key="option.value" :value="option.value">
+      {{ option.text }}
+    </option>
   </select>
 </template>
 
@@ -40,7 +45,8 @@ export default {
   background-size: 1rem;
 }
 
-.select:active, .select:focus {
+.select:active,
+.select:focus {
   border: 1px solid var(--input-border);
   outline: none;
   transition-duration: 0.2s;

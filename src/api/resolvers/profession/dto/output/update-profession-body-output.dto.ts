@@ -1,4 +1,4 @@
-import type {GetProfessionOutputDto} from "./get-profession-output.dto.ts";
+import type { GetProfessionOutputDto } from './get-profession-output.dto.ts';
 
 export interface UpdateProfessionBodyOutputDto {
   message: string;
