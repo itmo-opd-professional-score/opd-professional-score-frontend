@@ -41,12 +41,14 @@ export default defineComponent({
   },
   computed: {
    testName() {
-        return this.$route.params.testName || "No test name";
+     const param = this.$route.params.testName;
+     const name = Array.isArray(param) ? param[0] : param;
+     return name || "No test name";
       },
     formattedInterval() {
       const minutes = Math.floor(this.selectedInterval / 60);
-      const seconds = this.selectedInterval % 60;
-      return `${minutes} мин ${seconds ? seconds : '00'} сек`;
+      const seconds = (this.selectedInterval % 60).toString().padStart(2, '0');
+      return `${minutes} мин ${seconds} сек`;
     }
   }, methods: {
     saveSettings() {

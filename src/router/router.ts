@@ -100,6 +100,7 @@ const routes = [
    {path: '/test/settings/:testName',
       component: SelectSettingsPage,
       meta: { ruName: 'Настройки теста', requiresAuth: true },
+     props: true,
     },
 ];
 
