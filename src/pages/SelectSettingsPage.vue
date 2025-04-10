@@ -1,22 +1,28 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
+import { defineComponent, type PropType } from 'vue';
 import CommonButton from '../components/UI/CommonButton.vue';
 
 interface TestSettings {
-  testName: string
-  duration: number
-  showTimer: boolean
-  showMinuteResults: boolean
-  showTotalResults: boolean
-  showProgress: boolean
-  accelerationAmount: number
-  accelerationInterval: number
-  accelerationFrequency: number
+  testName: string;
+  duration: number;
+  showTimer: boolean;
+  showMinuteResults: boolean;
+  showTotalResults: boolean;
+  showProgress: boolean;
+  accelerationAmount: number;
+  accelerationInterval: number;
+  accelerationFrequency: number;
 }
 
 export default defineComponent({
-  name: "SelectSettingsPage",
-  components: {CommonButton},
+  name: 'SelectSettingsPage',
+  components: { CommonButton },
+  props: {
+    testName: {
+      type: [String, Array] as PropType<string | string[]>,
+      default: 'No test name',
+    },
+  },
   data() {
     return {
       selectedInterval: 1200,
@@ -36,24 +42,26 @@ export default defineComponent({
         accelerationAmount: 40,
         accelerationInterval: 60,
         accelerationFrequency: 10,
-      }
-    }
+      },
+    };
   },
   computed: {
-   testName() {
-     const param = this.$route.params.testName;
-     const name = Array.isArray(param) ? param[0] : param;
-     return name || "No test name";
-      },
+    resolvedTestName(): string {
+      const name = Array.isArray(this.testName)
+        ? this.testName[0]
+        : this.testName;
+      return name || 'No test name';
+    },
     formattedInterval() {
       const minutes = Math.floor(this.selectedInterval / 60);
       const seconds = (this.selectedInterval % 60).toString().padStart(2, '0');
       return `${minutes} мин ${seconds} сек`;
-    }
-  }, methods: {
+    },
+  },
+  methods: {
     saveSettings() {
       const settings: TestSettings = {
-        testName: this.testName,
+        testName: this.resolvedTestName,
         duration: this.selectedInterval,
         showTimer: this.showTimer,
         showMinuteResults: this.showMinuteResults,
@@ -61,9 +69,9 @@ export default defineComponent({
         showProgress: this.showProgress,
         accelerationAmount: this.accelerationAmount,
         accelerationInterval: this.accelerationInterval,
-        accelerationFrequency: this.accelerationFrequency
-      }
-      this.$emit('newSettings', settings)
+        accelerationFrequency: this.accelerationFrequency,
+      };
+      this.$emit('newSettings', settings);
     },
     resetToDefault() {
       this.selectedInterval = this.defaultSettings.selectedInterval;
@@ -75,76 +83,97 @@ export default defineComponent({
       this.accelerationInterval = this.defaultSettings.accelerationInterval;
       this.accelerationFrequency = this.defaultSettings.accelerationFrequency;
       this.saveSettings();
-    }
+    },
   },
   emits: ['newSettings'],
-})
+});
 </script>
 
 <template>
   <div id="choose-settings">
     <div class="choose-settings-form">
       <div class="section header-section">
-        <h2>Выберите настройки теста: <br>{{ testName }}</h2>
+        <h2>Выберите настройки теста: <br />{{ testName }}</h2>
         <CommonButton class="close-btn" @click="resetToDefault">
           <template v-slot:placeholder>×</template>
         </CommonButton>
       </div>
       <div class="settings-group">
         <div class="time-interval-selector">
-          <label>Время прохождения теста: <strong>{{ formattedInterval }}</strong></label>
-          <input
-              type="range"
-              min="120"
-              max="2700"
-              step="30"
-              v-model="selectedInterval"
-              class="custom-slider"
+          <label
+            >Время прохождения теста:
+            <strong>{{ formattedInterval }}</strong></label
           >
+          <input
+            type="range"
+            min="120"
+            max="2700"
+            step="30"
+            v-model="selectedInterval"
+            class="custom-slider"
+          />
           <div class="slider-labels">
             <span>2 мин</span>
             <span>45 мин</span>
           </div>
           <div class="setting-item">
             <label>
-              <input type="checkbox" v-model="showTimer">
+              <input type="checkbox" v-model="showTimer" />
               Отображать оставшееся время
             </label>
           </div>
 
           <div class="setting-item">
             <label>
-              <input type="checkbox" v-model="showMinuteResults">
+              <input type="checkbox" v-model="showMinuteResults" />
               Показывать результаты за минуту
             </label>
             <label>
-              <input type="checkbox" v-model="showTotalResults">
+              <input type="checkbox" v-model="showTotalResults" />
               Показывать общий результат
             </label>
           </div>
 
           <div class="setting-item">
             <label>
-              <input type="checkbox" v-model="showProgress">
+              <input type="checkbox" v-model="showProgress" />
               Отображать прогресс выполнения
             </label>
           </div>
           <div class="acceleration-settings">
             <h3>Настройки ускорения:</h3>
             <div class="acceleration-input">
-              <label>Величина ускорения(%):
-                <input type="number" v-model.number="accelerationAmount" min="0" max="100">
+              <label
+                >Величина ускорения(%):
+                <input
+                  type="number"
+                  v-model.number="accelerationAmount"
+                  min="0"
+                  max="100"
+                />
               </label>
             </div>
 
             <div class="acceleration-input">
-              <label>Интервал применения(от 1 до 1000):
-                <input type="number" v-model.number="accelerationInterval" min="1" max="1000">
+              <label
+                >Интервал применения(от 1 до 1000):
+                <input
+                  type="number"
+                  v-model.number="accelerationInterval"
+                  min="1"
+                  max="1000"
+                />
               </label>
             </div>
             <div class="acceleration-input">
-              <label>Как часто(от 1 до 1000):
-                <input type="number" v-model.number="accelerationFrequency" min="1" max="1000">
+              <label
+                >Как часто(от 1 до 1000):
+                <input
+                  type="number"
+                  v-model.number="accelerationFrequency"
+                  min="1"
+                  max="1000"
+                />
               </label>
             </div>
           </div>
@@ -157,7 +186,6 @@ export default defineComponent({
       </div>
     </div>
   </div>
-
 </template>
 
 <style scoped>
