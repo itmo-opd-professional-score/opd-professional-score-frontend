@@ -8,12 +8,13 @@ import PvkSetupPage from '../pages/PvkSetupPage.vue';
 import PasswordChanging from '../pages/PasswordChanging.vue';
 import LogInPage from '../pages/LogInPage.vue';
 import RegistrationPage from '../pages/RegistrationPage.vue';
-import SimpleSoundTest from '../pages/SimpleSoundTest.vue';
 import PersonalAccountChanging from '../pages/PersonalAccountChanging.vue';
 import TestMapper from '../pages/tests/TestMapper.vue';
 import CreateTestBlockPage from '../pages/CreateTestBlockPage.vue';
 import AdditionVisualTest from '../pages/tests/addition/visual/AdditionVisualTest.vue';
 import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.vue';
+import LightSimpleTest from "../pages/tests/LightSimpleTest.vue";
+import SimpleSoundTest from '../pages/SimpleSoundTest.vue';
 
 const routes = [
   {
@@ -86,6 +87,11 @@ const routes = [
     path: '/test/sound/simple',
     component: SimpleSoundTest,
     meta: { ruName: 'Простой звуковой тест', requiresAuth: true },
+  },
+  {
+    path: '/test/light/simple',
+    component: LightSimpleTest,
+    meta: {ruName: "Оценка скорости простых реакции на свет", requiresAuth: true}
   },
   {
     path: `/invitation/test/:token`,
