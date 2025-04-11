@@ -1,40 +1,23 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 import CommonButton from '../components/UI/CommonButton.vue';
-
-interface TestSettings {
-  testName: string;
-  duration: number;
-  showTimer: boolean;
-  showMinuteResults: boolean;
-  showTotalResults: boolean;
-  showProgress: boolean;
-  accelerationAmount: number;
-  accelerationInterval: number;
-  accelerationFrequency: number;
-}
+import type { TestSettingsDto } from '../api/dto/test-settings.dto.ts';
+import CustomInput from '../components/UI/inputs/CustomInput.vue';
 
 export default defineComponent({
   name: 'SelectSettingsPage',
-  components: { CommonButton },
+  components: { CustomInput, CommonButton },
   props: {
     testName: {
-      type: [String, Array] as PropType<string | string[]>,
-      default: 'No test name',
+      type: Array as PropType<string[]>,
+      default: () => ['No test name'],
     },
   },
   data() {
     return {
-      selectedInterval: 1200,
-      showTimer: true,
-      showMinuteResults: true,
-      showTotalResults: true,
-      showProgress: true,
-      accelerationAmount: 40,
-      accelerationInterval: 60,
-      accelerationFrequency: 10,
-      defaultSettings: {
-        selectedInterval: 1200,
+      selectedSettings: {
+        testName: '',
+        duration: 1200,
         showTimer: true,
         showMinuteResults: true,
         showTotalResults: true,
@@ -42,47 +25,23 @@ export default defineComponent({
         accelerationAmount: 40,
         accelerationInterval: 60,
         accelerationFrequency: 10,
-      },
+      } as TestSettingsDto,
     };
   },
   computed: {
-    resolvedTestName(): string {
-      const name = Array.isArray(this.testName)
-        ? this.testName[0]
-        : this.testName;
-      return name || 'No test name';
-    },
     formattedInterval() {
-      const minutes = Math.floor(this.selectedInterval / 60);
-      const seconds = (this.selectedInterval % 60).toString().padStart(2, '0');
+      const minutes = Math.floor(this.selectedSettings.duration / 60);
+      const seconds = (this.selectedSettings.duration % 60)
+        .toString()
+        .padStart(2, '0');
       return `${minutes} мин ${seconds} сек`;
     },
   },
   methods: {
     saveSettings() {
-      const settings: TestSettings = {
-        testName: this.resolvedTestName,
-        duration: this.selectedInterval,
-        showTimer: this.showTimer,
-        showMinuteResults: this.showMinuteResults,
-        showTotalResults: this.showTotalResults,
-        showProgress: this.showProgress,
-        accelerationAmount: this.accelerationAmount,
-        accelerationInterval: this.accelerationInterval,
-        accelerationFrequency: this.accelerationFrequency,
-      };
+      this.selectedSettings.testName = this.testName[0] || 'No test name';
+      const settings: TestSettingsDto = this.selectedSettings;
       this.$emit('newSettings', settings);
-    },
-    resetToDefault() {
-      this.selectedInterval = this.defaultSettings.selectedInterval;
-      this.showTimer = this.defaultSettings.showTimer;
-      this.showMinuteResults = this.defaultSettings.showMinuteResults;
-      this.showTotalResults = this.defaultSettings.showTotalResults;
-      this.showProgress = this.defaultSettings.showProgress;
-      this.accelerationAmount = this.defaultSettings.accelerationAmount;
-      this.accelerationInterval = this.defaultSettings.accelerationInterval;
-      this.accelerationFrequency = this.defaultSettings.accelerationFrequency;
-      this.saveSettings();
     },
   },
   emits: ['newSettings'],
@@ -94,9 +53,6 @@ export default defineComponent({
     <div class="choose-settings-form">
       <div class="section header-section">
         <h2>Выберите настройки теста: <br />{{ testName }}</h2>
-        <CommonButton class="close-btn" @click="resetToDefault">
-          <template v-slot:placeholder>×</template>
-        </CommonButton>
       </div>
       <div class="settings-group">
         <div class="time-interval-selector">
@@ -109,7 +65,7 @@ export default defineComponent({
             min="120"
             max="2700"
             step="30"
-            v-model="selectedInterval"
+            v-model="selectedSettings.duration"
             class="custom-slider"
           />
           <div class="slider-labels">
@@ -118,63 +74,63 @@ export default defineComponent({
           </div>
           <div class="setting-item">
             <label>
-              <input type="checkbox" v-model="showTimer" />
+              <input type="checkbox" v-model="selectedSettings.showTimer" />
               Отображать оставшееся время
             </label>
           </div>
 
           <div class="setting-item">
             <label>
-              <input type="checkbox" v-model="showMinuteResults" />
+              <input
+                type="checkbox"
+                v-model="selectedSettings.showMinuteResults"
+              />
               Показывать результаты за минуту
             </label>
             <label>
-              <input type="checkbox" v-model="showTotalResults" />
+              <input
+                type="checkbox"
+                v-model="selectedSettings.showTotalResults"
+              />
               Показывать общий результат
             </label>
           </div>
 
           <div class="setting-item">
             <label>
-              <input type="checkbox" v-model="showProgress" />
+              <input type="checkbox" v-model="selectedSettings.showProgress" />
               Отображать прогресс выполнения
             </label>
           </div>
           <div class="acceleration-settings">
             <h3>Настройки ускорения:</h3>
             <div class="acceleration-input">
-              <label
-                >Величина ускорения(%):
-                <input
-                  type="number"
-                  v-model.number="accelerationAmount"
-                  min="0"
-                  max="100"
-                />
-              </label>
+              <CustomInput
+                type="number"
+                v-model.number="selectedSettings.accelerationAmount"
+                :minNumber="0"
+                :maxNumber="100"
+                labelText="Величина ускорения(%):"
+              />
             </div>
 
             <div class="acceleration-input">
-              <label
-                >Интервал применения(от 1 до 1000):
-                <input
-                  type="number"
-                  v-model.number="accelerationInterval"
-                  min="1"
-                  max="1000"
-                />
-              </label>
+              <CustomInput
+                type="number"
+                v-model.number="selectedSettings.accelerationInterval"
+                :minNumber="1"
+                :maxNumber="1000"
+                labelText="Интервал применения(от 1 до 1000):"
+              />
             </div>
             <div class="acceleration-input">
-              <label
-                >Как часто(от 1 до 1000):
-                <input
-                  type="number"
-                  v-model.number="accelerationFrequency"
-                  min="1"
-                  max="1000"
-                />
-              </label>
+              <CustomInput
+                type="number"
+                v-model.number="selectedSettings.accelerationFrequency"
+                :minNumber="1"
+                :maxNumber="1000"
+                labelText="Как часто(от 1 до 1000):"
+              />
             </div>
           </div>
         </div>
@@ -281,27 +237,6 @@ export default defineComponent({
 
 .header-section {
   position: relative;
-  padding: 0.5rem 2rem 0.5rem 0.5rem !important;
-}
-
-.close-btn {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: white;
-  font-size: 2.5rem;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  padding: 0 0.5rem;
-  line-height: 1;
-}
-
-.close-btn:hover {
-  opacity: 0.8;
-  border: none;
-  background-color: transparent;
+  padding: 0.5rem 2rem 0.5rem 0.5rem;
 }
 </style>
