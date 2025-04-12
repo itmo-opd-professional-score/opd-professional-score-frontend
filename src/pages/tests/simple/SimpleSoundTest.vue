@@ -15,9 +15,7 @@ export default defineComponent({
   name: 'SimpleSoundTest',
   components: { CommonButton },
   props: {
-    token: {
-      type: String,
-    }
+    token: String
   },
   data() {
     return {
@@ -33,7 +31,7 @@ export default defineComponent({
       missedCount: 0,
       completedTestsLinks: [] as Array<string>,
       completedTestsResults: [] as Array<string>,
-      buttonText: ''
+      buttonText: 'Начать тест'
     };
   },
   computed: {
@@ -193,7 +191,6 @@ export default defineComponent({
       });
     },
     async load () {
-      this.buttonText = 'Начать тест';
       if (UserState.id) {
         await router.push('/test/simple/sound');
       } else {
