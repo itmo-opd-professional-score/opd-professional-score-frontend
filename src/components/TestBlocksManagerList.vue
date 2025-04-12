@@ -92,8 +92,8 @@ export default {
 .container-header {
   background: var(--background-secondary);
   border-radius: 10px;
-  width: 95%;
   height: 4rem;
+  width: 100%;
   padding: 0 1rem;
   justify-content: center;
   align-items: center;
@@ -124,7 +124,7 @@ export default {
 .pagination-controls {
   display: flex;
   justify-content: space-between;
-  width: 95%;
+  width: 100%;
   margin-top: auto;
   user-select: none;
 }

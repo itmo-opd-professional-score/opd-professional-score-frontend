@@ -1,4 +1,4 @@
-export interface CreateSoundAdditionInputDto {
+export interface CreateAdditionInputDto {
   userId: number | null;
   averageCallbackTime: number;
   dispersion: number;

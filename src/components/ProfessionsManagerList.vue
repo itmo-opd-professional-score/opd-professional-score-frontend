@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, type PropType, ref } from 'vue';
+import { computed, ref } from 'vue';
 import CommonButton from './UI/CommonButton.vue';
 import ProfessionsManagerElement from './UI/ProfessionsManagerElement.vue';
 import ProfessionEditForm from './ProfessionEditForm.vue';
@@ -50,21 +50,11 @@ const lastEl = ref();
 
 defineEmits(['professions-list-update']);
 
-const props = defineProps({
-  maxElementsCount: {
-    type: Number,
-    default: 5,
-  },
-  professions: {
-    type: Array as PropType<GetProfessionOutputDto[]>,
-    required: true,
-  },
-  isArchive: {
-    type: Boolean,
-    required: false,
-  },
-});
-
+const props = defineProps<{
+  professions: GetProfessionOutputDto[],
+  maxElementsCount: number;
+  isArchive?: boolean
+}>()
 const currentPage = ref(1);
 
 const paginatedData = computed(() => {
@@ -115,6 +105,7 @@ const prevPage = () => {
       <div class="valid">Описание</div>
       <div class="valid">Требования</div>
       <div class="valid">Сфера</div>
+      <div class="valid"></div>
     </div>
     <div class="professions">
       <ProfessionsManagerElement
@@ -171,13 +162,27 @@ const prevPage = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1vw;
+  gap: 0.25rem;
+  overflow: hidden;
+}
+
+.professions {
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5vw;
+  margin-bottom: 2vw;
+
+  .new-profession {
+    align-self: flex-end;
+  }
 }
 
 .pagination_controls {
   display: flex;
   justify-content: space-between;
-  width: 95%;
+  align-items: center;
+  width: 100%;
   margin-top: auto;
   user-select: none;
 }
@@ -185,26 +190,14 @@ const prevPage = () => {
 .header {
   background: var(--background-secondary);
   border-radius: 10px;
-  width: 95%;
+  width: 100%;
   height: 4rem;
-  padding: 0 1rem;
+  padding: 0 1vw;
   justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 1fr 2fr 4fr 3fr 1fr 1fr;
-}
-
-.professions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1vw;
-  padding: 0 2.5%;
-  overflow: scroll;
-
-  .new-profession {
-    align-self: flex-end;
-  }
+  grid-template-columns: 1fr 3fr 6fr 3fr 1fr 1.7fr;
+  margin-bottom: 1rem;
 }
 
 .header:hover {
@@ -221,7 +214,8 @@ const prevPage = () => {
   text-align: center;
 }
 
-#id {
+#id,
+#test_name {
   text-align: left;
 }
 
