@@ -1,5 +1,7 @@
 <script lang="ts">
 import CommonButton from '../../../../components/UI/CommonButton.vue';
+import { TestResolver } from '../../../../api/resolvers/test/test.resolver.ts';
+import { UserState } from '../../../../utils/userState/UserState.ts';
 
 export default {
   name: 'AdditionalVisualTest',
@@ -39,13 +41,12 @@ export default {
       }
 
       if (this.currentAttempt < this.totalAttempts) {
-        setTimeout(() => {
-          this.generateRandomNumbers();
-        }, 1000);
+        this.generateRandomNumbers();
       } else {
         this.testCompleted = true;
         this.status = `Тест завершен! Правильные ответы: ${this.score} из ${this.totalAttempts}`;
         this.calculateStandardDeviation();
+        this.saveResults()
       }
     },
     startTest() {
@@ -63,6 +64,20 @@ export default {
         ) / this.responseTimes.length;
       this.standardDeviation = Math.sqrt(variance);
     },
+    saveResults() {
+      const testResolver =
+        new TestResolver()
+      testResolver
+        .createAddition({
+          userId: UserState.id != undefined ? UserState.id : null,
+          dispersion: this.standardDeviation,
+          averageCallbackTime: this.responseTimes.reduce(
+            (sum, time) => sum + time, 0
+          ) / this.responseTimes.length,
+          allSignals: this.totalAttempts,
+          mistakes: this.totalAttempts - this.score,
+        }, "Visual")
+    }
   },
 };
 </script>
@@ -81,7 +96,7 @@ export default {
         она или нет, нажав на соответствующую кнопку.
       </p>
       <p>Готовы начать? Нажмите кнопку ниже, чтобы пройти тест!</p>
-      <CommonButton class="button" @click="startTest">
+      <CommonButton class="button submit_button" @click="startTest">
         <template v-slot:placeholder>Начать</template>
       </CommonButton>
     </div>
@@ -93,10 +108,10 @@ export default {
         <span> + </span>
         <span>{{ number2 }}</span>
       </div>
-      <CommonButton class="button" @click="checkEvenOdd(true)">
+      <CommonButton :disabled="testCompleted" class="button submit_button" @click="checkEvenOdd(true)">
         <template v-slot:placeholder>Четное</template>
       </CommonButton>
-      <CommonButton class="button" @click="checkEvenOdd(false)">
+      <CommonButton :disabled="testCompleted" class="button submit_button" @click="checkEvenOdd(false)">
         <template v-slot:placeholder>Нечетное</template>
       </CommonButton>
       <div class="results">

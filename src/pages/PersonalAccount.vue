@@ -145,7 +145,7 @@ onMounted(() => {
 
 <template>
   <div class="container">
-    <div class="user-info">
+    <div class="user-info-left">
       <div class="user-data-block">
         <p class="block_header">Информация о пользователе</p>
 
@@ -172,7 +172,7 @@ onMounted(() => {
       </div>
     </div>
     <div class="right-block">
-      <div class="tests-info" v-if="UserState.role == UserRole.ADMIN">
+      <div class="users-info" v-if="UserState.role == UserRole.ADMIN">
         <p class="block_header">Все пользователи</p>
         <div class="user_data_block">
           <UserManagerList
@@ -191,11 +191,9 @@ onMounted(() => {
           UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN
         "
       >
-        <div class="test-info-all">
-          <p class="block_header">Все тесты</p>
-          <div class="test_data_block">
-            <TestsManagerList :tests="allTests" :max-elements-count="5" />
-          </div>
+        <p class="block_header">Все тесты</p>
+        <div class="test_data_block">
+          <TestsManagerList :tests="allTests" :max-elements-count="5" />
         </div>
       </div>
 
@@ -320,33 +318,34 @@ onMounted(() => {
   gap: 1rem;
 }
 
-.user-info,
-.tests-info {
+.user-info-left {
+  height: 75vh;
+  background-color: var(--background-primary);
+  padding: 1vw;
+  border-radius: 15px;
   display: flex;
   flex-direction: column;
-  background-color: var(--background-primary);
-  padding: 1rem;
-  border-radius: 15px;
-  min-height: 75vh;
-  overflow: scroll;
 
-  .test-info {
-    height: 80%;
-  }
-
-  .user_data_block {
-    height: 100%;
-  }
-
-  .test-info-all,
-  .profession_data_block {
-    height: 90%;
+  .buttons_container {
+    margin-top: auto;
   }
 }
 
-.user-info {
-  justify-content: space-between;
-  height: 75vh;
+.tests-info, .users-info {
+  display: flex;
+  flex-direction: column;
+  min-height: 75vh;
+
+  .user_data_block, .tests-info-all, .test-info {
+    height: 100%
+  }
+
+  .test-info {
+    .test_data_block {
+      height: 90%;
+    }
+    height: 100%;
+  }
 }
 
 .right-block {
