@@ -2,10 +2,9 @@
 import CommonButton from '../../../../components/UI/CommonButton.vue';
 import { TestResolver } from '../../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../../utils/userState/UserState.ts';
-import router from '../../../../router/router.ts';
 
 export default {
-  name: 'AdditionalVisualTest',
+  name: 'AdditionVisualTest',
   components: { CommonButton },
   data() {
     return {
@@ -24,9 +23,6 @@ export default {
     };
   },
   methods: {
-    router() {
-      return router
-    },
     generateRandomNumbers() {
       this.number1 = Math.floor(Math.random() * 50) + 1;
       this.number2 = Math.floor(Math.random() * 50) + 1;
@@ -130,7 +126,7 @@ export default {
         <CommonButton v-if="!testCompleted" class="button submit_button" @click="checkEvenOdd(false)">
           <template v-slot:placeholder>Нечетное</template>
         </CommonButton>
-        <CommonButton v-else class="button submit_button" @click="$router.go">
+        <CommonButton v-else class="button submit_button" @click="$router.go(0)">
           <template v-slot:placeholder>Пройти еще раз</template>
         </CommonButton>
       </div>
@@ -193,13 +189,5 @@ button {
   background-color: #4127e4;
   color: white;
   transition: background-color 0.3s;
-}
-
-button.correct {
-  background-color: #28a745;
-}
-
-button.incorrect {
-  background-color: #dc3545;
 }
 </style>
