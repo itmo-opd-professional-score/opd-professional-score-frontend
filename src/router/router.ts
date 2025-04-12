@@ -13,8 +13,8 @@ import TestMapper from '../pages/tests/TestMapper.vue';
 import CreateTestBlockPage from '../pages/CreateTestBlockPage.vue';
 import AdditionVisualTest from '../pages/tests/addition/visual/AdditionVisualTest.vue';
 import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.vue';
-import LightSimpleTest from "../pages/tests/simple/SimpleLightTest.vue";
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
+import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 
 const routes = [
   {
@@ -84,13 +84,13 @@ const routes = [
     },
   },
   {
-    path: '/test/sound/simple',
+    path: '/test/simple/sound',
     component: SimpleSoundTest,
     meta: { ruName: 'Простой звуковой тест', requiresAuth: true },
   },
   {
-    path: '/test/light/simple',
-    component: LightSimpleTest,
+    path: '/test/simple/light',
+    component: SimpleLightTest,
     meta: {ruName: "Оценка скорости простых реакции на свет", requiresAuth: true}
   },
   {
