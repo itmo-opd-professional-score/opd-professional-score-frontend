@@ -5,6 +5,7 @@ import {
   type UserStateInterface,
 } from './UserState.types.ts';
 import { jwtDecode } from 'jwt-decode';
+import router from '../../router/router.ts';
 
 export const UserState = reactive<UserStateInterface>({
   status: 'unauthorized',
@@ -41,6 +42,10 @@ export const updateUserState = () => {
     const userData = jwtDecode(token) as UserJwt;
 
     if (userData) {
+      if (!userData.age || !userData.gender) {
+        localStorage.removeItem('token');
+        router.go(0)
+      }
       UserState.id = userData.id;
       UserState.status = 'authorized';
       UserState.username = userData.username;
