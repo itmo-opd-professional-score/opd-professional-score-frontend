@@ -1,8 +1,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import TestStatisticsCard from '../components/TestStatisticsCard.vue';
-import TestScoreList from '../components/TestsScoreList.vue';
-import { UserState } from '../utils/userState/UserState.ts';
+import TestStatisticsCard from '../../components/TestStatisticsCard.vue';
+import TestScoreList from '../../components/TestsScoreList.vue';
+import { UserState } from '../../utils/userState/UserState.ts';
 
 export default defineComponent({
   name: 'TestResultsPage',

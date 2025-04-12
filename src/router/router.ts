@@ -13,8 +13,8 @@ import TestMapper from '../pages/tests/TestMapper.vue';
 import CreateTestBlockPage from '../pages/CreateTestBlockPage.vue';
 import AdditionVisualTest from '../pages/tests/addition/visual/AdditionVisualTest.vue';
 import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.vue';
-import LightSimpleTest from "../pages/tests/LightSimpleTest.vue";
-import SimpleSoundTest from '../pages/SimpleSoundTest.vue';
+import LightSimpleTest from "../pages/tests/simple/SimpleLightTest.vue";
+import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 
 const routes = [
   {

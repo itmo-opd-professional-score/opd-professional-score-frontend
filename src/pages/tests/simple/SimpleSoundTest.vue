@@ -1,8 +1,8 @@
 <script lang="ts">
-import type { SimpleSoundTestInputDto } from '../api/resolvers/test/dto/input/simple-sound-test-input.dto.ts';
+import type { SimpleSoundTestInputDto } from '../../../api/resolvers/test/dto/input/simple-sound-test-input.dto.ts';
 import { defineComponent } from 'vue';
-import { usePopupStore } from '../store/popup.store.ts';
-import CommonButton from '../components/UI/CommonButton.vue';
+import { usePopupStore } from '../../../store/popup.store.ts';
+import CommonButton from '../../../components/UI/CommonButton.vue';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
