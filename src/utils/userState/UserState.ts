@@ -42,7 +42,7 @@ export const updateUserState = () => {
     const userData = jwtDecode(token) as UserJwt;
 
     if (userData) {
-      if (!userData.age || !userData.gender) {
+      if (!userData.hasOwnProperty('age') || !userData.hasOwnProperty('gender')) {
         localStorage.removeItem('token');
         router.go(0)
       }
