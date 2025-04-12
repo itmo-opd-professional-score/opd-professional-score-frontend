@@ -47,9 +47,9 @@ const tests = ref<{
   hardLight: [],
 });
 const allTests = ref<TestDataOutputDto[]>([]);
-const professionsArchive = ref<GetProfessionOutputDto[] | null>(null);
-const professionsPublished = ref<GetProfessionOutputDto[] | null>(null);
-const testBlocks = ref<GetTestBlockOutputDto[] | null>(null);
+const professionsArchive = ref<GetProfessionOutputDto[]>([]);
+const professionsPublished = ref<GetProfessionOutputDto[]>([]);
+const testBlocks = ref<GetTestBlockOutputDto[]>([]);
 
 const reloadTestBlocks = async () => {
   const res = await testBlockResolver.getByUserId(
@@ -174,15 +174,13 @@ onMounted(() => {
     <div class="right-block">
       <div class="users-info" v-if="UserState.role == UserRole.ADMIN">
         <p class="block_header">Все пользователи</p>
-        <div class="data-block">
-          <UserManagerList
-            :users="users"
-            :max-elements-count="5"
-            @users-list-update="reloadUsers"
-          >
-            <template v-slot:placeholder>Установить роль</template>
-          </UserManagerList>
-        </div>
+        <UserManagerList
+          :users="users"
+          :max-elements-count="5"
+          @users-list-update="reloadUsers"
+        >
+          <template v-slot:placeholder>Установить роль</template>
+        </UserManagerList>
       </div>
 
       <div
@@ -192,56 +190,43 @@ onMounted(() => {
         "
       >
         <p class="block_header">Все тесты</p>
-        <div class="data-block">
-          <TestsManagerList :tests="allTests" :max-elements-count="5" />
-        </div>
+        <TestsManagerList :tests="allTests" :max-elements-count="5" />
       </div>
 
       <div
         class="tests-info"
         v-if="
-          UserState.role == UserRole.EXPERT ||
-          (UserState.role == UserRole.ADMIN &&
-            professionsPublished != null &&
-            professionsPublished.length > 0)
+          (UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT)
+          && professionsPublished.length > 0
         "
       >
         <p class="block_header">Опубликованные профессии</p>
-        <div class="data-block">
-          <ProfessionsManagerList
-            :professions="professionsPublished as GetProfessionOutputDto[]"
-            :max-elements-count="5"
-            @professions-list-update="reloadProfessions"
-            v-if="professions != null"
-          />
-        </div>
+        <ProfessionsManagerList
+          :professions="professionsPublished"
+          :max-elements-count="5"
+          @professions-list-update="reloadProfessions"
+        />
       </div>
 
       <div
         class="tests-info"
         v-if="
-          (UserState.role == UserRole.EXPERT ||
-            UserState.role == UserRole.ADMIN) &&
-          professionsPublished != null &&
-          professionsPublished.length > 0
+          (UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN)
+          && professionsArchive.length > 0
         "
       >
-        <p class="block_header">Архивные профессии</p>
-        <div class="data-block">
-          <ProfessionsManagerList
-            :professions="professionsArchive as GetProfessionOutputDto[]"
-            :max-elements-count="5"
-            :is-archive="true"
-            @professions-list-update="reloadProfessions"
-          />
-        </div>
+        <div class="block_header">Архивные профессии</div>
+        <ProfessionsManagerList
+          :professions="professionsArchive"
+          :max-elements-count="3"
+          :is-archive="true"
+          @professions-list-update="reloadProfessions"
+        />
       </div>
 
       <div class="tests-info" v-if="testBlocks && testBlocks.length > 0">
         <div class="block_header">Информация о назначенных блоках тестов</div>
-        <div class="data-block">
-          <TestBlocksManagerList :test-blocks="testBlocks" />
-        </div>
+        <TestBlocksManagerList :test-blocks="testBlocks" />
       </div>
 
       <div
@@ -254,43 +239,35 @@ onMounted(() => {
 
         <div class="test-info" v-if="tests.simpleSound.length > 0">
           <p class="block_header">Реакция на простой звуковой сигнал</p>
-          <div class="data-block">
-            <TestsManagerList
-              :tests="tests.simpleSound"
-              :max-elements-count="5"
-            />
-          </div>
+          <TestsManagerList
+            :tests="tests.simpleSound"
+            :max-elements-count="5"
+          />
         </div>
 
         <div class="test-info" v-if="tests.simpleLight.length > 0">
           <p class="block_header">Реакция на простой световой сигнал</p>
-          <div class="data-block">
-            <TestsManagerList
-              :tests="tests.simpleLight"
-              :max-elements-count="5"
-            />
-          </div>
+          <TestsManagerList
+            :tests="tests.simpleLight"
+            :max-elements-count="5"
+          />
         </div>
 
 
         <div class="test-info" v-if="tests.additionSound.length > 0">
           <p class="block_header">Реакция на сложение по звуку</p>
-          <div class="data-block">
-            <TestsManagerList
-              :tests="tests.additionSound"
-              :max-elements-count="5"
-            />
-          </div>
+          <TestsManagerList
+            :tests="tests.additionSound"
+            :max-elements-count="5"
+          />
         </div>
 
         <div class="test-info" v-if="tests.additionVisual.length > 0">
           <p class="block_header">Реакция на сложение визуально</p>
-          <div class="data-block">
-            <TestsManagerList
-              :tests="tests.additionVisual"
-              :max-elements-count="5"
-            />
-          </div>
+          <TestsManagerList
+            :tests="tests.additionVisual"
+            :max-elements-count="5"
+          />
         </div>
 
       </div>
@@ -330,10 +307,6 @@ onMounted(() => {
   padding: 1.5vw;
   background-color: var(--background-primary);
   border-radius: 15px;
-
-  .data-block {
-    height: 100%;
-  }
 }
 
 .tests-info {

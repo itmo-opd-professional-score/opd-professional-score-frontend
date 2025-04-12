@@ -57,7 +57,7 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 1fr 2fr 4fr 3fr 1fr 1fr;
+  grid-template-columns: 1fr 3fr 6fr 3fr 1fr 1.7fr;
 }
 
 .wrapper:hover {
