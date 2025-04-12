@@ -174,7 +174,7 @@ onMounted(() => {
     <div class="right-block">
       <div class="users-info" v-if="UserState.role == UserRole.ADMIN">
         <p class="block_header">Все пользователи</p>
-        <div class="user_data_block">
+        <div class="data-block">
           <UserManagerList
             :users="users"
             :max-elements-count="5"
@@ -192,7 +192,7 @@ onMounted(() => {
         "
       >
         <p class="block_header">Все тесты</p>
-        <div class="test_data_block">
+        <div class="data-block">
           <TestsManagerList :tests="allTests" :max-elements-count="5" />
         </div>
       </div>
@@ -207,7 +207,7 @@ onMounted(() => {
         "
       >
         <p class="block_header">Опубликованные профессии</p>
-        <div class="profession_data_block">
+        <div class="data-block">
           <ProfessionsManagerList
             :professions="professionsPublished as GetProfessionOutputDto[]"
             :max-elements-count="5"
@@ -227,7 +227,7 @@ onMounted(() => {
         "
       >
         <p class="block_header">Архивные профессии</p>
-        <div class="profession_data_block">
+        <div class="data-block">
           <ProfessionsManagerList
             :professions="professionsArchive as GetProfessionOutputDto[]"
             :max-elements-count="5"
@@ -239,13 +239,13 @@ onMounted(() => {
 
       <div class="tests-info" v-if="testBlocks && testBlocks.length > 0">
         <div class="block_header">Информация о назначенных блоках тестов</div>
-        <div class="profession_data_block">
+        <div class="data-block">
           <TestBlocksManagerList :test-blocks="testBlocks" />
         </div>
       </div>
 
       <div
-        class="tests-info"
+        class="tests-info all"
         v-if="Object.values(tests).reduce((acc, arr) => acc + arr.length, 0)"
       >
         <div class="heading">
@@ -254,7 +254,7 @@ onMounted(() => {
 
         <div class="test-info" v-if="tests.simpleSound.length > 0">
           <p class="block_header">Реакция на простой звуковой сигнал</p>
-          <div class="test_data_block">
+          <div class="data-block">
             <TestsManagerList
               :tests="tests.simpleSound"
               :max-elements-count="5"
@@ -264,7 +264,7 @@ onMounted(() => {
 
         <div class="test-info" v-if="tests.simpleLight.length > 0">
           <p class="block_header">Реакция на простой световой сигнал</p>
-          <div class="test_data_block">
+          <div class="data-block">
             <TestsManagerList
               :tests="tests.simpleLight"
               :max-elements-count="5"
@@ -272,19 +272,10 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="test-info" v-if="tests.hardLight.length > 0">
-          <p class="block_header">Реакция на сложный световой сигнал</p>
-          <div class="test_data_block">
-            <TestsManagerList
-              :tests="tests.hardLight"
-              :max-elements-count="5"
-            />
-          </div>
-        </div>
 
         <div class="test-info" v-if="tests.additionSound.length > 0">
           <p class="block_header">Реакция на сложение по звуку</p>
-          <div class="test_data_block">
+          <div class="data-block">
             <TestsManagerList
               :tests="tests.additionSound"
               :max-elements-count="5"
@@ -294,13 +285,14 @@ onMounted(() => {
 
         <div class="test-info" v-if="tests.additionVisual.length > 0">
           <p class="block_header">Реакция на сложение визуально</p>
-          <div class="test_data_block">
+          <div class="data-block">
             <TestsManagerList
               :tests="tests.additionVisual"
               :max-elements-count="5"
             />
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -321,7 +313,7 @@ onMounted(() => {
 .user-info-left {
   height: 75vh;
   background-color: var(--background-primary);
-  padding: 1vw;
+  padding: 1.5vw;
   border-radius: 15px;
   display: flex;
   flex-direction: column;
@@ -331,21 +323,27 @@ onMounted(() => {
   }
 }
 
-.tests-info, .users-info {
+.users-info, .tests-info, .test-info {
   display: flex;
   flex-direction: column;
   min-height: 75vh;
+  padding: 1.5vw;
+  background-color: var(--background-primary);
+  border-radius: 15px;
 
-  .user_data_block, .tests-info-all, .test-info {
-    height: 100%
-  }
-
-  .test-info {
-    .test_data_block {
-      height: 90%;
-    }
+  .data-block {
     height: 100%;
   }
+}
+
+.tests-info {
+  gap: 1vw;
+}
+
+.tests-info.all {
+  min-height: fit-content;
+  padding: 0;
+  background-color: transparent;
 }
 
 .right-block {
@@ -354,12 +352,6 @@ onMounted(() => {
   flex-direction: column;
   gap: 1.2rem;
   height: 75vh;
-}
-
-.user-data-block {
-  padding: 0 10px;
-  border-radius: 10px;
-  color: rgb(237, 227, 227);
 }
 
 .block_header {
@@ -373,12 +365,6 @@ onMounted(() => {
   color: rgb(237, 227, 227, 0.9);
 }
 
-.info-block {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 0.5rem;
-}
-
 .field_label {
   font-weight: 600;
 }
@@ -387,12 +373,5 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-}
-
-.test_data_block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
 }
 </style>
