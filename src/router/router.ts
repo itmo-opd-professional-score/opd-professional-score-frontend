@@ -69,7 +69,7 @@ const routes = [
     meta: { ruName: 'Изменение пароля' },
   },
   {
-    path: '/test/additon/visual',
+    path: '/test/addition/visual',
     component: AdditionVisualTest,
     meta: { requiresAuth: true, ruName: 'Тест на определение четности' },
   },

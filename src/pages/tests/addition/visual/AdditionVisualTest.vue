@@ -2,6 +2,7 @@
 import CommonButton from '../../../../components/UI/CommonButton.vue';
 import { TestResolver } from '../../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../../utils/userState/UserState.ts';
+import router from '../../../../router/router.ts';
 
 export default {
   name: 'AdditionalVisualTest',
@@ -23,6 +24,9 @@ export default {
     };
   },
   methods: {
+    router() {
+      return router
+    },
     generateRandomNumbers() {
       this.number1 = Math.floor(Math.random() * 50) + 1;
       this.number2 = Math.floor(Math.random() * 50) + 1;
@@ -84,8 +88,8 @@ export default {
 
 <template>
   <div class="container">
-    <div v-if="!testStarted">
-      <h1>Инструкция</h1>
+    <div v-if="!testStarted" class="instruction">
+      <h2>Инструкция</h2>
       <p>Добро пожаловать в тест на четность!</p>
       <p>
         В этом тесте вам будет предложено определить, является ли сумма двух
@@ -101,49 +105,83 @@ export default {
       </CommonButton>
     </div>
 
-    <div v-else>
-      <h1>Определите четность суммы</h1>
-      <div class="numbers">
+    <div v-else :class="testCompleted && testStarted ? 'completed test' : 'test'">
+      <h2>Определите четность суммы</h2>
+      <div class="progress" v-if="!testCompleted">
+        <div>Правильные ответы: {{ score }}</div>
+        <div>Попытки: {{ attempts }}</div>
+      </div>
+      <div class="results" v-else>
+        <p>{{ status }}</p>
+        <p>
+          Стандартное отклонение времени ответов:
+          {{ standardDeviation.toFixed(2) }} секунд
+        </p>
+      </div>
+      <div class="numbers" v-if="!testCompleted">
         <span>{{ number1 }}</span>
         <span> + </span>
         <span>{{ number2 }}</span>
       </div>
-      <CommonButton :disabled="testCompleted" class="button submit_button" @click="checkEvenOdd(true)">
-        <template v-slot:placeholder>Четное</template>
-      </CommonButton>
-      <CommonButton :disabled="testCompleted" class="button submit_button" @click="checkEvenOdd(false)">
-        <template v-slot:placeholder>Нечетное</template>
-      </CommonButton>
-      <div class="results">
-        <p>Правильные ответы: {{ score }}</p>
-        <p>Попытки: {{ attempts }}</p>
+      <div class="buttons">
+        <CommonButton v-if="!testCompleted" class="button submit_button" @click="checkEvenOdd(true)">
+          <template v-slot:placeholder>Четное</template>
+        </CommonButton>
+        <CommonButton v-if="!testCompleted" class="button submit_button" @click="checkEvenOdd(false)">
+          <template v-slot:placeholder>Нечетное</template>
+        </CommonButton>
+        <CommonButton v-else class="button submit_button" @click="$router.go">
+          <template v-slot:placeholder>Пройти еще раз</template>
+        </CommonButton>
       </div>
-      <p>{{ status }}</p>
-      <p v-if="testCompleted">
-        Стандартное отклонение времени ответов:
-        {{ standardDeviation.toFixed(2) }} секунд
-      </p>
     </div>
   </div>
 </template>
 
 <style scoped>
 .container {
-  text-align: center;
   background: white;
   padding: 1.25rem;
   border-radius: 0.625rem;
   box-shadow: 0 0 0.625rem rgba(0, 0, 0, 0.1);
-}
+  margin-top: 15vh;
+  width: 40vw;
 
-.numbers {
-  font-size: 2rem;
-  margin: 1.25rem 0;
+  .instruction, .test {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1vw;
+
+    h2 {
+      text-align: center;
+    }
+  }
+
+  .test {
+    .progress {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .numbers {
+      font-size: 3rem;
+      margin: 1.25rem 0;
+      display: flex;
+      justify-content: center;
+    }
+  }
+
+  .test.completed {
+    justify-content: center;
+  }
 }
 
 .buttons {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
 }
 
 button {
@@ -163,9 +201,5 @@ button.correct {
 
 button.incorrect {
   background-color: #dc3545;
-}
-
-.results {
-  margin: 1.25rem 0;
 }
 </style>
