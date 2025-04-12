@@ -2,10 +2,17 @@
 import CommonButton from '../../../../components/UI/CommonButton.vue';
 import { TestResolver } from '../../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../../utils/userState/UserState.ts';
+import router from '../../../../router/router.ts';
+import { jwtDecode } from 'jwt-decode';
+import type { TestJwt } from '../../types';
+import { usePopupStore } from '../../../../store/popup.store.ts';
 
 export default {
   name: 'AdditionVisualTest',
   components: { CommonButton },
+  props: {
+    token: String
+  },
   data() {
     return {
       number1: 0,
@@ -20,6 +27,8 @@ export default {
       startTime: 0,
       responseTimes: [] as Array<number>,
       standardDeviation: 0,
+      completedTestsLinks: [] as Array<string>,
+      completedTestsResults: [] as Array<string>
     };
   },
   methods: {
@@ -65,6 +74,7 @@ export default {
       this.standardDeviation = Math.sqrt(variance);
     },
     saveResults() {
+      const popUpStore = usePopupStore()
       const testResolver =
         new TestResolver()
       testResolver
@@ -76,8 +86,51 @@ export default {
           ) / this.responseTimes.length,
           allSignals: this.totalAttempts,
           mistakes: this.totalAttempts - this.score,
-        }, "Visual")
-    }
+        }, "Visual").then((result) => {
+        if (!UserState.id) {
+          this.completedTestsLinks.push(this.token!);
+          this.completedTestsResults.push(result.body.testToken);
+          localStorage.setItem(
+            'completedTestsLinks',
+            JSON.stringify(this.completedTestsLinks),
+          );
+          localStorage.setItem(
+            'completedTestsResults',
+            JSON.stringify(this.completedTestsResults),
+          );
+        }
+        popUpStore.activateInfoPopup('Results were saved successfully!');
+      }).catch((error) => {
+        popUpStore.activateErrorPopup(
+          `Error code: ${error.status}. ${error.response.data.message}`,
+        );
+      });
+    },
+    async load () {
+      if (UserState.id) {
+        await router.push('/test/addition/visual');
+      } else {
+        const linksData = localStorage.getItem('completedTestsLinks');
+        const resultsData = localStorage.getItem('completedTestsResults');
+        if (linksData) {
+          this.completedTestsLinks.push(...JSON.parse(linksData));
+        }
+        if (resultsData) {
+          this.completedTestsResults.push(...JSON.parse(resultsData));
+        }
+        if (this.token && this.completedTestsLinks.length != 0) {
+          this.completedTestsLinks.forEach((link) => {
+            const data = jwtDecode(link) as TestJwt;
+            if (data.testType != 'SOUND_ADDITION') {
+              this.$router.back()
+            }
+          });
+        }
+      }
+    },
+  },
+  mounted() {
+      this.load()
   },
 };
 </script>
