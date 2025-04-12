@@ -190,7 +190,11 @@ onMounted(() => {
         "
       >
         <p class="block_header">Все тесты</p>
-        <TestsManagerList :tests="allTests" :max-elements-count="5" />
+        <TestsManagerList
+          :tests="allTests"
+          :max-elements-count="5"
+          :users="users"
+        />
       </div>
 
       <div

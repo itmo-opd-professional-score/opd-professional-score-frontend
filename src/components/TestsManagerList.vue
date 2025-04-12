@@ -4,11 +4,14 @@ import CommonButton from './UI/CommonButton.vue';
 import TestManagerElement from './UI/TestManagerElement.vue';
 import type { TestDataOutputDto } from '../api/resolvers/test/dto/output/test-data-output.dto.ts';
 import { useTestTypesStore } from '../store/test-types.store.ts';
+import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-data-output.dto.ts';
+import { UserState } from '../utils/userState/UserState.ts';
 
 const props = withDefaults(
   defineProps<{
     maxElementsCount: number;
     tests: TestDataOutputDto[];
+    users?: UserDataOutputDto[]
   }>(),
   {
     maxElementsCount: 5,
@@ -64,7 +67,15 @@ const prevPage = () => {
       <template #average_callback>{{
         item.averageCallbackTime.toFixed(2)
       }}</template>
-      <template #user>{{ item.userId ? item.userId : 'Аноним' }}</template>
+      <template #user>
+        {{
+          item.userId ?
+            UserState.id == item.userId ?
+              'Вы' :
+              users?.find(user => user.id == item.userId)?.username :
+            'Аноним'
+        }}
+      </template>
       <template #valid>{{ item.valid }}</template>
       <template #created_at>{{ item.createdAt.substring(0, 10) }}</template>
     </TestManagerElement>
