@@ -55,7 +55,6 @@ const props = defineProps<{
   maxElementsCount: number;
   isArchive?: boolean
 }>()
-console.log(props.professions);
 const currentPage = ref(1);
 
 const paginatedData = computed(() => {
