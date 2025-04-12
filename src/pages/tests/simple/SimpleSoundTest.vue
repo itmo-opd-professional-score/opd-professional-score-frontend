@@ -1,42 +1,42 @@
 <script lang="ts">
-import type { SimpleSoundTestInputDto } from '../../../api/resolvers/test/dto/input/simple-sound-test-input.dto.ts';
+import type { CreateSimpleInputDto } from '../../../api/resolvers/test/dto/input/create-simple-input.dto.ts';
 import { defineComponent } from 'vue';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import CommonButton from '../../../components/UI/CommonButton.vue';
+import { UserState } from '../../../utils/userState/UserState.ts';
+import router from '../../../router/router.ts';
+import { jwtDecode } from 'jwt-decode';
+import type { TestJwt } from '../types';
+import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
   name: 'SimpleSoundTest',
   components: { CommonButton },
+  props: {
+    token: {
+      type: String,
+    }
+  },
   data() {
     return {
-      userId: -1,
       testState: 'ready' as TestState,
       audioContext: null as AudioContext | null,
       reactionTimes: [] as number[],
       timeoutIds: [] as number[],
-      TRIAL_COUNT: 120,
+      TRIAL_COUNT: 10,
       currentTrial: 0,
       startTime: 0,
       inactivityTimeout: null as number | null,
       popupStore: usePopupStore(),
       missedCount: 0,
+      completedTestsLinks: [] as Array<string>,
+      completedTestsResults: [] as Array<string>,
+      buttonText: ''
     };
   },
   computed: {
-    buttonText(): string {
-      switch (this.testState) {
-        case 'ready':
-          return 'Начать тест';
-        case 'reacting':
-          return 'Ждите сигнала';
-        case 'completed':
-          return 'Тест окончен';
-        default:
-          return '';
-      }
-    },
     results(): {
       average: number;
       deviation: number;
@@ -59,12 +59,12 @@ export default defineComponent({
         worst: Math.max(...times),
       };
     },
-    testResultDto(): SimpleSoundTestInputDto {
+    testResultDto(): CreateSimpleInputDto {
       return {
-        userId: this.userId,
+        userId: UserState.id ? UserState.id : null,
         averageCallbackTime: this.results.average,
         allSignals: this.TRIAL_COUNT,
-        mistakes: this.missedCount,
+        misclicks: this.missedCount,
         dispersion: this.results.deviation,
       };
     },
@@ -81,6 +81,7 @@ export default defineComponent({
         }
         const reactionTime = Date.now() - this.startTime;
         this.reactionTimes.push(reactionTime);
+        this.buttonText = "Ждите сигнала"
         this.currentTrial++;
         clearTimeout(this.inactivityTimeout!);
         if (this.currentTrial < this.TRIAL_COUNT) {
@@ -91,6 +92,7 @@ export default defineComponent({
       }
     },
     startTest() {
+      this.buttonText = 'Ждите сигнала'
       this.popupStore.errorPopupVisible = false;
       this.testState = 'reacting';
       this.currentTrial = 0;
@@ -107,6 +109,7 @@ export default defineComponent({
         this.playSound(audioVolume);
         this.startTime = Date.now();
         this.setupInactivityTimeout();
+        this.buttonText = "Жмите"
       }, delay);
       this.timeoutIds.push(timerId);
     },
@@ -148,6 +151,8 @@ export default defineComponent({
     finishTest() {
       this.clearTimeouts();
       this.testState = 'completed';
+      this.buttonText = 'Тест окончен'
+      this.saveResults()
     },
     resetTest() {
       this.clearTimeouts();
@@ -162,36 +167,96 @@ export default defineComponent({
       this.timeoutIds.forEach((id) => clearTimeout(id));
       this.timeoutIds = [];
     },
+    saveResults() {
+      const popUpStore = usePopupStore()
+      const testResolver =
+        new TestResolver()
+      testResolver
+        .createSimple(this.testResultDto, "sst").then((result) => {
+        if (!UserState.id) {
+          this.completedTestsLinks.push(this.token!);
+          this.completedTestsResults.push(result.body.testToken);
+          localStorage.setItem(
+            'completedTestsLinks',
+            JSON.stringify(this.completedTestsLinks),
+          );
+          localStorage.setItem(
+            'completedTestsResults',
+            JSON.stringify(this.completedTestsResults),
+          );
+        }
+        popUpStore.activateInfoPopup('Results were saved successfully!');
+      }).catch((error) => {
+        popUpStore.activateErrorPopup(
+          `Error code: ${error.status}. ${error.response.data.message}`,
+        );
+      });
+    },
+    async load () {
+      this.buttonText = 'Начать тест';
+      if (UserState.id) {
+        await router.push('/test/simple/sound');
+      } else {
+        const linksData = localStorage.getItem('completedTestsLinks');
+        const resultsData = localStorage.getItem('completedTestsResults');
+        if (linksData) {
+          this.completedTestsLinks.push(...JSON.parse(linksData));
+        }
+        if (resultsData) {
+          this.completedTestsResults.push(...JSON.parse(resultsData));
+        }
+        if (this.token && this.completedTestsLinks.length != 0) {
+          this.completedTestsLinks.forEach((link) => {
+            const data = jwtDecode(link) as TestJwt;
+            if (data.testType != 'SIMPLE_SOUND') {
+              this.$router.back()
+            }
+          });
+        }
+      }
+    },
   },
   beforeUnmount() {
     this.clearTimeouts();
     clearTimeout(this.inactivityTimeout!);
+  },
+  mounted() {
+      this.load()
   },
 });
 </script>
 
 <template>
   <div class="container">
-    <h2 class="title">Тест на скорость реакции</h2>
-    <p class="description">
-      Этот тест измеряет время вашей реакции на звуковой сигнал. После начала
-      теста вы услышите 120 звуковых сигналов. Как только услышите сигнал - как
-      можно быстрее нажмите большую кнопку. Старайтесь не нажимать кнопку до
-      сигнала!
-    </p>
+    <div class="test" v-if="testState != 'completed'">
+      <h2 class="title">Тест на скорость реакции</h2>
+      <p class="description">
+        Этот тест измеряет время вашей реакции на звуковой сигнал. После начала
+        теста вы услышите 120 звуковых сигналов. Как только услышите сигнал - как
+        можно быстрее нажмите большую кнопку. Старайтесь не нажимать кнопку до
+        сигнала!
+      </p>
 
-    <div class="button-wrapper">
+      <div class="button-wrapper">
+        <CommonButton
+          class="reaction-button"
+          :class="{ active: testState == 'reacting' }"
+          @click="handleClick"
+        >
+          <template v-slot:placeholder> {{ buttonText }}</template>
+        </CommonButton>
+      </div>
+
       <CommonButton
-        class="reaction-button"
-        :class="{ active: testState == 'reacting' }"
-        @click="handleClick"
-        :disabled="testState == 'completed'"
+        class="reset-button"
+        @click="resetTest"
+        v-if="testState == 'reacting'"
       >
-        <template v-slot:placeholder> {{ buttonText }}</template>
+        <template v-slot:placeholder>Прервать тест</template>
       </CommonButton>
     </div>
 
-    <div v-if="testState == 'completed'" class="results">
+    <div v-else class="results">
       <h2 class="title">Результаты:</h2>
       <p>
         Среднее время: <strong>{{ results.average }} мс</strong>
@@ -212,26 +277,18 @@ export default defineComponent({
         <template v-slot:placeholder>Пройти заново</template>
       </CommonButton>
     </div>
-
-    <CommonButton
-      class="reset-button"
-      @click="resetTest"
-      v-if="testState == 'reacting'"
-    >
-      <template v-slot:placeholder>Прервать тест</template>
-    </CommonButton>
   </div>
 </template>
 
 <style scoped>
 .title {
-  font-size: 46px;
+  font-size: 36px;
   margin-bottom: 20px;
   color: #fff;
 }
 
 .container {
-  max-width: 35vw;
+  max-width: 45vw;
   padding: 2rem;
   text-align: center;
 }
