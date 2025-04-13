@@ -57,6 +57,15 @@ export default defineComponent({
     circleY() {
       return this.centerY + this.radius * Math.sin(this.angle);
     },
+    standardDeviation(): number | null {
+      const deviations = this.deviationHistory;
+      const n = deviations.length;
+      if(n < 2) return null;
+      const mean = deviations.reduce((sum, val) => sum + val, 0) / n;
+      const squares = deviations.map(x => Math.pow(x - mean, 2));
+      const variance = squares.reduce((sum, val) => sum + val, 0) / (n - 1);
+      return Math.sqrt(variance);
+    },
     buttonText(): string {
       switch (this.testState) {
         case 'ready':
@@ -93,7 +102,7 @@ export default defineComponent({
       if (elapsed >= this.time * 1000) {
         this.testState = 'completed';
         cancelAnimationFrame(this.animationFrameId as number);
-        this.stopTest(); // <-- остановим круг
+        this.stopTest();
       } else {
         this.animationFrameId = requestAnimationFrame(this.animate);
       }
@@ -134,7 +143,7 @@ export default defineComponent({
           this.remainingTimeValue = 0;
           clearInterval(this.timerIntervalId as number);
           this.testState = 'completed';
-          this.stopTest(); // <-- остановим круг по таймеру
+          this.stopTest();
         }
       }, 1000);
     },
@@ -147,7 +156,7 @@ export default defineComponent({
   },
   beforeUnmount() {
     this.cancelTimer();
-    this.stopTest(); // <-- очищаем анимацию
+    this.stopTest();
   },
 })
 </script>
@@ -179,6 +188,9 @@ export default defineComponent({
       </CommonButton>
       <div v-if="currentDeviation" class="current-deviation">
         Текущее отклонение: {{ currentDeviation }} мс
+      </div>
+      <div v-if="standardDeviation !== null" class="standard-deviation">
+        Стандартное отклонение: {{ standardDeviation }} мс
       </div>
     </div>
   </div>
@@ -246,5 +258,10 @@ export default defineComponent({
   background-color: #4CAF50;
   border-radius: 5px;
   transition: width 0.5s ease;
+}
+.standard-deviation {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #333;
 }
 </style>

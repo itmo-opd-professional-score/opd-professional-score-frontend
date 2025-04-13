@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import {defineComponent} from 'vue';
 
 export default defineComponent({
   name: "ReactionCircle",
@@ -54,9 +54,7 @@ export default defineComponent({
     },
     clickButton(time: number) {
       const idealTime = this.startTime + (Math.PI / this.speed);
-      const deviation = time - idealTime;
-      this.deviation = deviation;
-      console.log(`Отклонение от идеального времени: ${deviation} мс`);
+      this.deviation = idealTime - time;
     },
   },
   beforeUnmount() {
@@ -66,7 +64,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="test-container">
+  <div class="container">
     <svg class="circles" width="300" height="300">
       <circle cx="150" cy="150" r="100" stroke="black" stroke-width="2" fill="none" />
       <circle cx="150" cy="50" r="10" fill="rgb(0,128,0)"/>
@@ -76,8 +74,7 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.test-container {
-  background: #c1b9f6;
+.container {
   display: flex;
   flex-direction: column;
   align-items: center;
