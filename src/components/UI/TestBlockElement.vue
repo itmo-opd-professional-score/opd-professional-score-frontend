@@ -27,7 +27,7 @@ export default defineComponent({
 .test-block-element-wrapper {
   background: var(--background-secondary);
   border-radius: 10px;
-  width: 95%;
+  width: 100%;
   height: 4rem;
   padding: 0 1rem;
   justify-content: center;
