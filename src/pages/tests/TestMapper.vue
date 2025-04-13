@@ -6,6 +6,8 @@ import { usePopupStore } from '../../store/popup.store.ts';
 import NotFound from '../NotFound.vue';
 import AdditionSoundTest from './addition/sound/AdditionSoundTest.vue';
 import AdditionVisualTest from './addition/visual/AdditionVisualTest.vue';
+import SimpleSoundTest from './simple/SimpleSoundTest.vue';
+import SimpleLightTest from './simple/SimpleLightTest.vue';
 
 const props = defineProps<{
   token: string;
@@ -18,6 +20,10 @@ const testComponent = computed(() => {
         return AdditionSoundTest;
       case 'VISUAL_ADDITION':
         return AdditionVisualTest;
+      case 'SIMPLE_SOUND':
+        return SimpleSoundTest;
+      case 'SIMPLE_LIGHT':
+        return SimpleLightTest;
       default:
         return NotFound;
     }

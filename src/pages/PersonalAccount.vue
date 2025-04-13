@@ -161,6 +161,14 @@ onMounted(() => {
           <p class="field_label">Role</p>
           <p class="field">{{ UserState.role }}</p>
         </div>
+        <div class="info-block" v-if="UserState.age">
+          <p class="field_label">Age</p>
+          <p class="field">{{ UserState.age }}</p>
+        </div>
+        <div class="info-block" v-if="UserState.gender">
+          <p class="field_label">Gender</p>
+          <p class="field">{{ UserState.gender }}</p>
+        </div>
       </div>
       <div class="buttons_container">
         <Button @click="router.push('/profile/change')">
@@ -344,6 +352,12 @@ onMounted(() => {
 
 .field_label {
   font-weight: 600;
+  color: white;
+}
+
+.field {
+  color: white;
+  margin-bottom: 1vw;
 }
 
 .buttons_container {
