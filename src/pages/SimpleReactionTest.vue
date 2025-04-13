@@ -26,6 +26,8 @@ export default defineComponent({
       testState: 'ready' as TestState,
       timerIntervalId: null as number | null,
       remainingTimeValue: 0,
+      accelerationCount: 0,
+      accelerationIntervalId: null as number | null
     };
   },
   props: {
@@ -48,6 +50,18 @@ export default defineComponent({
     showProgressBar: {
       type: Boolean,
       default: false
+    },
+    accelerationAmount: {
+      type: Number,
+      default: 0.1
+    },
+    accelerationInterval: {
+      type: Number,
+      default: 60000
+    },
+    accelerationFrequency: {
+      type: Number,
+      default: 10
     }
   },
   computed: {
@@ -107,7 +121,24 @@ export default defineComponent({
         this.animationFrameId = requestAnimationFrame(this.animate);
       }
     },
+    setupAcceleration() {
+      if (!this.accelerationAmount || !this.accelerationInterval) return;
+
+      this.accelerationIntervalId = setInterval(() => {
+        if (this.accelerationCount >= this.accelerationFrequency) {
+          clearInterval(this.accelerationIntervalId as number);
+          return;
+        }  else {
+          const reactionCircle = this.$refs.reactionCircle as any;
+          reactionCircle.speed += reactionCircle.speed * this.accelerationAmount;
+          this.accelerationCount++;
+        }
+      },
+          this.accelerationInterval);
+    },
     startTest() {
+      this.accelerationCount = 0;
+      this.setupAcceleration();
       this.testState = 'reacting';
       this.startTime = performance.now();
       this.initialAngle = -Math.PI / 2;
@@ -130,7 +161,6 @@ export default defineComponent({
         this.currentDeviation = deviation;
         this.deviationHistory.push(deviation);
         console.log(`Текущее отклонение: ${deviation} мс`);
-        reactionCircle.speed *= 1.1;
         reactionCircle.cancelAnimation();
         reactionCircle.startAnimation();
       }
@@ -238,7 +268,7 @@ export default defineComponent({
   font-size: 1rem;
   box-shadow: 0 10px 20px rgba(128, 0, 128, 0.2);
   outline: none;
-  margin: 0 auto;
+  margin: 3vh auto;
 }
 .timer {
   font-size: 24px;
@@ -259,7 +289,7 @@ export default defineComponent({
   border-radius: 5px;
   transition: width 0.5s ease;
 }
-.standard-deviation {
+.standard-deviation, current-deviation {
   margin-top: 10px;
   font-size: 18px;
   color: #333;
