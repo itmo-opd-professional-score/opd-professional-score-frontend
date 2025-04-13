@@ -95,7 +95,7 @@ const routes = [
     meta: {ruName: "Оценка скорости простых реакции на свет", requiresAuth: true}
   },
   {
-    path: '/test/results/:testId',
+    path: '/test/results/:testTypeId/:testId',
     props: true,
     component: TestResultsPage,
     meta: {ruName: "Результаты прохождения теста", requiresAuth: true},

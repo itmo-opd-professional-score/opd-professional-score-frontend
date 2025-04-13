@@ -65,7 +65,7 @@ const prevPage = () => {
     <TestManagerElement
       v-for="item in paginatedData"
       :key="item.id"
-      @click="router.push(`/test/results/${item.id}`)"
+      @click="router.push(`/test/results/${item.testTypeId}/${item.id}`)"
     >
       <template #id>{{ item.id }}</template>
       <template #test_type>{{ testTypesStore.checkTestType(item) }}</template>

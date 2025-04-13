@@ -1,4 +1,18 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+  import type { UserDataOutputDto } from '../../api/resolvers/user/dto/output/user-data-output.dto.ts';
+  import { onMounted, ref } from 'vue';
+  import { UserResolver } from '../../api/resolvers/user/user.resolver.ts';
+  import type { DefaultInputDto } from '../../api/dto/common/default-input.dto.ts';
+  const props = defineProps<{
+    userId?: number
+  }>()
+  const currentUser = ref<DefaultInputDto<UserDataOutputDto> | null>();
+  onMounted(async () => {
+    if (props.userId && props.userId !== -1) {
+      currentUser.value = await new UserResolver().getById(props.userId);
+    }
+  })
+</script>
 
 <template>
   <div class="wrapper">
@@ -6,14 +20,14 @@
       #
       <slot name="id">0</slot>
     </div>
-    <div class="test_name" id="test_name">
-      <slot name="test_name">Lorem ipsum dolor sit amet.</slot>
-    </div>
     <div class="score">
-      <slot name="current_points">0</slot>/<slot name="max_points">100</slot>
+      <slot name="current_points">0</slot> / <slot name="max_points">100</slot>
     </div>
     <div class="time"><slot name="time">00:00:00</slot></div>
-    <div class="username"><slot name="username">Имя пользователя</slot></div>
+    <div class="username" v-if="$slots.username || userId">
+      <p v-if="userId">{{ currentUser != null ? currentUser.body.username : "Аноним"}}</p>
+      <slot name="username" v-else>Имя пользователя</slot>
+    </div>
     <div class="createdAt"><slot name="createdAt">2022-22-22</slot></div>
     <div class="valid"><slot name="valid">true</slot></div>
   </div>
@@ -29,7 +43,7 @@
   justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 1fr 1.5fr 1.25fr 1fr 1.5fr 1fr 1fr;
+  grid-template-columns: 1fr repeat(5, 2fr);
 }
 
 .wrapper:hover {

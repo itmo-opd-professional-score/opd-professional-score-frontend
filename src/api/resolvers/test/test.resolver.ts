@@ -21,6 +21,15 @@ export class TestResolver {
     );
   }
 
+  public async getByTypeById(typeEndpoint: string, id: number) {
+    return await this.apiResolver.request<null, TestDataOutputDto>(
+      `${typeEndpoint}/getById/${id}`,
+      'GET',
+      null,
+      this.token ? this.token : undefined,
+    )
+  }
+
   public async getTestsByTypeByUserId(userId: number, typeEndpoint: string) {
     return await this.apiResolver.request<null, TestDataOutputDto[]>(
       `${typeEndpoint}/getByUserId/${userId}`,

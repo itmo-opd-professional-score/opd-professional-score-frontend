@@ -3,10 +3,18 @@ import { defineComponent } from 'vue';
 import TestStatisticsCard from '../../components/TestStatisticsCard.vue';
 import TestScoreList from '../../components/TestsScoreList.vue';
 import { UserState } from '../../utils/userState/UserState.ts';
+import type { TestDataOutputDto } from '../../api/resolvers/test/dto/output/test-data-output.dto.ts';
+import { TestResolver } from '../../api/resolvers/test/test.resolver.ts';
+import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver.ts';
+import { UserRole } from '../../utils/userState/UserState.types.ts';
+import type { TestTypeDataOutputDto } from '../../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 
 export default defineComponent({
   name: 'TestResultsPage',
   computed: {
+    UserRole() {
+      return UserRole
+    },
     UserState() {
       return UserState;
     },
@@ -16,93 +24,52 @@ export default defineComponent({
     TestScoreList,
   },
   props: {
-    testId: Number
+    testId: {
+      type: String,
+      required: true,
+    },
+    testTypeId: {
+      type: String,
+      required: true,
+    }
   },
   data() {
     return {
-      testData: [
-        {
-          id: 1,
-          test_name: 'Кто ты в мире Danganronpa?',
-          current_points: 72,
-          max_points: 120,
-          time: '00:14:00',
-          username: 'Слудная Виктория',
-          createdAt: '15.05.2023 10:30',
-          valid: true,
-        },
-        {
-          id: 2,
-          test_name: 'Насколько хорошо ты знаешь Монокуму?',
-          current_points: 88,
-          max_points: 110,
-          time: '00:18:00',
-          username: 'Слудная Виктория',
-          createdAt: '22.06.2023 16:45',
-          valid: false,
-        },
-        {
-          id: 3,
-          test_name: 'Какой у тебя талант в стиле Danganronpa?',
-          current_points: 67,
-          max_points: 90,
-          time: '00:11:30',
-          username: 'Слудная Виктория',
-          createdAt: '01.07.2023 08:15',
-          valid: true,
-        },
-        {
-          id: 4,
-          test_name: 'Какой у тебя талант в стиле Danganronpa?',
-          current_points: 55,
-          max_points: 85,
-          time: '00:09:20',
-          username: 'Слудная Виктория',
-          createdAt: '10.08.2023 12:20',
-          valid: false,
-        },
-        {
-          id: 5,
-          test_name: 'Сможешь ли ты выжить в игре на выживание?',
-          current_points: 100,
-          max_points: 130,
-          time: '00:25:00',
-          username: 'Слудная Виктория',
-          createdAt: '05.09.2023 14:50',
-          valid: true,
-        },
-        {
-          id: 6,
-          test_name: 'Какой персонаж Danganronpa был бы твоим напарником?',
-          current_points: 45,
-          max_points: 75,
-          time: '00:06:40',
-          username: 'Слудная Виктория',
-          createdAt: '19.10.2023 09:10',
-          valid: false,
-        },
-        {
-          id: 7,
-          test_name: 'Сможешь ли ты раскрыть убийство?',
-          current_points: 90,
-          max_points: 100,
-          time: '00:16:25',
-          username: 'Слудная Виктория',
-          createdAt: '30.11.2023 17:30',
-          valid: true,
-        },
-        {
-          id: 8,
-          test_name: 'Какой ты монокуб?',
-          current_points: 65,
-          max_points: 95,
-          time: '00:10:10',
-          username: 'Слудная Виктория',
-          createdAt: '12.12.2023 11:55',
-          valid: true,
-        },
-      ],
-    };
+      testResolver: new TestResolver(),
+      currentTest: {} as TestDataOutputDto,
+      testsData: [] as TestDataOutputDto[],
+      userTestsData: [] as TestDataOutputDto[],
+      testType: {} as TestTypeDataOutputDto | null,
+      endpoint: ''
+    }
+  },
+  methods: {
+    async load() {
+      this.testType = await new TestTypeResolver().getById(parseInt(this.testTypeId))
+      switch (this.testType?.name) {
+        case 'SOUND_ADDITION':
+          this.endpoint = 'at';
+          break
+        case 'VISUAL_ADDITION':
+          this.endpoint = 'at';
+          break
+        case 'SIMPLE_SOUND':
+          this.endpoint = 'sst';
+          break
+        case 'SIMPLE_LIGHT':
+          this.endpoint = 'slt';
+          break
+        case 'HARD_LIGHT':
+          this.endpoint = 'hlt';
+          break
+      }
+      this.currentTest = await this.testResolver.getByTypeById(this.endpoint, parseInt(this.testId));
+      this.testsData = await this.testResolver.getAllByType(this.endpoint)
+      this.userTestsData = this.testsData.filter((test) => test.userId === UserState.id)
+    }
+  },
+  mounted() {
+      this.load()
   },
 });
 </script>
@@ -112,23 +79,35 @@ export default defineComponent({
     <h3>Текущий тест</h3>
     <section class="current-test">
       <TestStatisticsCard
-        :time="2"
-        :date="'33'"
-        :max-score="10"
-        :score="10"
+        v-if="currentTest.id != undefined"
+        :time="parseFloat(currentTest.averageCallbackTime.toFixed(2))"
+        :date="currentTest.createdAt.substring(0, 10)"
+        :max-score="currentTest.allSignals"
+        :test-category="testType?.name"
+        :user-name="UserState.username"
+        :score="
+          currentTest.misclicks ?
+          currentTest.allSignals - currentTest.misclicks :
+          currentTest.allSignals - currentTest.mistakes  !
+        "
+        :valid="currentTest.valid"
         :test-name="'Проверка на скорость'"
-      ></TestStatisticsCard>
-    </section>
-    <section class="user-test-history" v-if="testData.length > 0">
-      <h4>Ваши последние результаты:</h4>
-      <TestScoreList :tests="testData" :max-elements-count="5" />
+      />
+      <div class="user-test-history">
+        <h4>Ваши последние результаты:</h4>
+        <TestScoreList
+          :tests="userTestsData"
+          :max-elements-count="5"
+          :hide-user-id="true"
+        />
+      </div>
     </section>
     <section
-      class="user-test-history"
-      v-if="UserState.role == 'EXPERT' || UserState.role == 'ADMIN'"
+      class="test-history"
+      v-if="UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN"
     >
       <h4>Последние результаты всех пользователей:</h4>
-      <TestScoreList :tests="testData" :max-elements-count="5" />
+      <TestScoreList :tests="testsData" :max-elements-count="8" />
     </section>
   </div>
 </template>
@@ -137,16 +116,16 @@ export default defineComponent({
 .test-results-page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
   background-color: var(--background-primary);
-  padding: 15px;
-  width: 75vw;
+  padding: 2vw;
+  width: 90vw;
   border-radius: 15px;
+  gap: 2vw;
 }
 .current-test {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  height: 70vh;
+  gap: 2vw;
 }
 .user-test-history {
   display: flex;
@@ -155,10 +134,19 @@ export default defineComponent({
   border-radius: 15px;
   flex-direction: column;
   justify-content: center;
+  flex: 1.2;
+}
+
+.test-history {
+  background-color: var(--background-primary);
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+  padding: 15px 0;
+  height: 90vh;
 }
 h3 {
-  margin-bottom: 40px;
-  font-size: 48px;
+  font-size: 36px;
   color: rgb(237, 227, 227, 0.9);
   font-weight: bold;
 }

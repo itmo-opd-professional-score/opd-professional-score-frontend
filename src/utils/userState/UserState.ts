@@ -42,10 +42,10 @@ export const updateUserState = () => {
     const userData = jwtDecode(token) as UserJwt;
 
     if (userData) {
-      if (!userData.hasOwnProperty('age') || !userData.hasOwnProperty('gender')) {
-        localStorage.removeItem('token');
-        router.go(0)
-      }
+      // if (!userData.hasOwnProperty('age') || !userData.hasOwnProperty('gender')) {
+      //   localStorage.removeItem('token');
+      //   router.go(0)
+      // }
       UserState.id = userData.id;
       UserState.status = 'authorized';
       UserState.username = userData.username;
