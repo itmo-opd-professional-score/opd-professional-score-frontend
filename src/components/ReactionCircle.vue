@@ -9,8 +9,8 @@ export default defineComponent({
       centerX: 150,
       centerY: 150,
       speed: 0.001,
-      angle: -Math.PI / 2,
-      initialAngle: -Math.PI / 2,
+      angle: Math.PI / 2,
+      initialAngle: Math.PI / 2,
       startTime: 0,
       deviation: null as number | null,
       animationFrameId: null as number | null,
@@ -41,7 +41,7 @@ export default defineComponent({
     startAnimation() {
       this.isMoving = true;
       this.startTime = performance.now();
-      this.initialAngle = -Math.PI / 2;
+      this.initialAngle = Math.PI / 2;
       this.angle = this.initialAngle;
       this.animationFrameId = requestAnimationFrame(this.animate);
     },
@@ -53,7 +53,7 @@ export default defineComponent({
       this.isMoving = false;
     },
     clickButton(time: number) {
-      const idealTime = this.startTime + (Math.PI / (2 * this.speed));
+      const idealTime = this.startTime + (Math.PI / this.speed);
       const deviation = time - idealTime;
       this.deviation = deviation;
       console.log(`Отклонение от идеального времени: ${deviation} мс`);

@@ -14,6 +14,7 @@ import TestMapper from '../pages/tests/TestMapper.vue';
 import CreateTestBlockPage from '../pages/CreateTestBlockPage.vue';
 import AdditionVisualTest from '../pages/tests/addition/visual/AdditionVisualTest.vue';
 import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.vue';
+import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
 
 const routes = [
   {

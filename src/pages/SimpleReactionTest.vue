@@ -75,10 +75,9 @@ export default defineComponent({
       const seconds = Math.floor((this.remainingTimeValue % 60000) / 1000);
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
-    //TODO: change 2 * 60 to time from props!!!
     progressBarWidth(): string {
       if (this.remainingTimeValue === 0) return '0%';
-      const totalSeconds = 2 * 60;
+      const totalSeconds = this.time;
       const progress = (1 - (this.remainingTimeValue / (totalSeconds * 1000))) * 100;
       return `${progress}%`;
     },
@@ -105,8 +104,7 @@ export default defineComponent({
       this.initialAngle = -Math.PI / 2;
       this.angle = this.initialAngle;
       this.animationFrameId = requestAnimationFrame(this.animate);
-      //TODO: change 2 * 60 to time from props!!!
-      this.startTimer(2 * 60);
+      this.startTimer(this.time);
       (this.$refs.reactionCircle as any).startAnimation();
     },
     stopTest() {
