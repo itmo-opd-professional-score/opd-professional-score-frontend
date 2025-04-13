@@ -6,6 +6,7 @@ import type { TestDataOutputDto } from '../api/resolvers/test/dto/output/test-da
 import { useTestTypesStore } from '../store/test-types.store.ts';
 import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-data-output.dto.ts';
 import { UserState } from '../utils/userState/UserState.ts';
+import router from '../router/router.ts';
 
 const props = withDefaults(
   defineProps<{
@@ -61,7 +62,11 @@ const prevPage = () => {
       <div class="test_type">Пройден</div>
       <div class="test_type">Дата</div>
     </div>
-    <TestManagerElement v-for="item in paginatedData" :key="item.id">
+    <TestManagerElement
+      v-for="item in paginatedData"
+      :key="item.id"
+      @click="router.push(`/test/results/${item.id}`)"
+    >
       <template #id>{{ item.id }}</template>
       <template #test_type>{{ testTypesStore.checkTestType(item) }}</template>
       <template #average_callback>{{

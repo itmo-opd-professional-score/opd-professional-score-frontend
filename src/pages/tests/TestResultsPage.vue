@@ -15,6 +15,9 @@ export default defineComponent({
     TestStatisticsCard,
     TestScoreList,
   },
+  props: {
+    testId: Number
+  },
   data() {
     return {
       testData: [
