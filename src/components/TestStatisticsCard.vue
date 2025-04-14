@@ -1,8 +1,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
+import CommonButton from './UI/CommonButton.vue';
 
 export default defineComponent({
   name: 'StatisticsCard',
+  components: { CommonButton },
   props: {
     testName: {
       type: String,
@@ -42,40 +44,44 @@ export default defineComponent({
       return percentage >= 80 ? 'green' : percentage >= 50 ? 'orange' : 'red';
     },
   },
+  methods: {
+    async generateTestLink() {
+      //TODO
+    }
+  }
 });
 </script>
 
 <template>
   <div class="statistics-card">
     <h4 class="title">{{ testName }}</h4>
-    <div class="results">
-      <div class="progress-bar result">
-        <div class="valid">
-          <p>{{ scorePercentage}}</p>
-        </div>
-        <div class="bar">
-          <div
-            class="progress"
-            :style="{ width: scorePercentage, backgroundColor: cardColors }"
-          ></div>
-        </div>
+    <div class="result">
+      <div class="valid">
+        <p>{{ scorePercentage}}</p>
       </div>
-      <div class="score result">
-        <p class="fields">Правильные ответы: {{ score }} / {{ maxScore }}</p>
+      <div class="bar">
+        <div
+          class="progress"
+          :style="{ width: scorePercentage, backgroundColor: cardColors }"
+        ></div>
       </div>
-      <div class="time result">
-        <p class="fields">Среднее время реакции: {{ time }} мс</p>
-      </div>
-      <div class="valid result">
-        <p class="fields">Статус:
-          <span :style="{ color: valid ? 'green' : 'red'}">
+      <p class="fields">Правильные ответы: {{ score }} / {{ maxScore }}</p>
+      <p class="fields">Респондент: {{ userName }}</p>
+      <p class="fields">Среднее время реакции: {{ time }} мс</p>
+      <p class="fields">Статус:
+        <span :style="{ color: valid ? 'green' : 'red'}">
             {{ valid ? 'Сдан' : 'Не сдан' }}
           </span>
-        </p>
-      </div>
-      <div class="date result">
-        <p class="fields">Дата: {{ date }}</p>
-      </div>
+      </p>
+      <p class="fields">Дата: {{ date }}</p>
+    </div>
+    <div class="share-link">
+      <CommonButton>
+        <template #placeholder>Другие тесты</template>
+      </CommonButton>
+      <CommonButton class="submit_button" @click="generateTestLink()">
+        <template #placeholder>Поделиться тестом</template>
+      </CommonButton>
     </div>
   </div>
 </template>
@@ -97,10 +103,10 @@ export default defineComponent({
   color: #ffffff;
   font-weight: bold;
 }
-.results {
+.result, .share-link {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: center;
   background-color: var(--background-secondary);
   padding: 1vw;
   gap: 1vw;
@@ -112,14 +118,17 @@ export default defineComponent({
   flex-direction: column;
 }
 
-.fields {
-  font-size: 16px;
-  font-weight: 500;
-  display: flex;
-  gap: 0.5vw;
+.share-link {
+  margin-top: auto;
 }
 
-.progress-bar .valid p{
+.fields {
+  font-size: 18px;
+  font-weight: 500;
+  display: flex;
+}
+
+.valid p {
   display: flex;
   justify-content: center;
   padding: 1vw;
