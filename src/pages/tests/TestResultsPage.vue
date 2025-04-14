@@ -76,14 +76,13 @@ export default defineComponent({
 
 <template>
   <div class="test-results-page">
-    <h3>Текущий тест</h3>
     <section class="current-test">
       <TestStatisticsCard
         v-if="currentTest.id != undefined"
         :time="parseFloat(currentTest.averageCallbackTime.toFixed(2))"
         :date="currentTest.createdAt.substring(0, 10)"
         :max-score="currentTest.allSignals"
-        :test-category="testType?.name"
+        :test-name="testType ? testType.description : ''"
         :user-name="UserState.username"
         :score="
           currentTest.misclicks ?
@@ -91,7 +90,6 @@ export default defineComponent({
           currentTest.allSignals - currentTest.mistakes  !
         "
         :valid="currentTest.valid"
-        :test-name="'Проверка на скорость'"
       />
       <div class="user-test-history">
         <h4>Ваши последние результаты:</h4>
@@ -116,25 +114,26 @@ export default defineComponent({
 .test-results-page {
   display: flex;
   flex-direction: column;
-  background-color: var(--background-primary);
-  padding: 2vw;
   width: 90vw;
-  border-radius: 15px;
-  gap: 2vw;
+  gap: 4vw;
 }
 .current-test {
   display: flex;
-  height: 70vh;
+  height: 80vh;
   gap: 2vw;
+  padding: 2vw;
+  border-radius: 15px;
+  background-color: var(--background-primary);
 }
 .user-test-history {
+  gap: 2vw;
   display: flex;
   background-color: var(--background-primary);
   padding: 15px;
   border-radius: 15px;
   flex-direction: column;
   justify-content: center;
-  flex: 1.2;
+  flex: 2;
 }
 
 .test-history {
@@ -144,20 +143,15 @@ export default defineComponent({
   border-radius: 15px;
   padding: 15px 0;
   height: 90vh;
-}
-h3 {
-  font-size: 36px;
-  color: rgb(237, 227, 227, 0.9);
-  font-weight: bold;
+  gap: 2vw;
 }
 h4 {
   display: flex;
   justify-content: center;
   border-radius: 10px;
-  padding: 0.5rem 0;
-  margin-bottom: 0.5rem;
-  font-size: 1.25rem;
+  margin-top: 1vw;
+  font-size: 24px;
   font-weight: bolder;
-  color: rgb(237, 227, 227, 0.9);
+  color: white;
 }
 </style>

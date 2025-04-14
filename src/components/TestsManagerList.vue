@@ -68,7 +68,7 @@ const prevPage = () => {
       @click="router.push(`/test/results/${item.testTypeId}/${item.id}`)"
     >
       <template #id>{{ item.id }}</template>
-      <template #test_type>{{ testTypesStore.checkTestType(item) }}</template>
+      <template #test_type>{{ testTypesStore.checkTestType(item).description }}</template>
       <template #average_callback>{{
         item.averageCallbackTime.toFixed(2)
       }}</template>

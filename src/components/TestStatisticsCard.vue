@@ -12,10 +12,6 @@ export default defineComponent({
       type: String,
       default: 'Anonymous',
     },
-    testCategory: {
-      type: String,
-      default: 'Без категории',
-    },
     score: {
       type: Number,
       required: true,
@@ -52,30 +48,35 @@ export default defineComponent({
 <template>
   <div class="statistics-card">
     <h4 class="title">{{ testName }}</h4>
-    <p class="category fields">Категория: {{ testCategory }}</p>
-    <p class="user fields">Респондент: {{ userName }}</p>
-    <div class="result">
-      <div class="score-result">
-        <p class="score fields">
-          Результат: {{ score }} / {{ maxScore }} ({{ scorePercentage }})
-        </p>
-        <div class="progress-bar">
+    <div class="results">
+      <div class="progress-bar result">
+        <div class="valid">
+          <p>{{ scorePercentage}}</p>
+        </div>
+        <div class="bar">
           <div
             class="progress"
             :style="{ width: scorePercentage, backgroundColor: cardColors }"
           ></div>
         </div>
       </div>
-      <div class="time-result">
-        <p class="text fields">Затраченное время:</p>
-        <p class="time fields">{{ time }}</p>
+      <div class="score result">
+        <p class="fields">Правильные ответы: {{ score }} / {{ maxScore }}</p>
       </div>
-      <div class="level-result">
-        <p class="level fields">Оценка:</p>
+      <div class="time result">
+        <p class="fields">Среднее время реакции: {{ time }} мс</p>
+      </div>
+      <div class="valid result">
+        <p class="fields">Статус:
+          <span :style="{ color: valid ? 'green' : 'red'}">
+            {{ valid ? 'Сдан' : 'Не сдан' }}
+          </span>
+        </p>
+      </div>
+      <div class="date result">
+        <p class="fields">Дата: {{ date }}</p>
       </div>
     </div>
-    <p class="date">Дата: {{ date }}</p>
-    <p class="valid">Валидность: {{ valid }}</p>
   </div>
 </template>
 
@@ -84,7 +85,7 @@ export default defineComponent({
   background-color: var(--background-primary);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 2vw;
   padding: 15px;
   border-radius: 15px;
   flex: 1;
@@ -92,52 +93,63 @@ export default defineComponent({
 
 .title {
   font-size: 24px;
-  margin: 15px 0;
+  margin-top: 1vw;
   color: #ffffff;
   font-weight: bold;
 }
-.result {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  background-color: var(--background-primary);
-  padding: 10px;
-  border-radius: 15px;
-}
-.score-result,
-.time-result,
-.level-result {
+.results {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  justify-content: space-around;
+  background-color: var(--background-secondary);
+  padding: 1vw;
+  gap: 1vw;
+  border-radius: 15px;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
 }
 
 .fields {
   font-size: 16px;
-  color: rgb(237, 227, 227, 0.9);
   font-weight: 500;
+  display: flex;
+  gap: 0.5vw;
 }
-.date {
-  margin-top: 30px;
+
+.progress-bar .valid p{
+  display: flex;
+  justify-content: center;
+  padding: 1vw;
+  font-size: 36px;
 }
-.date,
-.valid {
-  color: #3a3e53;
-}
-.valid {
-  margin-bottom: 15px;
-}
-.progress-bar {
-  max-width: 30rem;
-  height: 10px;
-  color: rgb(237, 227, 227, 0.9);
-  border-radius: 5px;
+
+.bar {
+  height: 1.2vw;
+  color: white;
+  border-radius: 15px;
   overflow: hidden;
-  margin-bottom: 30px;
+  border: solid 2px white;
+  position: relative;
+
+  &::before {
+    position: absolute;
+    content: 'df';
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-primary);
+  }
 }
 
 .progress {
   height: 100%;
   transition: width 0.5s ease-in-out;
+  border-radius: 15px;
+  position: absolute;
+  inset: 0;
 }
 </style>
