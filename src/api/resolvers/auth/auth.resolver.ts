@@ -6,7 +6,6 @@ import type { AuthUserOutputDto } from './dto/output/auth-user-output.dto.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import type { DefaultErrorDto } from '../../dto/common/default-error.dto.ts';
 import { updateUserState } from '../../../utils/userState/UserState.ts';
-import { useRouter } from 'vue-router';
 import type { SendCodeAgainInputDto } from './dto/input/send-code-again-input.dto.ts';
 import type { RegUserSecondStepInputDto } from './dto/input/reg-user-second-step-input.dto.ts';
 import router from '../../../router/router.ts';
@@ -14,7 +13,6 @@ import router from '../../../router/router.ts';
 export class AuthResolver {
   private apiResolver = new ApiResolver('auth');
   private popupStore = usePopupStore();
-  private router = useRouter();
 
   public async login(data: LoginUserInputDto) {
     return await this.apiResolver
@@ -26,11 +24,11 @@ export class AuthResolver {
       .then((res) => {
         localStorage.setItem('token', res.body.token);
         updateUserState();
-
         this.popupStore.activateInfoPopup('Login successfully');
-        this.router.push('/profile');
+        router.push('/profile');
       })
       .catch((err) => {
+        console.log(err)
         const e = err.response.data as DefaultErrorDto;
         this.popupStore.activateErrorPopup(
           `Error code: ${e.status}. ${e.message}`,
@@ -76,7 +74,7 @@ export class AuthResolver {
         updateUserState();
 
         this.popupStore.activateInfoPopup('Register successfully');
-        this.router.push('/profile');
+        router.push('/profile');
       })
       .catch((err) => {
         const e = err.response.data as DefaultErrorDto;
