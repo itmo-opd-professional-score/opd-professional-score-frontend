@@ -29,7 +29,6 @@ export const updateUserState = () => {
     const birthYear = new Date(birthDate).getFullYear();
     const currentYear = today.getFullYear();
     let age = currentYear - birthYear;
-    // Adjust age if birthday hasn't occurred yet this year
     const birthMonth = new Date(birthDate).getMonth();
     const birthDay = new Date(birthDate).getDate();
     if (birthMonth > today.getMonth() || (birthMonth === today.getMonth() && birthDay > today.getDate())) { age--; }
@@ -42,10 +41,10 @@ export const updateUserState = () => {
     const userData = jwtDecode(token) as UserJwt;
 
     if (userData) {
-      // if (!userData.hasOwnProperty('age') || !userData.hasOwnProperty('gender')) {
-      //   localStorage.removeItem('token');
-      //   router.go(0)
-      // }
+      if (!userData.hasOwnProperty('age') || !userData.hasOwnProperty('gender')) {
+        localStorage.removeItem('token');
+        router.go(0)
+      }
       UserState.id = userData.id;
       UserState.status = 'authorized';
       UserState.username = userData.username;
