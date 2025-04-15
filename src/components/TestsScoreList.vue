@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import TestScore from './UI/TestScoreElement.vue';
-import { computed, h, type PropType, ref } from 'vue';
+import { computed, type PropType, ref, watch } from 'vue';
 import CommonButton from './UI/CommonButton.vue';
 import type { TestDataOutputDto } from '../api/resolvers/test/dto/output/test-data-output.dto.ts';
+import TestFilter from './testFilter/TestFilter.vue';
+import type { UserSex } from '../utils/userState/UserState.types.ts';
+import { UserResolver } from '../api/resolvers/user/user.resolver.ts';
+import type { EnabledFilters } from './testFilter/testFilter.types';
 
 const props = defineProps({
   maxElementsCount: {
@@ -13,19 +17,29 @@ const props = defineProps({
     type: Array as PropType<TestDataOutputDto[]>,
     required: true,
   },
+  enabledFilters: {
+    type: {} as PropType<EnabledFilters>,
+    default: {
+      gender: false,
+      age: false
+    }
+  },
   hideUserId: Boolean
 });
 
+const userResolver = new UserResolver()
 const currentPage = ref(1);
+const currentGender = ref<UserSex | null>(null)
+const filteredTests = ref<TestDataOutputDto[]>(props.tests);
 
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * props.maxElementsCount;
   const end = start + props.maxElementsCount;
-  return props.tests.slice(start, end);
+  return filteredTests.value.slice(start, end);
 });
 
 const totalPages = computed(() => {
-  return Math.ceil(props.tests.length / props.maxElementsCount);
+  return Math.ceil(filteredTests.value.length / props.maxElementsCount);
 });
 
 const nextPage = () => {
@@ -39,10 +53,37 @@ const prevPage = () => {
     currentPage.value--;
   }
 };
+
+const filterByGender = async (gender: UserSex | null) => {
+  filteredTests.value = []
+  if (gender == null) {
+    filteredTests.value = props.tests
+  } else {
+    const filtered = await Promise.all(
+      props.tests.map(async (test) => {
+        if (test.userId == null) return false;
+        const user = await userResolver.getById(test.userId);
+        return user?.body.gender === gender ? test : false;
+      })
+    );
+
+    filteredTests.value = filtered.filter(test => test != false);
+  }
+  currentGender.value = gender
+}
+
+watch(() => props.tests, (newTests) => {
+  filteredTests.value = newTests;
+})
+
 </script>
 
 <template>
   <div class="component_container">
+    <TestFilter
+      :enabledFilters="enabledFilters"
+      @gender-update="(gender: UserSex) => filterByGender(gender)"
+    />
     <div :class="hideUserId ? 'hide-username header' : 'header'">
       <div class="id" id="id">Id</div>
       <div class="score">Score</div>
