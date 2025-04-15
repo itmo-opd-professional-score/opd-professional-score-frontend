@@ -20,11 +20,11 @@
 
       <div class="buttons">
         <CommonButton
-            v-for="color in colors"
-            :key="color"
-            class="color-btn"
-            :style="{ backgroundColor: colorMap[color] }"
-            @click="handleColorClick(color)"
+          v-for="color in colors"
+          :key="color"
+          class="color-btn"
+          :style="{ backgroundColor: colorMap[color] }"
+          @click="handleColorClick(color)"
         ></CommonButton>
       </div>
 
@@ -46,9 +46,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue'
-import CommonButton from './CommonButton.vue'
+import CommonButton from './UI/CommonButton.vue'
 
-const colors = ['red', 'blue', 'green', 'yellow']
+type Color = 'red' | 'blue' | 'green' | 'yellow'
+const colors: Color[] = ['red', 'blue', 'green', 'yellow']
 const colorMap = {
   red: '#ff4444',
   blue: '#4444ff',
@@ -59,20 +60,23 @@ const TIME_LIMIT = 2000
 
 const testStarted = ref(false)
 const testCompleted = ref(false)
-const currentColor = ref('')
+const currentColor = ref<Color | 'white'>('white')
 const currentAttempt = ref(0)
 const correctAnswers = ref(0)
 const wrongAnswers = ref(0)
-const reactionTimes = ref([])
-const startTime = ref(null)
+const reactionTimes = ref<number[]>([])
+const startTime = ref<number | null>(null)
 const timeLeft = ref(TIME_LIMIT)
-let timeoutId = null
-let timerInterval = null
+const flashTimeouts = ref<number[]>([])
+let timeoutId: number | undefined
+let timerInterval: number | undefined
+
+
 
 const avgTime = computed(() => {
   return reactionTimes.value.length > 0
-      ? Math.round(reactionTimes.value.reduce((a, b) => a + b, 0) / reactionTimes.value.length)
-      : 0
+    ? Math.round(reactionTimes.value.reduce((a, b) => a + b, 0) / reactionTimes.value.length)
+    : 0
 })
 
 const bestTime = computed(() => {
@@ -134,23 +138,24 @@ function flashScreen() {
   }
 
   flash()
-  flashTimeouts.push(setTimeout(() => {
+  flashTimeouts.value.push(setTimeout(() => {
     flash()
-    flashTimeouts.push(setTimeout(() => {
+    flashTimeouts.value.push(setTimeout(() => { // Исправлено на flashTimeouts.value
       flash()
-      flashTimeouts.push(setTimeout(() => showNextColor(), 200))
+      flashTimeouts.value.push(setTimeout(() => showNextColor(), 200)) // Исправлено на flashTimeouts.value
     }, 200))
   }, 200))
 }
+
 function clearFlashTimeouts() {
-  flashTimeouts.forEach(timeout => clearTimeout(timeout))
-  flashTimeouts = []
+  flashTimeouts.value.forEach((timeout: number) => clearTimeout(timeout))
+  flashTimeouts.value = []
 }
 
-function handleColorClick(selectedColor) {
+function handleColorClick(selectedColor: 'red' | 'blue' | 'green' | 'yellow') {
   if (!startTime.value) return
 
-  clearInterval(timerInterval)
+  if (timerInterval) clearInterval(timerInterval)
   const reactionTime = Date.now() - startTime.value
 
   if (selectedColor === currentColor.value) {
@@ -162,17 +167,19 @@ function handleColorClick(selectedColor) {
 
   startTime.value = null
   clearTimeout(timeoutId)
+  clearFlashTimeouts() // Добавлена очистка таймаутов
   showNextColor()
 }
 
 function endTest() {
   testCompleted.value = true
+  clearFlashTimeouts() // Добавлена очистка таймаутов
 }
 
 function restartTest() {
   testStarted.value = false
   testCompleted.value = false
-  currentColor.value = ''
+  currentColor.value = 'white'
   currentAttempt.value = 0
   correctAnswers.value = 0
   wrongAnswers.value = 0
@@ -180,22 +187,25 @@ function restartTest() {
   startTime.value = null
   clearTimeout(timeoutId)
   clearInterval(timerInterval)
+  clearFlashTimeouts() // Добавлена очистка таймаутов
 }
 
 onUnmounted(() => {
   clearTimeout(timeoutId)
   clearInterval(timerInterval)
+  clearFlashTimeouts() // Добавлена очистка таймаутов
 })
 </script>
 
 <style scoped>
+/* Стили остались без изменений */
 .container {
   text-align: center;
   background: white;
-  padding: 5vh 3vw; /* Адаптивные отступы */
-  border-radius: 1vh; /* Относительно высоты экрана */
+  padding: 5vh 3vw;
+  border-radius: 1vh;
   box-shadow: 0 0 2vw rgba(0, 0, 0, 0.1);
-  max-width: 80vw; /* Максимальная ширина */
+  max-width: 80vw;
   width: 90vw;
   margin: 0 auto;
   position: absolute;
@@ -207,10 +217,10 @@ onUnmounted(() => {
 
 .color-display {
   width: 100%;
-  height: 25vh; /* Относительно высоты экрана */
+  height: 25vh;
   margin: 2vh 0;
   border-radius: 1vh;
-  border: 0.3vw solid #333; /* Относительно ширины */
+  border: 0.3vw solid #333;
   transition: background-color 0.2s;
 }
 
