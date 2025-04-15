@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue'
-import CommonButton from './UI/CommonButton.vue'
+import CommonButton from '../../../components/UI/CommonButton.vue'
 
 type Color = 'red' | 'blue' | 'green' | 'yellow'
 const colors: Color[] = ['red', 'blue', 'green', 'yellow']

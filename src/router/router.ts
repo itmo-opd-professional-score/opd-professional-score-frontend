@@ -18,6 +18,7 @@ import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
+import HardLightTest from '../pages/tests/hard/HardLightTest.vue';
 
 const routes = [
   {
@@ -97,6 +98,21 @@ const routes = [
     meta: {ruName: "Оценка скорости простых реакции на свет", requiresAuth: true}
   },
   {
+    path: '/test/simple/rdo',
+    component: SimpleReactionTest,
+    meta: {ruName: "Оценка скорости реакции на движущийся объект", requiresAuth: true},
+    props: {
+      time: 10,
+      showTimer: true,
+      showProgressBar: true
+    }
+  },
+  {
+    path: '/test/hard/light',
+    component: HardLightTest,
+    meta: { ruName: "Оценка скорости реакции на сложный световой сигнал", requiresAuth: true },
+  },
+  {
     path: '/test/results/:testTypeId/:testId',
     props: true,
     component: TestResultsPage,
@@ -117,16 +133,6 @@ const routes = [
       meta: { ruName: 'Настройки теста', requiresAuth: true },
      props: true,
     },
-  {
-    path: '/simple-reaction-test',
-    name: 'SimpleReactionTest',
-    component: SimpleReactionTest,
-    props: {
-      time: 10,
-      showTimer: true,
-      showProgressBar: true
-    }
-  }
 ];
 
 const router = createRouter({
