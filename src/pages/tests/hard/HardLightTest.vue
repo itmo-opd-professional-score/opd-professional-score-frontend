@@ -16,7 +16,7 @@ f<template>
       <div class="timer-container">
         <div class="timer-bar" :style="timerStyle"></div>
       </div>
-      <div class="attempt-counter">Попытка: {{ currentAttempt }}/ {{ ALL_SIGNALS }}</div>
+      <div class="attempt-counter">Попытка: {{ currentAttempt }} / {{ ALL_SIGNALS }}</div>
 
       <div class="color-display" :style="{ backgroundColor: currentColor }"></div>
 
@@ -72,7 +72,7 @@ const colorMap = {
   yellow: '#ffff44'
 }
 const TIME_LIMIT = 2000
-const ALL_SIGNALS = 3
+const ALL_SIGNALS = 15
 
 const testStarted = ref(false)
 const testCompleted = ref(false)
