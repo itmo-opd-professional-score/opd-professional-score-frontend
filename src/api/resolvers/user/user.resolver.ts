@@ -27,6 +27,21 @@ export class UserResolver {
       });
   }
 
+  public async getById(id: number) {
+    return await this.apiResolver
+      .request<
+        null,
+        DefaultInputDto<UserDataOutputDto>
+      >(`getUserById/${id}`, 'GET', null, this.token ? this.token : undefined)
+      .catch((err) => {
+        const e = err.response.data as DefaultErrorDto;
+        this.popupStore.activateErrorPopup(
+          `Error code: ${e.status}. ${e.message}`,
+        );
+        return null;
+      });
+  }
+
   public async getByEmail(email: string) {
     return await this.apiResolver
       .request<

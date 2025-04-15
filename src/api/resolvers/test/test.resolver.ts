@@ -6,6 +6,7 @@ import type { TestDataOutputDto } from './dto/output/test-data-output.dto.ts';
 import type { CreateAdditionInputDto } from './dto/input/create-addition-input.dto.ts';
 import type { CreateOutputDto } from './dto/output/create-output.dto.ts';
 import type { CreateSimpleInputDto } from './dto/input/create-simple-input.dto.ts';
+import type { TestType } from '../../../pages/tests/types';
 
 export class TestResolver {
   private apiResolver = new ApiResolverUtil('test');
@@ -19,6 +20,15 @@ export class TestResolver {
       null,
       this.token ? this.token : undefined,
     );
+  }
+
+  public async getByTypeById(typeEndpoint: string, id: number) {
+    return await this.apiResolver.request<null, TestDataOutputDto>(
+      `${typeEndpoint}/getById/${id}`,
+      'GET',
+      null,
+      this.token ? this.token : undefined,
+    )
   }
 
   public async getTestsByTypeByUserId(userId: number, typeEndpoint: string) {
@@ -70,5 +80,17 @@ export class TestResolver {
       .catch((error) => {
         this.usePopUp.activateErrorPopup(error.message);
       });
+  }
+
+  public async generateTestLink(testType: {testType: TestType}) {
+    return await this.apiResolver.request<{testType: TestType}, string>(
+      'getInvitationTestToken',
+      'POST',
+      testType,
+      this.token ? this.token : undefined,
+    ).catch((err) => {
+      this.usePopUp.activateErrorPopup(err.message);
+      return null
+    })
   }
 }

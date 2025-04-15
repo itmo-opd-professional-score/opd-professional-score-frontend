@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import TestScore from './UI/TestScoreElement.vue';
-import { computed, type PropType, ref } from 'vue';
+import { computed, h, type PropType, ref } from 'vue';
 import CommonButton from './UI/CommonButton.vue';
-import type { TestsScoresDto } from '../api/dto/tests-scores.dto.ts';
+import type { TestDataOutputDto } from '../api/resolvers/test/dto/output/test-data-output.dto.ts';
 
 const props = defineProps({
   maxElementsCount: {
@@ -10,9 +10,10 @@ const props = defineProps({
     default: 5,
   },
   tests: {
-    type: Array as PropType<TestsScoresDto[]>,
+    type: Array as PropType<TestDataOutputDto[]>,
     required: true,
   },
+  hideUserId: Boolean
 });
 
 const currentPage = ref(1);
@@ -42,23 +43,35 @@ const prevPage = () => {
 
 <template>
   <div class="component_container">
-    <div class="header">
+    <div :class="hideUserId ? 'hide-username header' : 'header'">
       <div class="id" id="id">Id</div>
-      <div class="test_name" id="test_name">Name</div>
       <div class="score">Score</div>
       <div class="time">Time</div>
-      <div class="username">Username</div>
+      <div class="username" v-if="!hideUserId">Username</div>
       <div class="createdAt">Pass date</div>
       <div class="valid">Valid</div>
     </div>
-    <TestScore v-for="item in paginatedData" :key="item.id">
+    <TestScore
+      v-for="item in paginatedData"
+      :key="item.id"
+      :class="hideUserId ? 'hide-username' : ''"
+      :user-id="
+      !hideUserId ?
+        item.userId ?
+          item.userId :
+          -1 :
+        undefined"
+    >
       <template #id>{{ item.id }}</template>
-      <template #test_name>{{ item.test_name }}</template>
-      <template #current_points>{{ item.current_points }}</template>
-      <template #max_points>{{ item.max_points }}</template>
-      <template #time>{{ item.time }}</template>
-      <template #username>{{ item.username }}</template>
-      <template #createdAt>{{ item.createdAt }}</template>
+      <template #current_points>{{
+          item.misclicks ?
+          item.allSignals - item.misclicks :
+          item.allSignals - item.mistakes  !
+        }}</template>
+      <template #max_points>{{ item.allSignals }}</template>
+      <template #time>{{ item.averageCallbackTime.toFixed(2) }}</template>
+      <template #username v-if="!hideUserId">{{ item.userId}}</template>
+      <template #createdAt>{{ item.createdAt.substring(0, 10) }}</template>
       <template #valid>{{ item.valid }}</template>
     </TestScore>
 
@@ -79,6 +92,7 @@ const prevPage = () => {
 <style scoped>
 .component_container {
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -88,8 +102,9 @@ const prevPage = () => {
 .pagination_controls {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   width: 95%;
-  margin-top: 1rem;
+  margin-top: auto;
   user-select: none;
 }
 
@@ -102,8 +117,12 @@ const prevPage = () => {
   justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 1fr 1.5fr 1.25fr 1fr 1.5fr 1fr 1fr;
+  grid-template-columns: 1fr repeat(5, 2fr);
   margin-bottom: 1rem;
+}
+
+.hide-username {
+  grid-template-columns: 1fr repeat(4, 2fr);
 }
 
 .header:hover {

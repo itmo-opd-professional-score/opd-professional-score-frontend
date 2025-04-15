@@ -4,7 +4,7 @@ defineProps<{ disabled?: boolean }>();
 
 <template>
   <button :disabled="disabled" class="wrapper">
-    <slot name="placeholder">Button name</slot>
+    <slot name="placeholder"></slot>
   </button>
 </template>
 
@@ -30,8 +30,8 @@ defineProps<{ disabled?: boolean }>();
   transition-duration: 0.2s;
 }
 
-.wrapper[disabled='disabled']:hover {
-  cursor: wait;
+.wrapper:disabled:hover {
+  cursor: not-allowed;
 }
 
 .wrapper.submit_button {
@@ -56,5 +56,11 @@ defineProps<{ disabled?: boolean }>();
   background-color: var(--danger-button-primary);
   border-color: transparent;
   color: white;
+}
+
+.wrapper.tranparent {
+  background-color: transparent;
+  border-color: transparent;
+  color: black
 }
 </style>
