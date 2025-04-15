@@ -14,8 +14,10 @@ import CreateTestBlockPage from '../pages/CreateTestBlockPage.vue';
 import AdditionVisualTest from '../pages/tests/addition/visual/AdditionVisualTest.vue';
 import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.vue';
 import SelectSettingsPage from '../pages/SelectSettingsPage.vue';
-import LightSimpleTest from "../pages/tests/LightSimpleTest.vue";
-import SimpleSoundTest from '../pages/SimpleSoundTest.vue';
+import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
+import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
+import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
+import TestResultsPage from '../pages/tests/TestResultsPage.vue';
 
 const routes = [
   {
@@ -71,7 +73,7 @@ const routes = [
     meta: { ruName: 'Изменение пароля' },
   },
   {
-    path: '/test/additon/visual',
+    path: '/test/addition/visual',
     component: AdditionVisualTest,
     meta: { requiresAuth: true, ruName: 'Тест на определение четности' },
   },
@@ -85,14 +87,20 @@ const routes = [
     },
   },
   {
-    path: '/test/sound/simple',
+    path: '/test/simple/sound',
     component: SimpleSoundTest,
     meta: { ruName: 'Простой звуковой тест', requiresAuth: true },
   },
   {
-    path: '/test/light/simple',
-    component: LightSimpleTest,
+    path: '/test/simple/light',
+    component: SimpleLightTest,
     meta: {ruName: "Оценка скорости простых реакции на свет", requiresAuth: true}
+  },
+  {
+    path: '/test/results/:testTypeId/:testId',
+    props: true,
+    component: TestResultsPage,
+    meta: {ruName: "Результаты прохождения теста", requiresAuth: true},
   },
   {
     path: `/invitation/test/:token`,
@@ -109,6 +117,16 @@ const routes = [
       meta: { ruName: 'Настройки теста', requiresAuth: true },
      props: true,
     },
+  {
+    path: '/simple-reaction-test',
+    name: 'SimpleReactionTest',
+    component: SimpleReactionTest,
+    props: {
+      time: 10,
+      showTimer: true,
+      showProgressBar: true
+    }
+  }
 ];
 
 const router = createRouter({

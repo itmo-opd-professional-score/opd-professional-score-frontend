@@ -4,11 +4,15 @@ import CommonButton from './UI/CommonButton.vue';
 import TestManagerElement from './UI/TestManagerElement.vue';
 import type { TestDataOutputDto } from '../api/resolvers/test/dto/output/test-data-output.dto.ts';
 import { useTestTypesStore } from '../store/test-types.store.ts';
+import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-data-output.dto.ts';
+import { UserState } from '../utils/userState/UserState.ts';
+import router from '../router/router.ts';
 
 const props = withDefaults(
   defineProps<{
     maxElementsCount: number;
     tests: TestDataOutputDto[];
+    users?: UserDataOutputDto[]
   }>(),
   {
     maxElementsCount: 5,
@@ -58,13 +62,25 @@ const prevPage = () => {
       <div class="test_type">Пройден</div>
       <div class="test_type">Дата</div>
     </div>
-    <TestManagerElement v-for="item in paginatedData" :key="item.id">
+    <TestManagerElement
+      v-for="item in paginatedData"
+      :key="item.id"
+      @click="router.push(`/test/results/${item.testTypeId}/${item.id}`)"
+    >
       <template #id>{{ item.id }}</template>
-      <template #test_type>{{ testTypesStore.checkTestType(item) }}</template>
+      <template #test_type>{{ testTypesStore.checkTestType(item).description }}</template>
       <template #average_callback>{{
         item.averageCallbackTime.toFixed(2)
       }}</template>
-      <template #user>{{ item.userId ? item.userId : 'Аноним' }}</template>
+      <template #user>
+        {{
+          item.userId ?
+            UserState.id == item.userId ?
+              'Вы' :
+              users?.find(user => user.id == item.userId)?.username :
+            'Аноним'
+        }}
+      </template>
       <template #valid>{{ item.valid }}</template>
       <template #created_at>{{ item.createdAt.substring(0, 10) }}</template>
     </TestManagerElement>
@@ -96,7 +112,7 @@ const prevPage = () => {
 .pagination_controls {
   display: flex;
   justify-content: space-between;
-  width: 95%;
+  width: 100%;
   margin-top: auto;
   user-select: none;
 }
@@ -104,7 +120,7 @@ const prevPage = () => {
 .header {
   background: var(--background-secondary);
   border-radius: 10px;
-  width: 95%;
+  width: 100%;
   height: 4rem;
   padding: 0 1rem;
   justify-content: center;
