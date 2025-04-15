@@ -3,7 +3,9 @@ export type TestType =
   | 'VISUAL_ADDITION'
   | 'SIMPLE_LIGHT'
   | 'SIMPLE_SOUND'
-  | 'HARD_LIGHT';
+  | 'HARD_LIGHT'
+  | 'SIMPLE_RDO'
+  | 'HARD_RDO';
 export interface TestJwt {
   testId: number | null;
   testType: TestType;

@@ -8,6 +8,8 @@ import AdditionSoundTest from './addition/sound/AdditionSoundTest.vue';
 import AdditionVisualTest from './addition/visual/AdditionVisualTest.vue';
 import SimpleSoundTest from './simple/SimpleSoundTest.vue';
 import SimpleLightTest from './simple/SimpleLightTest.vue';
+import HardLightTest from './hard/HardLightTest.vue';
+import SimpleRdoTest from './simple/SimpleRdoTest.vue';
 
 const props = defineProps<{
   token: string;
@@ -24,6 +26,10 @@ const testComponent = computed(() => {
         return SimpleSoundTest;
       case 'SIMPLE_LIGHT':
         return SimpleLightTest;
+      case 'HARD_LIGHT':
+        return HardLightTest;
+      case 'SIMPLE_RDO':
+        return SimpleRdoTest;
       default:
         return NotFound;
     }

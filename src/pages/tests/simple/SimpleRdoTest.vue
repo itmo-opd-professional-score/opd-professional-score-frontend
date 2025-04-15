@@ -1,14 +1,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import ReactionCircle from "../components/ReactionCircle.vue";
-import CommonButton from "../components/UI/CommonButton.vue";
-import { usePopupStore } from '../store/popup.store.ts';
-import { TestResolver } from '../api/resolvers/test/test.resolver.ts';
-import { UserState } from '../utils/userState/UserState.ts';
-import router from '../router/router.ts';
+import ReactionCircle from "../../../components/ReactionCircle.vue";
+import CommonButton from "../../../components/UI/CommonButton.vue";
+import { usePopupStore } from '../../../store/popup.store.ts';
+import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
+import { UserState } from '../../../utils/userState/UserState.ts';
+import router from '../../../router/router.ts';
 import { jwtDecode } from 'jwt-decode';
-import type { TestJwt } from './tests/types';
-import type { CreateRdoInputDto } from '../api/resolvers/test/dto/input/create-rdo-input.dto.ts';
+import type { TestJwt } from '../types';
+import type { CreateRdoInputDto } from '../../../api/resolvers/test/dto/input/create-rdo-input.dto.ts';
 
 interface ReactionCircleInstance {
   startAnimation(): void;
@@ -46,7 +46,7 @@ export default defineComponent({
     };
   },
   props: {
-    token: { type: String, required: false},
+    token: String,
     time: { type: Number, required: true },
     showTimer: { type: Boolean, default: false },
     showFinalResults: { type: Boolean, default: false },
