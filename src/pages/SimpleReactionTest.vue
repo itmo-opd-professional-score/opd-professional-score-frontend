@@ -160,19 +160,29 @@ export default defineComponent({
 
 <template>
   <div class="container">
-  <h2 class="title">Тест на скорость реакции на движущиеся объекты</h2>
+  <div class="instruction" v-show="testState !== 'reacting'">
+    <h2 class="title">Тест на скорость реакции на движущиеся объекты</h2>
     <p class="description">
       Этот тест измеряет время вашей реакции на движущийся объект.
       После начала теста фиолетовый круг начнет двигаться. Как только он будет находиться в начале своего пути (верхняя точка траектории) - как
       можно быстрее нажмите большую кнопку. Старайтесь не нажимать кнопку до или после этой зоны!
     </p>
+    <CommonButton
+      class="reaction-button"
+      :class="{ active: testState == 'reacting' }"
+      :disabled="testState == 'completed'"
+      @click="clickButton"
+    >
+      <template v-slot:placeholder>Начать тест</template>
+    </CommonButton>
+  </div>
+  <div class="test-container" v-show="testState === 'reacting'">
     <div v-if="showTimer" class="timer">
       Осталось времени: {{ remainingTime }}
     </div>
     <div v-if="showProgressBar" class="progress-bar-container">
       <div class="progress-bar" :style="{ width: progressBarWidth }"></div>
     </div>
-  <div class="test-container">
     <ReactionCircle ref="reactionCircle" :time="time"></ReactionCircle>
     <div class="button-wrapper">
       <CommonButton
@@ -183,11 +193,17 @@ export default defineComponent({
       >
         <template v-slot:placeholder> {{buttonText}}</template>
       </CommonButton>
-      <div v-if="currentDeviation" class="current-deviation">
-        Текущее отклонение: {{ currentDeviation.toFixed(2) }} мс
+      <div class="current-deviation">
+        Текущее отклонение:
+        {{
+          currentDeviation !== null ? currentDeviation.toFixed(2) : '0'
+        }} мс
       </div>
-      <div v-if="standardDeviation !== null" class="standard-deviation">
-        Стандартное отклонение: {{ standardDeviation.toFixed(2) }} мс
+      <div class="standard-deviation">
+        Стандартное отклонение:
+        {{
+          standardDeviation !== null ? standardDeviation.toFixed(2) : '0'
+        }} мс
       </div>
     </div>
   </div>
@@ -198,7 +214,7 @@ export default defineComponent({
 
 <style scoped>
 .title {
-  font-size: 46px;
+  font-size: 36px;
   margin-bottom: 20px;
   color: #fff;
 }
