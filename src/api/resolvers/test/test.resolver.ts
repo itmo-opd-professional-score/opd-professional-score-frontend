@@ -6,6 +6,7 @@ import type { TestDataOutputDto } from './dto/output/test-data-output.dto.ts';
 import type { CreateAdditionInputDto } from './dto/input/create-addition-input.dto.ts';
 import type { CreateOutputDto } from './dto/output/create-output.dto.ts';
 import type { CreateSimpleInputDto } from './dto/input/create-simple-input.dto.ts';
+import type { TestType } from '../../../pages/tests/types';
 
 export class TestResolver {
   private apiResolver = new ApiResolverUtil('test');
@@ -79,5 +80,16 @@ export class TestResolver {
       .catch((error) => {
         this.usePopUp.activateErrorPopup(error.message);
       });
+  }
+
+  public async generateTestLink(testType: TestType) {
+    return await this.apiResolver.request<TestType, string>(
+      'getInvitationTestToken',
+      'POST',
+      testType,
+      this.token ? this.token : undefined,
+    ).catch((err) => {
+      this.usePopUp.activateErrorPopup(err.message);
+    })
   }
 }
