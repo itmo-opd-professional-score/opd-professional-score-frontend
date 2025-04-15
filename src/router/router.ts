@@ -16,6 +16,7 @@ import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.v
 import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
+import TestResultsPage from '../pages/tests/TestResultsPage.vue';
 
 const routes = [
   {
@@ -93,6 +94,12 @@ const routes = [
     path: '/test/simple/light',
     component: SimpleLightTest,
     meta: {ruName: "Оценка скорости простых реакции на свет", requiresAuth: true}
+  },
+  {
+    path: '/test/results/:testTypeId/:testId',
+    props: true,
+    component: TestResultsPage,
+    meta: {ruName: "Результаты прохождения теста", requiresAuth: true},
   },
   {
     path: `/invitation/test/:token`,
