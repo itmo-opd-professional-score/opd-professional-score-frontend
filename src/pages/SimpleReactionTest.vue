@@ -1,15 +1,21 @@
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from 'vue';
 import ReactionCircle from "../components/ReactionCircle.vue";
 import CommonButton from "../components/UI/CommonButton.vue";
+
+interface ReactionCircleInstance {
+  startAnimation(): void;
+  cancelAnimation(): void;
+  clickButton(time: number): void;
+  speed: number;
+  deviation: number;
+}
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
   name: "SimpleReactionTest",
-
   components: { CommonButton, ReactionCircle },
-
   data() {
     return {
       radius: 100,
@@ -31,91 +37,55 @@ export default defineComponent({
     };
   },
   props: {
-    time: {
-      type: Number,
-      required: true
-    },
-    showTimer: {
-      type: Boolean,
-      default: false
-    },
-    showFinalResults: {
-      type: Boolean,
-      default: false
-    },
-    showPerMinuteResults: {
-      type: Boolean,
-      default: false
-    },
-    showProgressBar: {
-      type: Boolean,
-      default: false
-    },
-    accelerationAmount: {
-      type: Number,
-      default: 0.1
-    },
-    accelerationInterval: {
-      type: Number,
-      default: 60000
-    },
-    accelerationFrequency: {
-      type: Number,
-      default: 10
-    }
+    time: { type: Number, required: true },
+    showTimer: { type: Boolean, default: false },
+    showFinalResults: { type: Boolean, default: false },
+    showPerMinuteResults: { type: Boolean, default: false },
+    showProgressBar: { type: Boolean, default: false },
+    accelerationAmount: { type: Number, default: 0.1 },
+    accelerationInterval: { type: Number, default: 60000 },
+    accelerationFrequency: { type: Number, default: 10 }
   },
   computed: {
-    circleX() {
-      return this.centerX + this.radius * Math.cos(this.angle);
-    },
-    circleY() {
-      return this.centerY + this.radius * Math.sin(this.angle);
-    },
+    circleX() { return this.centerX + this.radius * Math.cos(this.angle); },
+    circleY() { return this.centerY + this.radius * Math.sin(this.angle); },
     standardDeviation(): number | null {
-      const deviations = this.deviationHistory;
-      const n = deviations.length;
-      if(n < 2) return null;
-      const mean = deviations.reduce((sum, val) => sum + val, 0) / n;
-      const squares = deviations.map(x => Math.pow(x - mean, 2));
-      const variance = squares.reduce((sum, val) => sum + val, 0) / (n - 1);
+      const n = this.deviationHistory.length;
+      if (n < 2) return null;
+      const mean = this.deviationHistory.reduce((a, b) => a + b) / n;
+      const variance = this.deviationHistory.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1);
       return Math.sqrt(variance);
     },
-    buttonText(): string {
+    buttonText() {
       switch (this.testState) {
-        case 'ready':
-          return 'Начать тест';
-        case 'reacting':
-          return 'Жмите';
-        case 'completed':
-          return 'Тест окончен';
-        default:
-          return '';
+        case 'ready': return 'Начать тест';
+        case 'reacting': return 'Жмите';
+        case 'completed': return 'Тест окончен';
+        default: return '';
       }
     },
-    remainingTime(): string | null {
-      if (this.testState == 'completed') return null;
+    remainingTime() {
+      if (this.testState === 'completed') return null;
       const minutes = Math.floor(this.remainingTimeValue / 60000);
       const seconds = Math.floor((this.remainingTimeValue % 60000) / 1000);
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
-    progressBarWidth(): string {
+    progressBarWidth() {
       if (this.remainingTimeValue === 0) return '0%';
-      const totalSeconds = this.time;
-      const progress = (1 - (this.remainingTimeValue / (totalSeconds * 1000))) * 100;
-      return `${progress}%`;
-    },
+      return `${(1 - this.remainingTimeValue / (this.time * 1000)) * 100}%`;
+    }
   },
   methods: {
     animate(time: number) {
       if (this.testState !== 'reacting') {
-        cancelAnimationFrame(this.animationFrameId as number);
+        cancelAnimationFrame(this.animationFrameId!);
         return;
       }
       const elapsed = time - this.startTime;
       this.angle = (this.initialAngle + elapsed * this.speed) % (Math.PI * 2);
       if (elapsed >= this.time * 1000) {
         this.testState = 'completed';
-        cancelAnimationFrame(this.animationFrameId as number);
+        cancelAnimationFrame(this.animationFrameId!);
         this.stopTest();
       } else {
         this.animationFrameId = requestAnimationFrame(this.animate);
@@ -123,18 +93,15 @@ export default defineComponent({
     },
     setupAcceleration() {
       if (!this.accelerationAmount || !this.accelerationInterval) return;
-
       this.accelerationIntervalId = setInterval(() => {
         if (this.accelerationCount >= this.accelerationFrequency) {
-          clearInterval(this.accelerationIntervalId as number);
+          clearInterval(this.accelerationIntervalId!);
           return;
-        }  else {
-          const reactionCircle = this.$refs.reactionCircle as any;
-          reactionCircle.speed += reactionCircle.speed * this.accelerationAmount;
-          this.accelerationCount++;
         }
-      },
-          this.accelerationInterval);
+        const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
+        reactionCircle.speed *= 1 + this.accelerationAmount;
+        this.accelerationCount++;
+      }, this.accelerationInterval);
     },
     startTest() {
       this.accelerationCount = 0;
@@ -145,22 +112,22 @@ export default defineComponent({
       this.angle = this.initialAngle;
       this.animationFrameId = requestAnimationFrame(this.animate);
       this.startTimer(this.time);
-      (this.$refs.reactionCircle as any).startAnimation();
+      const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
+      reactionCircle.startAnimation();
     },
     stopTest() {
-      (this.$refs.reactionCircle as any).cancelAnimation();
+      const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
+      reactionCircle.cancelAnimation();
     },
     clickButton() {
-      if (this.testState == 'ready') {
+      if (this.testState === 'ready') {
         this.startTest();
-      } else if (this.testState == 'reacting') {
+      } else if (this.testState === 'reacting') {
         const currentTime = performance.now();
-        const reactionCircle = this.$refs.reactionCircle as any;
+        const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
         reactionCircle.clickButton(currentTime);
-        const deviation = reactionCircle.deviation;
-        this.currentDeviation = deviation;
-        this.deviationHistory.push(deviation);
-        console.log(`Текущее отклонение: ${deviation} мс`);
+        this.currentDeviation = reactionCircle.deviation;
+        this.deviationHistory.push(reactionCircle.deviation);
         reactionCircle.cancelAnimation();
         reactionCircle.startAnimation();
       }
@@ -171,7 +138,7 @@ export default defineComponent({
         this.remainingTimeValue -= 1000;
         if (this.remainingTimeValue <= 0) {
           this.remainingTimeValue = 0;
-          clearInterval(this.timerIntervalId as number);
+          clearInterval(this.timerIntervalId!);
           this.testState = 'completed';
           this.stopTest();
         }
@@ -182,13 +149,13 @@ export default defineComponent({
         clearInterval(this.timerIntervalId);
         this.timerIntervalId = null;
       }
-    },
+    }
   },
   beforeUnmount() {
     this.cancelTimer();
     this.stopTest();
-  },
-})
+  }
+});
 </script>
 
 <template>
@@ -217,10 +184,10 @@ export default defineComponent({
         <template v-slot:placeholder> {{buttonText}}</template>
       </CommonButton>
       <div v-if="currentDeviation" class="current-deviation">
-        Текущее отклонение: {{ currentDeviation }} мс
+        Текущее отклонение: {{ currentDeviation.toFixed(2) }} мс
       </div>
       <div v-if="standardDeviation !== null" class="standard-deviation">
-        Стандартное отклонение: {{ standardDeviation }} мс
+        Стандартное отклонение: {{ standardDeviation.toFixed(2) }} мс
       </div>
     </div>
   </div>
