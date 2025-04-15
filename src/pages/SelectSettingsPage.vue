@@ -1,48 +1,55 @@
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import {defineComponent} from 'vue';
 import CommonButton from '../components/UI/CommonButton.vue';
-import type { TestSettingsDto } from '../api/dto/test-settings.dto.ts';
+import type {TestSettingsDto} from '../api/dto/test-settings.dto.ts';
 import CustomInput from '../components/UI/inputs/CustomInput.vue';
+
 
 export default defineComponent({
   name: 'SelectSettingsPage',
-  components: { CustomInput, CommonButton },
+  components: {CustomInput, CommonButton},
   props: {
     testName: {
-      type: Array as PropType<string[]>,
-      default: () => ['No test name'],
+      type: String,
+      default: 'No test name',
     },
   },
   data() {
     return {
-      selectedSettings: {
-        testName: '',
-        duration: 1200,
-        showTimer: true,
-        showMinuteResults: true,
-        showTotalResults: true,
-        showProgress: true,
-        accelerationAmount: 40,
-        accelerationInterval: 60,
-        accelerationFrequency: 10,
-      } as TestSettingsDto,
+      duration: 1200,
+      showTimer: false,
+      showMinuteResults: false,
+      showTotalResults: false,
+      showProgress: false,
+      accelerationAmount: 40,
+      accelerationInterval: 60,
+      accelerationFrequency: 10,
     };
   },
   computed: {
     formattedInterval() {
-      const minutes = Math.floor(this.selectedSettings.duration / 60);
-      const seconds = (this.selectedSettings.duration % 60)
-        .toString()
-        .padStart(2, '0');
+      const minutes = Math.floor(this.duration / 60);
+      const seconds = (this.duration % 60)
+          .toString()
+          .padStart(2, '0');
       return `${minutes} мин ${seconds} сек`;
     },
   },
   methods: {
     saveSettings() {
-      this.selectedSettings.testName = this.testName[0] || 'No test name';
-      const settings: TestSettingsDto = this.selectedSettings;
+      const settings: TestSettingsDto = {
+        testName: this.testName,
+        duration: this.duration,
+        showTimer: this.showTimer,
+        showMinuteResults: this.showMinuteResults,
+        showTotalResults: this.showTotalResults,
+        showProgress: this.showProgress,
+        accelerationAmount: this.accelerationAmount,
+        accelerationInterval: this.accelerationInterval,
+        accelerationFrequency: this.accelerationFrequency
+      };
       this.$emit('newSettings', settings);
-    },
+    }
   },
   emits: ['newSettings'],
 });
@@ -52,84 +59,81 @@ export default defineComponent({
   <div id="choose-settings">
     <div class="choose-settings-form">
       <div class="section header-section">
-        <h2>Выберите настройки теста: <br />{{ testName }}</h2>
+        <h2>Выберите настройки теста: <br/>{{ testName }}</h2>
       </div>
       <div class="settings-group">
         <div class="time-interval-selector">
           <label
-            >Время прохождения теста:
+          >Время прохождения теста:
             <strong>{{ formattedInterval }}</strong></label
           >
-          <input
-            type="range"
-            min="120"
-            max="2700"
-            step="30"
-            v-model="selectedSettings.duration"
-            class="custom-slider"
+          <CustomInput
+              type="range"
+              v-model.number="duration"
+              :minNumber="120"
+              :maxNumber="2700"
+              class="custom-slider"
           />
           <div class="slider-labels">
             <span>2 мин</span>
             <span>45 мин</span>
           </div>
           <div class="setting-item">
-            <label>
-              <input type="checkbox" v-model="selectedSettings.showTimer" />
-              Отображать оставшееся время
-            </label>
+            <CustomInput
+                type="checkbox"
+                @change="showTimer=!showTimer"
+                labelText="Отображать оставшееся время"
+            />
           </div>
 
           <div class="setting-item">
-            <label>
-              <input
+            <CustomInput
                 type="checkbox"
-                v-model="selectedSettings.showMinuteResults"
-              />
-              Показывать результаты за минуту
-            </label>
-            <label>
-              <input
+                @change="showMinuteResults=!showMinuteResults"
+                labelText="Показывать результаты за минуту"
+            />
+            <CustomInput
                 type="checkbox"
-                v-model="selectedSettings.showTotalResults"
-              />
-              Показывать общий результат
-            </label>
+                @change="showTotalResults=!showTotalResults"
+                labelText="Показывать общий результат"
+            />
           </div>
 
           <div class="setting-item">
-            <label>
-              <input type="checkbox" v-model="selectedSettings.showProgress" />
-              Отображать прогресс выполнения
-            </label>
+            <CustomInput
+                type="checkbox"
+                @change="showProgress=!showProgress"
+                labelText="Отображать прогресс выполнения"
+            />
           </div>
           <div class="acceleration-settings">
             <h3>Настройки ускорения:</h3>
             <div class="acceleration-input">
               <CustomInput
-                type="number"
-                v-model.number="selectedSettings.accelerationAmount"
-                :minNumber="0"
-                :maxNumber="100"
-                labelText="Величина ускорения(%):"
+                  type="number"
+                  v-model.number="accelerationAmount"
+                  :minNumber="0"
+                  :maxNumber="100"
+                  labelText="Величина ускорения(%):"
               />
             </div>
 
             <div class="acceleration-input">
               <CustomInput
-                type="number"
-                v-model.number="selectedSettings.accelerationInterval"
-                :minNumber="1"
-                :maxNumber="1000"
-                labelText="Интервал применения(от 1 до 1000):"
+                  type="number"
+                  v-model.number="accelerationInterval"
+                  :minNumber="1"
+                  :maxNumber="1000"
+                  labelText="Интервал применения(от 1 до 1000):"
               />
             </div>
             <div class="acceleration-input">
               <CustomInput
-                type="number"
-                v-model.number="selectedSettings.accelerationFrequency"
-                :minNumber="1"
-                :maxNumber="1000"
-                labelText="Как часто(от 1 до 1000):"
+                  type="number"
+                  v-model.number="accelerationFrequency"
+                  :minNumber="1"
+                  :maxNumber="1000"
+                  labelText="Как часто(от 1 до 1000):"
               />
             </div>
           </div>
