@@ -6,7 +6,9 @@ import type { TestDataOutputDto } from './dto/output/test-data-output.dto.ts';
 import type { CreateAdditionInputDto } from './dto/input/create-addition-input.dto.ts';
 import type { CreateOutputDto } from './dto/output/create-output.dto.ts';
 import type { CreateSimpleInputDto } from './dto/input/create-simple-input.dto.ts';
+import type { CreateRdoInputDto } from './dto/input/create-rdo-input.dto.ts';
 import type { TestType } from '../../../pages/tests/types';
+
 
 export class TestResolver {
   private apiResolver = new ApiResolverUtil('test');
@@ -58,6 +60,15 @@ export class TestResolver {
       CreateOutputDto
     >(
       `${endpoint}/create`,
+      'POST',
+      data,
+      this.token ? this.token : undefined,
+    )
+  }
+
+  public async createRdo(data: CreateRdoInputDto) {
+    return await this.apiResolver.request<CreateRdoInputDto, CreateOutputDto>(
+      'rdo/createRDOTest',
       'POST',
       data,
       this.token ? this.token : undefined,
