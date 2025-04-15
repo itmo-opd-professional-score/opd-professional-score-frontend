@@ -1,15 +1,14 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, type PropType } from 'vue';
 import CommonButton from './UI/CommonButton.vue';
+import { TestResolver } from '../api/resolvers/test/test.resolver.ts';
+import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
+import router from '../router/router.ts';
 
 export default defineComponent({
   name: 'StatisticsCard',
   components: { CommonButton },
   props: {
-    testName: {
-      type: String,
-      required: true,
-    },
     userName: {
       type: String,
       default: 'Anonymous',
@@ -34,6 +33,7 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    testType: {} as PropType<TestTypeDataOutputDto>,
   },
   computed: {
     scorePercentage(): string {
@@ -43,10 +43,27 @@ export default defineComponent({
       const percentage = (this.score / this.maxScore) * 100;
       return percentage >= 80 ? 'green' : percentage >= 50 ? 'orange' : 'red';
     },
+    shareLink(): string {
+      const origin = window.location.origin;
+      return `${origin}/invitation/test/${this.invitationToken}`
+    }
+  },
+  data() {
+    return {
+      invitationToken: null as string | null,
+    }
   },
   methods: {
     async generateTestLink() {
-      //TODO
+      if (this.testType?.name !== undefined) {
+        const testResolver = new TestResolver()
+        this.invitationToken = await testResolver.generateTestLink({
+          testType: this.testType?.name
+        })
+      }
+    },
+    copyLink() {
+      navigator.clipboard.writeText(this.shareLink)
     }
   }
 });
@@ -54,7 +71,7 @@ export default defineComponent({
 
 <template>
   <div class="statistics-card">
-    <h4 class="title">{{ testName }}</h4>
+    <h4 class="title">{{ testType?.description }}</h4>
     <div class="result">
       <div class="valid">
         <p>{{ scorePercentage}}</p>
@@ -82,6 +99,15 @@ export default defineComponent({
       <CommonButton class="submit_button" @click="generateTestLink()">
         <template #placeholder>Поделиться тестом</template>
       </CommonButton>
+      <div :class="invitationToken ? 'wrapper' : 'wrapper hidden'">
+        <div class="link">
+          <p class="fields">Your link is:</p>
+          <span>{{ shareLink }}</span>
+          <CommonButton :disabled="invitationToken == null" class="tranparent" @click="copyLink()">
+            <template #placeholder></template>
+          </CommonButton>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -94,6 +120,7 @@ export default defineComponent({
   gap: 2vw;
   padding: 15px;
   border-radius: 15px;
+  overflow: hidden;
   flex: 1;
 }
 
@@ -120,6 +147,45 @@ export default defineComponent({
 
 .share-link {
   margin-top: auto;
+
+  .wrapper {
+    transition: height 0.5s;
+    height: 3vw;
+    overflow: hidden;
+    .link {
+      display: flex;
+      align-items: center;
+      gap: 0.5vw;
+
+      p {
+        white-space: nowrap;
+      }
+
+      span {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        padding: 0.5vw;
+        color: blueviolet;
+        background-color: var(--background-secondary);
+        border-radius: 10px;
+        width: 100%;
+        height: 2.25vw;
+      }
+
+      button {
+        background: url("/copy.svg") center center no-repeat;
+        background-size: contain;
+        width: 3vw;
+        aspect-ratio: 1 / 1;
+      }
+    }
+  }
+
+  .wrapper.hidden {
+    height: 0;
+    margin-top: -1vw;
+  }
 }
 
 .fields {

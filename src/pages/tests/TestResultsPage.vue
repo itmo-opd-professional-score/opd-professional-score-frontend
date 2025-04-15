@@ -82,7 +82,7 @@ export default defineComponent({
         :time="parseFloat(currentTest.averageCallbackTime.toFixed(2))"
         :date="currentTest.createdAt.substring(0, 10)"
         :max-score="currentTest.allSignals"
-        :test-name="testType ? testType.description : ''"
+        :test-type="testType ? testType : undefined"
         :user-name="UserState.username"
         :score="
           currentTest.misclicks ?

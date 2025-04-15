@@ -82,14 +82,15 @@ export class TestResolver {
       });
   }
 
-  public async generateTestLink(testType: TestType) {
-    return await this.apiResolver.request<TestType, string>(
+  public async generateTestLink(testType: {testType: TestType}) {
+    return await this.apiResolver.request<{testType: TestType}, string>(
       'getInvitationTestToken',
       'POST',
       testType,
       this.token ? this.token : undefined,
     ).catch((err) => {
       this.usePopUp.activateErrorPopup(err.message);
+      return null
     })
   }
 }
