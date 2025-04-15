@@ -109,7 +109,7 @@ const routes = [
     name: 'SimpleReactionTest',
     component: SimpleReactionTest,
     props: {
-      time: 120,
+      time: 10,
       showTimer: true,
       showProgressBar: true
     }

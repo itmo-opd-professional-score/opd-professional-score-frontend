@@ -91,9 +91,9 @@ export default defineComponent({
     },
     resetTest(): void {
       if (UserState) {
-        this.$router.go(0);
+        router.go(0);
       } else {
-        this.$router.push('/auth/login');
+        router.push('/auth/login');
       }
     },
     saveResults(): void {
@@ -142,7 +142,7 @@ export default defineComponent({
           this.completedTestsLinks.forEach((link) => {
             const data = jwtDecode(link) as TestJwt;
             if (data.testType != 'SIMPLE_LIGHT') {
-              this.$router.back()
+              router.back()
             }
           });
         }
