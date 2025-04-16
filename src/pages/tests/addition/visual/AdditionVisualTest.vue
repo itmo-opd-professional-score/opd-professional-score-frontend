@@ -122,7 +122,7 @@ export default {
           this.completedTestsLinks.forEach((link) => {
             const data = jwtDecode(link) as TestJwt;
             if (data.testType != 'VISUAL_ADDITION') {
-              this.$router.back()
+              router.back()
             }
           });
         }

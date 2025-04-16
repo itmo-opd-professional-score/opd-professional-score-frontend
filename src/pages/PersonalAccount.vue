@@ -20,6 +20,7 @@ import { useTestTypesStore } from '../store/test-types.store.ts';
 import type { GetTestBlockOutputDto } from '../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
 import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
 import TestBlocksManagerList from '../components/TestBlocksManagerList.vue';
+import CommonButton from '../components/UI/CommonButton.vue';
 
 const authResolver = new AuthResolver();
 const userResolver = new UserResolver();
@@ -39,12 +40,16 @@ const tests = ref<{
   simpleSound: TestDataOutputDto[];
   simpleLight: TestDataOutputDto[];
   hardLight: TestDataOutputDto[];
+  simpleRdo: TestDataOutputDto[];
+  hardRdo: TestDataOutputDto[];
 }>({
   additionSound: [],
   additionVisual: [],
   simpleSound: [],
   simpleLight: [],
   hardLight: [],
+  simpleRdo: [],
+  hardRdo: [],
 });
 const allTests = ref<TestDataOutputDto[]>([]);
 const professionsArchive = ref<GetProfessionOutputDto[]>([]);
@@ -91,16 +96,22 @@ const reloadProfessions = async () => {
 const reloadTests = async () => {
   if (UserState.role) {
     let additionTests: TestDataOutputDto[];
+    let rdoTests: TestDataOutputDto[];
     if (UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT) {
       allTests.value.push(...(await testResolver.getAllByType('at')));
       allTests.value.push(...(await testResolver.getAllByType('sst')));
       allTests.value.push(...(await testResolver.getAllByType('slt')));
       allTests.value.push(...(await testResolver.getAllByType('hlt')));
+      allTests.value.push(...(await testResolver.getAllByType('rdo')));
     }
     additionTests = await testResolver.getTestsByTypeByUserId(
       UserState.id!,
       'at',
     );
+    rdoTests = await testResolver.getTestsByTypeByUserId(
+      UserState.id!,
+      'rdo'
+    )
     if (additionTests) {
       tests.value.additionSound = additionTests.filter((test) =>
         testTypesStore.checkTestType(test).name == 'SOUND_ADDITION' ? test : null,
@@ -109,6 +120,15 @@ const reloadTests = async () => {
         testTypesStore.checkTestType(test).name == 'VISUAL_ADDITION' ? test : null,
       );
     }
+    if (rdoTests) {
+      tests.value.simpleRdo = rdoTests.filter((test) =>
+        testTypesStore.checkTestType(test).name == 'SIMPLE_RDO' ? test : null,
+      );
+      tests.value.hardRdo = rdoTests.filter((test) =>
+        testTypesStore.checkTestType(test).name == 'HARD_RDO' ? test : null,
+      );
+    }
+
     tests.value.simpleSound.push(
       ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst')),
     );
@@ -168,6 +188,54 @@ onMounted(() => {
         <div class="info-block" v-if="UserState.gender">
           <p class="field_label">Gender</p>
           <p class="field">{{ UserState.gender }}</p>
+        </div>
+        <div class="info-block test-button">
+          <CommonButton
+            @click="router.push('/test/simple/sound')"
+            class="submit_button"
+          >
+            <template #placeholder>Simple sound test</template>
+          </CommonButton>
+        </div>
+        <div class="info-block test-button">
+          <CommonButton
+            @click="router.push('/test/simple/light')"
+            class="submit_button"
+          >
+            <template #placeholder>Simple light test</template>
+          </CommonButton>
+        </div>
+        <div class="info-block test-button">
+          <CommonButton
+            @click="router.push('/test/hard/light')"
+            class="submit_button"
+          >
+            <template #placeholder>Hard light test</template>
+          </CommonButton>
+        </div>
+        <div class="info-block test-button">
+          <CommonButton
+            @click="router.push('/test/addition/sound')"
+            class="submit_button"
+          >
+            <template #placeholder>Addition sound test</template>
+          </CommonButton>
+        </div>
+        <div class="info-block test-button">
+          <CommonButton
+            @click="router.push('/test/addition/visual')"
+            class="submit_button"
+          >
+            <template #placeholder>Addition visual test</template>
+          </CommonButton>
+        </div>
+        <div class="info-block test-button">
+          <CommonButton
+            @click="router.push('/test/simple/rdo')"
+            class="submit_button"
+          >
+            <template #placeholder>Simple rdo test</template>
+          </CommonButton>
         </div>
       </div>
       <div class="buttons_container">
@@ -310,6 +378,10 @@ onMounted(() => {
   .buttons_container {
     margin-top: auto;
   }
+}
+
+.test-button button {
+  width: 100%;
 }
 
 .users-info, .tests-info, .test-info {

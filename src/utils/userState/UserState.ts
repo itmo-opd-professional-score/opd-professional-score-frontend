@@ -64,7 +64,6 @@ export const calculateAge = (birthDate: string) => {
   const birthYear = new Date(birthDate).getFullYear();
   const currentYear = today.getFullYear();
   let age = currentYear - birthYear;
-  console.log(birthDate);
   const birthMonth = new Date(birthDate).getMonth();
   const birthDay = new Date(birthDate).getDate();
   if (birthMonth > today.getMonth() || (birthMonth === today.getMonth() && birthDay > today.getDate())) { age--; }

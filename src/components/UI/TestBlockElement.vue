@@ -1,14 +1,32 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import CommonButton from './CommonButton.vue';
+import { TestBlockResolver } from '../../api/resolvers/testBlocks/test-block.resolver.ts';
+import { jwtDecode } from 'jwt-decode';
+import { ref } from 'vue';
+import router from '../../router/router.ts';
 
-export default defineComponent({
-  name: 'TestBlockElement',
-  components: { CommonButton },
-  methods: {
-    open() {},
-  },
-});
+interface TestBlockJwt {
+  tests: string,
+  iat: number,
+  exp: number
+}
+
+const testLink = (testType: string) => {
+  return `/test/${testType.split('_')[0].toLowerCase()}/${testType.split('_')[1].toLowerCase()}`
+}
+
+const props = defineProps<{
+  blockId: number
+}>()
+
+const isOpen = ref<boolean>(false);
+const testsTypes = ref<string[]>()
+const testBlockResolver = new TestBlockResolver()
+const openBlock = async () => {
+  const testBlock = await testBlockResolver.getById(props.blockId)
+  testsTypes.value = (jwtDecode(testBlock.testBlockToken) as TestBlockJwt).tests.split(' ')
+  isOpen.value = !isOpen.value
+}
 </script>
 
 <template>
@@ -17,9 +35,20 @@ export default defineComponent({
     <div class="field" id="name">
       <slot name="name">Название</slot>
     </div>
-    <CommonButton class="open-button" id="btn" @click="open">
+    <CommonButton class="open-button" id="btn" @click="openBlock()">
       <template v-slot:placeholder>Открыть</template>
     </CommonButton>
+    <div class="block-links" v-if="isOpen">
+      <div
+        class="link"
+        v-for="(testType, index) in testsTypes"
+        :key="index"
+      >
+       <CommonButton @click="router.push(testLink(testType))">
+         <template #placeholder>Пройти тест #{{ index + 1 }}</template>
+       </CommonButton>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -35,6 +64,22 @@ export default defineComponent({
   display: grid;
   grid-template-columns: 1fr 5fr 1fr;
   gap: 2rem;
+  position: relative;
+
+  .block-links {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: var(--background-primary);
+    backdrop-filter: blur(15px);
+    height: min-content;
+    border-radius: 10px;
+    margin-top: 1vw;
+
+    .link {
+      padding: 1vw;
+    }
+  }
 }
 
 .test-block-element-wrapper:hover {

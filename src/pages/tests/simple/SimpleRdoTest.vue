@@ -1,14 +1,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import ReactionCircle from "../components/ReactionCircle.vue";
-import CommonButton from "../components/UI/CommonButton.vue";
-import { usePopupStore } from '../store/popup.store.ts';
-import { TestResolver } from '../api/resolvers/test/test.resolver.ts';
-import { UserState } from '../utils/userState/UserState.ts';
-import router from '../router/router.ts';
+import ReactionCircle from "../../../components/ReactionCircle.vue";
+import CommonButton from "../../../components/UI/CommonButton.vue";
+import { usePopupStore } from '../../../store/popup.store.ts';
+import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
+import { UserState } from '../../../utils/userState/UserState.ts';
+import router from '../../../router/router.ts';
 import { jwtDecode } from 'jwt-decode';
-import type { TestJwt } from './tests/types';
-import type { CreateRdoInputDto } from '../api/resolvers/test/dto/input/create-rdo-input.dto.ts';
+import type { TestJwt } from '../types';
+import type { CreateRdoInputDto } from '../../../api/resolvers/test/dto/input/create-rdo-input.dto.ts';
 
 interface ReactionCircleInstance {
   startAnimation(): void;
@@ -46,7 +46,7 @@ export default defineComponent({
     };
   },
   props: {
-    token: { type: String, required: false},
+    token: String,
     time: { type: Number, required: true },
     showTimer: { type: Boolean, default: false },
     showFinalResults: { type: Boolean, default: false },
@@ -91,6 +91,7 @@ export default defineComponent({
         dispersion: this.standardDeviation,
         mistakes: this.deviationHistory.filter(deviation => Math.abs(deviation) > 140).length,
         averageCallbackTime: this.deviationHistory.reduce((a, b) => a + b) / this.deviationHistory.length,
+        testType: 'SIMPLE_RDO'
       }
     }
   },
@@ -137,6 +138,7 @@ export default defineComponent({
     stopTest() {
       const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
       reactionCircle.cancelAnimation();
+      this.saveResults()
     },
     clickButton() {
       if (this.testState === 'ready') {
@@ -170,8 +172,6 @@ export default defineComponent({
       }
     },
     saveResults(): void {
-      this.buttonText = 'Тест окончен'
-
       const popUpStore = usePopupStore()
       const testResolver =
         new TestResolver()
@@ -219,10 +219,6 @@ export default defineComponent({
       }
     },
   },
-  beforeUnmount() {
-    this.cancelTimer();
-    this.stopTest();
-  }
 });
 </script>
 
@@ -340,7 +336,7 @@ export default defineComponent({
   border-radius: 5px;
   transition: width 0.5s ease;
 }
-.standard-deviation, current-deviation {
+.standard-deviation, .current-deviation {
   margin-top: 10px;
   font-size: 18px;
   color: #333;

@@ -1,20 +1,22 @@
-<template>
+f<template>
   <div class="container">
     <div v-if="!testStarted">
       <h1>Тест на реакцию на цвета</h1>
       <div class="instructions">
         <p>Когда появится цветной экран, быстро нажмите кнопку соответствующего цвета.</p>
         <p>На каждый ответ у вас есть 2 секунды.</p>
-        <p>Всего будет 15 попыток.</p>
+        <p>Всего будет {{ ALL_SIGNALS }} попыток.</p>
       </div>
-      <CommonButton class="start-btn" @click="startTest">Начать тест</CommonButton>
+      <CommonButton class="start-btn submit_button" @click="startTest">
+        <template #placeholder>Начать тест</template>
+      </CommonButton>
     </div>
 
     <div v-else-if="!testCompleted" class="test-screen">
       <div class="timer-container">
         <div class="timer-bar" :style="timerStyle"></div>
       </div>
-      <div class="attempt-counter">Попытка: {{ currentAttempt }}/15</div>
+      <div class="attempt-counter">Попытка: {{ currentAttempt }} / {{ ALL_SIGNALS }}</div>
 
       <div class="color-display" :style="{ backgroundColor: currentColor }"></div>
 
@@ -22,15 +24,15 @@
         <CommonButton
           v-for="color in colors"
           :key="color"
-          class="color-btn"
+          class="color-btn submit_button"
           :style="{ backgroundColor: colorMap[color] }"
           @click="handleColorClick(color)"
-        ></CommonButton>
+        />
       </div>
 
       <div class="stats">
         <p>Среднее время: {{ avgTime > 0 ? avgTime + ' мс' : '-' }}</p>
-        <p>Правильно: {{ correctAnswers }}, Ошибок: {{ wrongAnswers }}</p>
+        <p>Правильно: {{ correctAnswers }}, Ошибки: {{ wrongAnswers }}, Пропуски: {{ missedAnswers }}</p>
       </div>
     </div>
 
@@ -39,14 +41,27 @@
       <p>Среднее время реакции: <strong>{{ avgTime }} мс</strong></p>
       <p>Правильных ответов: <strong>{{ correctAnswers }}</strong></p>
       <p>Лучшее время: <strong>{{ bestTime }} мс</strong></p>
-      <CommonButton class="restart-btn" @click="restartTest">Пройти снова</CommonButton>
+      <CommonButton class="restart-btn submit_button" @click="restartTest">
+        <template #placeholder>Пройти снова</template>
+      </CommonButton>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onUnmounted } from 'vue'
-import CommonButton from './UI/CommonButton.vue'
+import { ref, computed, onUnmounted, onMounted } from 'vue';
+import CommonButton from '../../../components/UI/CommonButton.vue'
+import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
+import { usePopupStore } from '../../../store/popup.store.ts';
+import { UserState } from '../../../utils/userState/UserState.ts';
+import router from '../../../router/router.ts';
+import { jwtDecode } from 'jwt-decode';
+import type { TestJwt } from '../types';
+import type { CreateHardLightInputDto } from '../../../api/resolvers/test/dto/input/create-hard-light-input.dto.ts';
+
+const props = defineProps<{
+  token?: string
+}>()
 
 type Color = 'red' | 'blue' | 'green' | 'yellow'
 const colors: Color[] = ['red', 'blue', 'green', 'yellow']
@@ -57,17 +72,22 @@ const colorMap = {
   yellow: '#ffff44'
 }
 const TIME_LIMIT = 2000
+const ALL_SIGNALS = 15
 
 const testStarted = ref(false)
 const testCompleted = ref(false)
 const currentColor = ref<Color | 'white'>('white')
 const currentAttempt = ref(0)
 const correctAnswers = ref(0)
+const missedAnswers = ref(0)
 const wrongAnswers = ref(0)
 const reactionTimes = ref<number[]>([])
 const startTime = ref<number | null>(null)
 const timeLeft = ref(TIME_LIMIT)
 const flashTimeouts = ref<number[]>([])
+
+let completedTestsLinks = [];
+let completedTestsResults = [];
 let timeoutId: number | undefined
 let timerInterval: number | undefined
 
@@ -91,13 +111,22 @@ const timerStyle = computed(() => {
   }
 })
 
+const calculateDispersion = (data: number[]) => {
+  const mean = data.reduce((sum, value) => sum + value, 0) / data.length;
+  const variance = data.reduce(
+    (sum, value) => sum + Math.pow(value - mean, 2),
+    0,
+  );
+  return Math.sqrt(variance / (data.length - 1));
+};
+
 function startTest() {
   testStarted.value = true
   showNextColor()
 }
 
 function showNextColor() {
-  if (currentAttempt.value >= 15) {
+  if (currentAttempt.value >= ALL_SIGNALS) {
     endTest()
     return
   }
@@ -127,7 +156,7 @@ function startTimer() {
 }
 
 function handleTimeOut() {
-  wrongAnswers.value++
+  missedAnswers.value++
   flashScreen()
 }
 
@@ -173,6 +202,7 @@ function handleColorClick(selectedColor: 'red' | 'blue' | 'green' | 'yellow') {
 
 function endTest() {
   testCompleted.value = true
+  saveResults()
   clearFlashTimeouts() // Добавлена очистка таймаутов
 }
 
@@ -195,6 +225,63 @@ onUnmounted(() => {
   clearInterval(timerInterval)
   clearFlashTimeouts() // Добавлена очистка таймаутов
 })
+
+const saveResults = () => {
+  const testResolver = new TestResolver();
+  const popUpStore = usePopupStore();
+  const data: CreateHardLightInputDto = {
+    allSignals: ALL_SIGNALS,
+    averageCallbackTime: avgTime.value,
+    dispersion: calculateDispersion(reactionTimes.value),
+    misclicks: missedAnswers.value,
+    mistakes: wrongAnswers.value,
+    userId: UserState.id ? UserState.id : null,
+  };
+  testResolver
+    .createHardLight(data)
+    .then((result) => {
+      if (!UserState.id) {
+        completedTestsLinks.push(props.token);
+        completedTestsResults.push(result.body.testToken);
+        localStorage.setItem(
+          'completedTestsLinks',
+          JSON.stringify(completedTestsLinks),
+        );
+        localStorage.setItem(
+          'completedTestsResults',
+          JSON.stringify(completedTestsResults),
+        );
+      }
+      popUpStore.activateInfoPopup('Results were saved successfully!');
+    })
+    .catch((error) => {
+      popUpStore.activateErrorPopup(
+        `Error code: ${error.status}. ${error.response.data.message}`,
+      );
+    });
+};
+onMounted(async () => {
+  if (UserState.id) {
+    await router.push('/test/hard/light');
+  } else {
+    const linksData = localStorage.getItem('completedTestsLinks');
+    const resultsData = localStorage.getItem('completedTestsResults');
+    if (linksData) {
+      completedTestsLinks.push(...JSON.parse(linksData));
+    }
+    if (resultsData) {
+      completedTestsResults.push(...JSON.parse(resultsData));
+    }
+    if (props.token && completedTestsLinks.length != 0) {
+      completedTestsLinks.forEach((link) => {
+        const data = jwtDecode(link) as TestJwt;
+        if (data.testType != 'HARD_LIGHT') {
+          router.back()
+        }
+      });
+    }
+  }
+});
 </script>
 
 <style scoped>

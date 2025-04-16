@@ -8,6 +8,7 @@ import type { CreateOutputDto } from './dto/output/create-output.dto.ts';
 import type { CreateSimpleInputDto } from './dto/input/create-simple-input.dto.ts';
 import type { CreateRdoInputDto } from './dto/input/create-rdo-input.dto.ts';
 import type { TestType } from '../../../pages/tests/types';
+import type { CreateHardLightInputDto } from './dto/input/create-hard-light-input.dto.ts';
 
 
 export class TestResolver {
@@ -60,6 +61,18 @@ export class TestResolver {
       CreateOutputDto
     >(
       `${endpoint}/create`,
+      'POST',
+      data,
+      this.token ? this.token : undefined,
+    )
+  }
+
+  public async createHardLight(data: CreateHardLightInputDto) {
+    return await this.apiResolver.request<
+      CreateSimpleInputDto,
+      CreateOutputDto
+    >(
+      'hlt/create',
       'POST',
       data,
       this.token ? this.token : undefined,

@@ -13,11 +13,12 @@ import TestMapper from '../pages/tests/TestMapper.vue';
 import CreateTestBlockPage from '../pages/CreateTestBlockPage.vue';
 import AdditionVisualTest from '../pages/tests/addition/visual/AdditionVisualTest.vue';
 import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.vue';
-import SelectSettingsPage from '../pages/SelectSettingsPage.vue';
-import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
+import SelectSettingsPage from '../pages/tests/SelectSettingsPage.vue';
+import SimpleReactionTest from "../pages/tests/simple/SimpleRdoTest.vue";
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
+import HardLightTest from '../pages/tests/hard/HardLightTest.vue';
 
 const routes = [
   {
@@ -97,6 +98,21 @@ const routes = [
     meta: {ruName: "Оценка скорости простых реакции на свет", requiresAuth: true}
   },
   {
+    path: '/test/simple/rdo',
+    component: SimpleReactionTest,
+    meta: {ruName: "Оценка скорости реакции на движущийся объект", requiresAuth: true},
+    props: {
+      time: 10,
+      showTimer: true,
+      showProgressBar: true
+    }
+  },
+  {
+    path: '/test/hard/light',
+    component: HardLightTest,
+    meta: { ruName: "Оценка скорости реакции на сложный световой сигнал", requiresAuth: true },
+  },
+  {
     path: '/test/results/:testTypeId/:testId',
     props: true,
     component: TestResultsPage,
@@ -112,21 +128,12 @@ const routes = [
     component: CreateTestBlockPage,
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
   },
-   {path: '/test/settings/:testName',
-      component: SelectSettingsPage,
-      meta: { ruName: 'Настройки теста', requiresAuth: true },
+   {
+     path: '/test/settings/:testName',
+     component: SelectSettingsPage,
+     meta: { ruName: 'Настройки теста', requiresAuth: true },
      props: true,
-    },
-  {
-    path: '/simple-reaction-test',
-    name: 'SimpleReactionTest',
-    component: SimpleReactionTest,
-    props: {
-      time: 10,
-      showTimer: true,
-      showProgressBar: true
-    }
-  }
+   },
 ];
 
 const router = createRouter({
