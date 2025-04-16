@@ -172,8 +172,6 @@ export default defineComponent({
       }
     },
     saveResults(): void {
-      this.buttonText = 'Тест окончен'
-
       const popUpStore = usePopupStore()
       const testResolver =
         new TestResolver()
@@ -221,10 +219,6 @@ export default defineComponent({
       }
     },
   },
-  beforeUnmount() {
-    this.cancelTimer();
-    this.stopTest();
-  }
 });
 </script>
 

@@ -40,12 +40,16 @@ const tests = ref<{
   simpleSound: TestDataOutputDto[];
   simpleLight: TestDataOutputDto[];
   hardLight: TestDataOutputDto[];
+  simpleRdo: TestDataOutputDto[];
+  hardRdo: TestDataOutputDto[];
 }>({
   additionSound: [],
   additionVisual: [],
   simpleSound: [],
   simpleLight: [],
   hardLight: [],
+  simpleRdo: [],
+  hardRdo: [],
 });
 const allTests = ref<TestDataOutputDto[]>([]);
 const professionsArchive = ref<GetProfessionOutputDto[]>([]);
@@ -92,16 +96,22 @@ const reloadProfessions = async () => {
 const reloadTests = async () => {
   if (UserState.role) {
     let additionTests: TestDataOutputDto[];
+    let rdoTests: TestDataOutputDto[];
     if (UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT) {
       allTests.value.push(...(await testResolver.getAllByType('at')));
       allTests.value.push(...(await testResolver.getAllByType('sst')));
       allTests.value.push(...(await testResolver.getAllByType('slt')));
       allTests.value.push(...(await testResolver.getAllByType('hlt')));
+      allTests.value.push(...(await testResolver.getAllByType('rdo')));
     }
     additionTests = await testResolver.getTestsByTypeByUserId(
       UserState.id!,
       'at',
     );
+    rdoTests = await testResolver.getTestsByTypeByUserId(
+      UserState.id!,
+      'rdo'
+    )
     if (additionTests) {
       tests.value.additionSound = additionTests.filter((test) =>
         testTypesStore.checkTestType(test).name == 'SOUND_ADDITION' ? test : null,
@@ -110,6 +120,15 @@ const reloadTests = async () => {
         testTypesStore.checkTestType(test).name == 'VISUAL_ADDITION' ? test : null,
       );
     }
+    if (rdoTests) {
+      tests.value.simpleRdo = rdoTests.filter((test) =>
+        testTypesStore.checkTestType(test).name == 'SIMPLE_RDO' ? test : null,
+      );
+      tests.value.hardRdo = rdoTests.filter((test) =>
+        testTypesStore.checkTestType(test).name == 'HARD_RDO' ? test : null,
+      );
+    }
+
     tests.value.simpleSound.push(
       ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst')),
     );
@@ -208,6 +227,14 @@ onMounted(() => {
             class="submit_button"
           >
             <template #placeholder>Addition visual test</template>
+          </CommonButton>
+        </div>
+        <div class="info-block test-button">
+          <CommonButton
+            @click="router.push('/test/simple/rdo')"
+            class="submit_button"
+          >
+            <template #placeholder>Simple rdo test</template>
           </CommonButton>
         </div>
       </div>

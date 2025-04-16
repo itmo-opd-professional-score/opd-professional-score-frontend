@@ -62,6 +62,12 @@ export default defineComponent({
         case 'HARD_LIGHT':
           this.endpoint = 'hlt';
           break
+        case 'SIMPLE_RDO':
+          this.endpoint = 'rdo';
+          break
+        case 'HARD_RDO':
+          this.endpoint = 'rdo';
+          break
       }
       this.currentTest = await this.testResolver.getByTypeById(this.endpoint, parseInt(this.testId));
       this.testsData = await this.testResolver.getAllByType(this.endpoint)
