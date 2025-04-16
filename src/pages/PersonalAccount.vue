@@ -189,52 +189,42 @@ onMounted(() => {
           <p class="field_label">Gender</p>
           <p class="field">{{ UserState.gender }}</p>
         </div>
-        <div class="info-block test-button">
+        <div class="test buttons">
           <CommonButton
             @click="router.push('/test/simple/sound')"
             class="submit_button"
           >
             <template #placeholder>Simple sound test</template>
           </CommonButton>
-        </div>
-        <div class="info-block test-button">
           <CommonButton
             @click="router.push('/test/simple/light')"
             class="submit_button"
           >
             <template #placeholder>Simple light test</template>
           </CommonButton>
-        </div>
-        <div class="info-block test-button">
-          <CommonButton
-            @click="router.push('/test/hard/light')"
-            class="submit_button"
-          >
-            <template #placeholder>Hard light test</template>
-          </CommonButton>
-        </div>
-        <div class="info-block test-button">
           <CommonButton
             @click="router.push('/test/addition/sound')"
             class="submit_button"
           >
             <template #placeholder>Addition sound test</template>
           </CommonButton>
-        </div>
-        <div class="info-block test-button">
           <CommonButton
             @click="router.push('/test/addition/visual')"
             class="submit_button"
           >
             <template #placeholder>Addition visual test</template>
           </CommonButton>
-        </div>
-        <div class="info-block test-button">
           <CommonButton
             @click="router.push('/test/simple/rdo')"
             class="submit_button"
           >
             <template #placeholder>Simple rdo test</template>
+          </CommonButton>
+          <CommonButton
+            @click="router.push('/test/hard/rdo')"
+            class="submit_button"
+          >
+            <template #placeholder>Hard rdo test</template>
           </CommonButton>
         </div>
       </div>
@@ -380,8 +370,10 @@ onMounted(() => {
   }
 }
 
-.test-button button {
-  width: 100%;
+.test.buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1vw;
 }
 
 .users-info, .tests-info, .test-info {

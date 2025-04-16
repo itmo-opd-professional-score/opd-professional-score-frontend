@@ -19,6 +19,7 @@ import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
 import HardLightTest from '../pages/tests/hard/HardLightTest.vue';
+import HardRdoTest from '../pages/tests/hard/HardRdoTest.vue';
 
 const routes = [
   {
@@ -100,12 +101,17 @@ const routes = [
   {
     path: '/test/simple/rdo',
     component: SimpleReactionTest,
-    meta: {ruName: "Оценка скорости реакции на движущийся объект", requiresAuth: true},
+    meta: {ruName: "Оценка скорости простой реакции на движущийся объект", requiresAuth: true},
     props: {
       time: 10,
       showTimer: true,
       showProgressBar: true
     }
+  },
+  {
+    path: '/test/hard/rdo',
+    component: HardRdoTest,
+    meta: { ruName: "Оценки скорости сложной реакции на движущийся объект", requiresAuth: true },
   },
   {
     path: '/test/hard/light',

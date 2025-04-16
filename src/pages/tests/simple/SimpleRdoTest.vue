@@ -198,7 +198,7 @@ export default defineComponent({
     },
     async load () {
       if (UserState.id) {
-        await router.push('/test/simple/light');
+        await router.push('/test/simple/rdo');
       } else {
         const linksData = localStorage.getItem('completedTestsLinks');
         const resultsData = localStorage.getItem('completedTestsResults');
@@ -211,7 +211,7 @@ export default defineComponent({
         if (this.token && this.completedTestsLinks.length != 0) {
           this.completedTestsLinks.forEach((link) => {
             const data = jwtDecode(link) as TestJwt;
-            if (data.testType != 'SIMPLE_LIGHT') {
+            if (data.testType != 'SIMPLE_RDO') {
               router.back()
             }
           });
@@ -219,7 +219,11 @@ export default defineComponent({
       }
     },
   },
+  mounted() {
+      this.load()
+  },
 });
+
 </script>
 
 <template>

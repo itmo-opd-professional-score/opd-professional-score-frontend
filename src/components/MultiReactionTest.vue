@@ -1,22 +1,6 @@
 <template>
   <div>
-    <h2>Тест на скорость реакции с тремя шарами</h2>
-    <button @click="startAllBalls" class="start-button">Старт</button>
-    <div class="balls-row">
-      <div v-for="(ball, index) in balls" :key="index" class="ball-container">
-        <ReactionCircle ref="reactionCircle" :time="time" />
-        <CommonButton
-          class="reaction-button"
-          :disabled="ball.state === 'completed'"
-          @click="handleButtonClick(index)"
-        >
-          {{ ball.buttonText }}
-        </CommonButton>
-        <div v-if="ball.currentDeviation" class="current-deviation">
-          Текущее отклонение: {{ ball.currentDeviation }} мс
-        </div>
-      </div>
-    </div>
+
   </div>
 </template>
 
