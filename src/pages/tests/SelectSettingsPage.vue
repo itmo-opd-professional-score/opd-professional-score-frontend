@@ -11,7 +11,7 @@ export default defineComponent({
   props: {
     testName: {
       type: String,
-      default: 'No test name',
+      default: 'Test Settings',
     },
   },
   data() {

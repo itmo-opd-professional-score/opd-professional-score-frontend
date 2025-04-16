@@ -91,6 +91,7 @@ export default defineComponent({
         dispersion: this.standardDeviation,
         mistakes: this.deviationHistory.filter(deviation => Math.abs(deviation) > 140).length,
         averageCallbackTime: this.deviationHistory.reduce((a, b) => a + b) / this.deviationHistory.length,
+        testType: 'SIMPLE_RDO'
       }
     }
   },
@@ -137,6 +138,7 @@ export default defineComponent({
     stopTest() {
       const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
       reactionCircle.cancelAnimation();
+      this.saveResults()
     },
     clickButton() {
       if (this.testState === 'ready') {
@@ -340,7 +342,7 @@ export default defineComponent({
   border-radius: 5px;
   transition: width 0.5s ease;
 }
-.standard-deviation, current-deviation {
+.standard-deviation, .current-deviation {
   margin-top: 10px;
   font-size: 18px;
   color: #333;
