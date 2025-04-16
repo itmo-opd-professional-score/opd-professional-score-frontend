@@ -20,6 +20,7 @@ import { useTestTypesStore } from '../store/test-types.store.ts';
 import type { GetTestBlockOutputDto } from '../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
 import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
 import TestBlocksManagerList from '../components/TestBlocksManagerList.vue';
+import CommonButton from '../components/UI/CommonButton.vue';
 
 const authResolver = new AuthResolver();
 const userResolver = new UserResolver();
@@ -169,6 +170,46 @@ onMounted(() => {
           <p class="field_label">Gender</p>
           <p class="field">{{ UserState.gender }}</p>
         </div>
+        <div class="info-block test-button">
+          <CommonButton
+            @click="router.push('/test/simple/sound')"
+            class="submit_button"
+          >
+            <template #placeholder>Simple sound test</template>
+          </CommonButton>
+        </div>
+        <div class="info-block test-button">
+          <CommonButton
+            @click="router.push('/test/simple/light')"
+            class="submit_button"
+          >
+            <template #placeholder>Simple light test</template>
+          </CommonButton>
+        </div>
+        <div class="info-block test-button">
+          <CommonButton
+            @click="router.push('/test/hard/light')"
+            class="submit_button"
+          >
+            <template #placeholder>Hard light test</template>
+          </CommonButton>
+        </div>
+        <div class="info-block test-button">
+          <CommonButton
+            @click="router.push('/test/addition/sound')"
+            class="submit_button"
+          >
+            <template #placeholder>Addition sound test</template>
+          </CommonButton>
+        </div>
+        <div class="info-block test-button">
+          <CommonButton
+            @click="router.push('/test/addition/visual')"
+            class="submit_button"
+          >
+            <template #placeholder>Addition visual test</template>
+          </CommonButton>
+        </div>
       </div>
       <div class="buttons_container">
         <Button @click="router.push('/profile/change')">
@@ -310,6 +351,10 @@ onMounted(() => {
   .buttons_container {
     margin-top: auto;
   }
+}
+
+.test-button button {
+  width: 100%;
 }
 
 .users-info, .tests-info, .test-info {
