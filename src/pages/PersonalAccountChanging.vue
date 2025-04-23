@@ -5,9 +5,11 @@ import router from '../router/router.ts';
 import Button from '../components/UI/CommonButton.vue';
 import { UserResolver } from '../api/resolvers/user/user.resolver.ts';
 import { usePopupStore } from '../store/popup.store.ts';
+import { AuthResolver } from '../api/resolvers/auth/auth.resolver.ts';
 
 const updateProfile = async () => {
   const userResolver = new UserResolver();
+  const authResolver = new AuthResolver();
   userResolver
     .updateUser({
       id: UserState.id,
@@ -19,7 +21,7 @@ const updateProfile = async () => {
     })
     .then((res) => {
       if (res.status == 200) {
-        router.push('/profile');
+        authResolver.logout()
       } else {
         const popUpStore = usePopupStore();
         popUpStore.activateErrorPopup(res.body);

@@ -105,7 +105,11 @@ export default defineComponent({
       v-if="UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN"
     >
       <h4>Последние результаты всех пользователей:</h4>
-      <TestScoreList :tests="testsData" :max-elements-count="8" />
+      <TestScoreList
+        :tests="testsData"
+        :max-elements-count="7"
+        :enabled-filters="{age: true, gender: true}"
+      />
     </section>
   </div>
 </template>
