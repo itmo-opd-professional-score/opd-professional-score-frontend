@@ -1,6 +1,6 @@
 export type TestType =
-  | 'SOUND_ADDITION'
-  | 'VISUAL_ADDITION'
+  | 'ADDITION_SOUND'
+  | 'ADDITION_VISUAL'
   | 'SIMPLE_LIGHT'
   | 'SIMPLE_SOUND'
   | 'HARD_LIGHT'

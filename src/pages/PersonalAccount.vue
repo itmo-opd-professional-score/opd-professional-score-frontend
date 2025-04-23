@@ -4,7 +4,7 @@ import { onMounted, ref } from 'vue';
 import TestsManagerList from '../components/TestsManagerList.vue';
 import UserManagerList from '../components/UserManagerList.vue';
 import ProfessionsManagerList from '../components/ProfessionsManagerList.vue';
-import { calculateAge, updateUserState, UserState } from '../utils/userState/UserState.ts';
+import { calculateAge, UserState } from '../utils/userState/UserState.ts';
 import { ProfessionResolver } from '../api/resolvers/profession/profession.resolver.ts';
 import type { GetProfessionOutputDto } from '../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
 import { usePopupStore } from '../store/popup.store.ts';
@@ -114,10 +114,10 @@ const reloadTests = async () => {
     )
     if (additionTests) {
       tests.value.additionSound = additionTests.filter((test) =>
-        testTypesStore.checkTestType(test).name == 'SOUND_ADDITION' ? test : null,
+        testTypesStore.checkTestType(test).name == 'ADDITION_SOUND' ? test : null,
       );
       tests.value.additionVisual = additionTests.filter((test) =>
-        testTypesStore.checkTestType(test).name == 'VISUAL_ADDITION' ? test : null,
+        testTypesStore.checkTestType(test).name == 'ADDITION_VISUAL' ? test : null,
       );
     }
     if (rdoTests) {
@@ -189,7 +189,7 @@ onMounted(() => {
           <p class="field_label">Gender</p>
           <p class="field">{{ UserState.gender }}</p>
         </div>
-        <div class="test buttons">
+        <div class="test buttons" v-if="UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT">
           <CommonButton
             @click="router.push('/test/simple/sound')"
             class="submit_button"
@@ -336,6 +336,30 @@ onMounted(() => {
           <p class="block_header">Реакция на сложение визуально</p>
           <TestsManagerList
             :tests="tests.additionVisual"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.hardLight.length > 0">
+          <p class="block_header">Реакция на сложение визуально</p>
+          <TestsManagerList
+            :tests="tests.hardLight"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.simpleRdo.length > 0">
+          <p class="block_header">Реакция на сложение визуально</p>
+          <TestsManagerList
+            :tests="tests.simpleRdo"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.hardRdo.length > 0">
+          <p class="block_header">Реакция на сложение визуально</p>
+          <TestsManagerList
+            :tests="tests.hardRdo"
             :max-elements-count="5"
           />
         </div>

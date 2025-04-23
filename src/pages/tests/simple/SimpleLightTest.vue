@@ -47,12 +47,13 @@ export default defineComponent({
         times.reduce((acc, val) => acc + Math.pow(val - average, 2), 0) /
         times.length;
       const deviation = Math.round(Math.sqrt(variance));
+      console.log(this.reactionTimes)
       return {
         average,
         deviation,
         best: Math.min(...times),
         worst: Math.max(...times),
-        missedCount: this.reactionTimes.filter(reaction => reaction > 1).length
+        missedCount: this.reactionTimes.filter(reaction => reaction > 600).length
       };
     },
     testResultDto(): CreateSimpleInputDto {
@@ -141,7 +142,7 @@ export default defineComponent({
         if (this.token && this.completedTestsLinks.length != 0) {
           this.completedTestsLinks.forEach((link) => {
             const data = jwtDecode(link) as TestJwt;
-            if (data.testType != 'SIMPLE_LIGHT') {
+            if (data.testType == 'SIMPLE_LIGHT') {
               router.back()
             }
           });

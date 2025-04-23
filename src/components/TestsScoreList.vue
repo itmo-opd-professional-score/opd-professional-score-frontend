@@ -105,15 +105,17 @@ watch(() => props.tests, (newTests) => {
     >
       <template #id>{{ item.id }}</template>
       <template #current_points>{{
-          item.misclicks ?
-          item.allSignals - item.misclicks :
-          item.allSignals - item.mistakes  !
+          item.misclicks != null ?
+            item.allSignals - item.misclicks :
+            item.allSignals - item.mistakes
         }}</template>
       <template #max_points>{{ item.allSignals }}</template>
       <template #time>{{ item.averageCallbackTime.toFixed(2) }}</template>
       <template #username v-if="!hideUserId">{{ item.userId}}</template>
       <template #createdAt>{{ item.createdAt.substring(0, 10) }}</template>
-      <template #valid>{{ item.valid }}</template>
+      <template #valid>{{ (item.misclicks != null ?
+        item.allSignals - item.misclicks :
+        item.allSignals - item.mistakes / item.allSignals) > 0.6 }}</template>
     </TestScore>
 
     <div class="pagination_controls">

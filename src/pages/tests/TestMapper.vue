@@ -10,6 +10,7 @@ import SimpleSoundTest from './simple/SimpleSoundTest.vue';
 import SimpleLightTest from './simple/SimpleLightTest.vue';
 import HardLightTest from './hard/HardLightTest.vue';
 import SimpleRdoTest from './simple/SimpleRdoTest.vue';
+import HardRdoTest from './hard/HardRdoTest.vue';
 
 const props = defineProps<{
   token: string;
@@ -18,9 +19,9 @@ const testComponent = computed(() => {
   try {
     const data = jwtDecode(props.token) as TestJwt;
     switch (data.testType) {
-      case 'SOUND_ADDITION':
+      case 'ADDITION_SOUND':
         return AdditionSoundTest;
-      case 'VISUAL_ADDITION':
+      case 'ADDITION_VISUAL':
         return AdditionVisualTest;
       case 'SIMPLE_SOUND':
         return SimpleSoundTest;
@@ -30,6 +31,8 @@ const testComponent = computed(() => {
         return HardLightTest;
       case 'SIMPLE_RDO':
         return SimpleRdoTest;
+      case 'HARD_RDO':
+        return HardRdoTest;
       default:
         return NotFound;
     }

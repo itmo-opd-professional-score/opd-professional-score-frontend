@@ -113,8 +113,7 @@ export default defineComponent({
       accelerationInterval: 60000,
       accelerationFrequency: 10,
       remainingTimeValue: 6000,
-      startTime: 0,
-      timerId: 0,
+      maxTime: 0,
       timerIntervalId: 0,
     };
   },
@@ -122,7 +121,7 @@ export default defineComponent({
     testResultsDto(): CreateRdoInputDto {
       return {
         userId: UserState.id ? UserState.id : null,
-        allSignals: this.balls[0].deviationHistory.length,
+        allSignals: this.balls[0].deviationHistory.length * 3,
         dispersion: this.standardDeviations.length > 0 ?
           this.standardDeviations.reduce((a, b) => a + b) / 3 : 0,
         mistakes: this.mistakes,
@@ -156,7 +155,7 @@ export default defineComponent({
       let count = 0
       this.balls.forEach(ball => {
         ball.deviationHistory.forEach(deviation => {
-          if (Math.abs(deviation) > 140) count ++
+          if (Math.abs(deviation) > 300) count ++
         })
       })
       return count
@@ -175,15 +174,16 @@ export default defineComponent({
   methods: {
     startAllBalls(setTimer?: boolean) {
       if (setTimer) {
-        clearInterval(this.timerId)
+        clearInterval(this.timerIntervalId)
+        this.remainingTimeValue = this.maxTime
         this.timerIntervalId = setInterval(() => {
           this.remainingTimeValue -= 1000;
-          if (this.balls.every(ball => ball.state === 'completed') || this.remainingTimeValue <= 0) {
+          if (this.remainingTimeValue <= 0) {
+            clearInterval(this.timerIntervalId)
             this.stopTest()
           }
         }, 1000);
       }
-      this.startTime = performance.now()
       this.balls.forEach((ball, index) => {
         ball.state = 'reacting';
         ball.currentDeviation = null;
@@ -223,6 +223,7 @@ export default defineComponent({
           ball.state = 'completed';
         }
       })
+      console.log('hi')
       this.saveResults()
     },
     saveResults(): void {
@@ -266,7 +267,7 @@ export default defineComponent({
         if (this.token && this.completedTestsLinks.length != 0) {
           this.completedTestsLinks.forEach((link) => {
             const data = jwtDecode(link) as TestJwt;
-            if (data.testType != 'HARD_RDO') {
+            if (data.testType == 'HARD_RDO') {
               router.back()
             }
           });
@@ -274,7 +275,7 @@ export default defineComponent({
       }
       const settings = await new TestSetupsResolver().getById(1)
       if (settings) {
-        this.remainingTimeValue = settings.duration * 10
+        this.maxTime = settings.duration * 10
         this.showTimer = settings.showTimer
         this.showProgressBar = settings.showProgress
       }

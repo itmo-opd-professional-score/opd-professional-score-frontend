@@ -19,42 +19,40 @@ interface ReactionCircleInstance {
 }
 
 type TestState = 'ready' | 'reacting' | 'completed';
+type AccelerationMode = 'linear' | 'smooth'
 
 export default defineComponent({
   name: "SimpleReactionTest",
   components: { CommonButton, ReactionCircle },
+  props: {
+    token: String,
+  },
   data() {
     return {
       radius: 100,
       centerX: 150,
       centerY: 150,
       speed: 0.001,
-      angle: -Math.PI / 2,
-      initialAngle: -Math.PI / 2,
-      startTime: 0,
-      deviation: null as number | null,
-      deviationHistory: [] as number[],
-      currentDeviation: null as number | null,
-      animationFrameId: null as number | null,
+      angle: 0,
+      animationFrameId: 0,
+      loopCount: 0,
+      acceleration: 1,
+
+      currentDeviation: 0,
+      deviationHistory: [] as Array<number>,
       testState: 'ready' as TestState,
-      timerIntervalId: null as number | null,
-      remainingTimeValue: 0,
-      accelerationCount: 0,
-      accelerationIntervalId: null as number | null,
+      remainingSeconds: 0,
+      startTime: 0,
+      time: 120,
+
       completedTestsLinks: [] as Array<string>,
       completedTestsResults: [] as Array<string>,
+
+      accelerationMode: 'linear' as AccelerationMode,
+      timerIntervalId: 0,
+      showTimer: false,
+      showProgressBar: false,
     };
-  },
-  props: {
-    token: String,
-    time: { type: Number, required: true },
-    showTimer: { type: Boolean, default: false },
-    showFinalResults: { type: Boolean, default: false },
-    showPerMinuteResults: { type: Boolean, default: false },
-    showProgressBar: { type: Boolean, default: false },
-    accelerationAmount: { type: Number, default: 0.1 },
-    accelerationInterval: { type: Number, default: 60000 },
-    accelerationFrequency: { type: Number, default: 10 }
   },
   computed: {
     circleX() { return this.centerX + this.radius * Math.cos(this.angle); },
@@ -76,13 +74,13 @@ export default defineComponent({
     },
     remainingTime() {
       if (this.testState === 'completed') return null;
-      const minutes = Math.floor(this.remainingTimeValue / 60000);
-      const seconds = Math.floor((this.remainingTimeValue % 60000) / 1000);
+      const minutes = Math.floor(this.remainingSeconds / 60);
+      const seconds = Math.floor(this.remainingSeconds % 60);
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
     progressBarWidth() {
-      if (this.remainingTimeValue === 0) return '0%';
-      return `${(1 - this.remainingTimeValue / (this.time * 1000)) * 100}%`;
+      if (this.remainingSeconds === 0) return '0%';
+      return `${this.remainingSeconds / this.time * 100}%`;
     },
     testResultsDto(): CreateRdoInputDto {
       return {
@@ -102,7 +100,7 @@ export default defineComponent({
         return;
       }
       const elapsed = time - this.startTime;
-      this.angle = (this.initialAngle + elapsed * this.speed) % (Math.PI * 2);
+      this.angle = Math.round((elapsed * this.speed) % (Math.PI * 2));
       if (elapsed >= this.time * 1000) {
         this.testState = 'completed';
         cancelAnimationFrame(this.animationFrameId!);
@@ -111,25 +109,22 @@ export default defineComponent({
         this.animationFrameId = requestAnimationFrame(this.animate);
       }
     },
-    setupAcceleration() {
-      if (!this.accelerationAmount || !this.accelerationInterval) return;
-      this.accelerationIntervalId = setInterval(() => {
-        if (this.accelerationCount >= this.accelerationFrequency) {
-          clearInterval(this.accelerationIntervalId!);
-          return;
-        }
-        const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
-        reactionCircle.speed *= 1 + this.accelerationAmount;
-        this.accelerationCount++;
-      }, this.accelerationInterval);
+    accelerate() {
+      const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
+      this.acceleration++
+      reactionCircle.speed = parseFloat((reactionCircle.speed *= 1.1).toFixed(4))
+      console.log(reactionCircle.speed);
+      this.speed = reactionCircle.speed
+      cancelAnimationFrame(this.animationFrameId!);
+      reactionCircle.cancelAnimation()
+      this.angle = 0
+      reactionCircle.startAnimation();
+      this.animationFrameId = requestAnimationFrame(this.animate);
     },
     startTest() {
-      this.accelerationCount = 0;
-      this.setupAcceleration();
       this.testState = 'reacting';
       this.startTime = performance.now();
-      this.initialAngle = -Math.PI / 2;
-      this.angle = this.initialAngle;
+      this.angle = 0;
       this.animationFrameId = requestAnimationFrame(this.animate);
       this.startTimer(this.time);
       const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
@@ -149,27 +144,18 @@ export default defineComponent({
         reactionCircle.clickButton(currentTime);
         this.currentDeviation = reactionCircle.deviation;
         this.deviationHistory.push(reactionCircle.deviation);
-        reactionCircle.cancelAnimation();
-        reactionCircle.startAnimation();
       }
     },
     startTimer(totalSeconds: number) {
-      this.remainingTimeValue = totalSeconds * 1000;
+      this.remainingSeconds = totalSeconds;
       this.timerIntervalId = setInterval(() => {
-        this.remainingTimeValue -= 1000;
-        if (this.remainingTimeValue <= 0) {
-          this.remainingTimeValue = 0;
+        this.remainingSeconds--
+        if (this.remainingSeconds <= 0) {
           clearInterval(this.timerIntervalId!);
           this.testState = 'completed';
           this.stopTest();
         }
       }, 1000);
-    },
-    cancelTimer() {
-      if (this.timerIntervalId) {
-        clearInterval(this.timerIntervalId);
-        this.timerIntervalId = null;
-      }
     },
     saveResults(): void {
       const popUpStore = usePopupStore()
@@ -211,7 +197,7 @@ export default defineComponent({
         if (this.token && this.completedTestsLinks.length != 0) {
           this.completedTestsLinks.forEach((link) => {
             const data = jwtDecode(link) as TestJwt;
-            if (data.testType != 'SIMPLE_RDO') {
+            if (data.testType == 'SIMPLE_RDO') {
               router.back()
             }
           });
@@ -222,6 +208,16 @@ export default defineComponent({
   mounted() {
       this.load()
   },
+  watch: {
+    angle(_, newAngle): void {
+      if (newAngle == 6) {
+        this.loopCount++
+        this.accelerate()
+        // console.log(this.loopCount, this.acceleration)
+        // if (this.loopCount >= this.acceleration ** 2) { this.accelerate() }
+      }
+    }
+  }
 });
 
 </script>
