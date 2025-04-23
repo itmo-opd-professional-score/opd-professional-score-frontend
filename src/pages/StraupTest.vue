@@ -100,8 +100,9 @@ export default defineComponent({
 </script>
 
 <template>
-
   <div class="container">
+  <div class="test-container">
+
     <div class="info-block" v-if="testState == 'reacting'">
       <div v-if="showTimer" class="timer">
         Осталось времени: {{ remainingTime() }}
@@ -128,6 +129,7 @@ export default defineComponent({
         </template>
       </CommonButton>
     </div>
+  </div>
   </div>
 </template>
 
@@ -183,7 +185,7 @@ export default defineComponent({
   border-radius: 5px;
   margin: 10px auto;
 }
-.container {
+.test-container {
   background: #c1b9f6;
   display: flex;
   flex-direction: column;
@@ -192,6 +194,11 @@ export default defineComponent({
   padding: 15px;
   border-radius: 15px;
   min-height: 50vh;
+}
+.container {
+  max-width: 35vw;
+  padding: 2rem;
+  text-align: center;
 }
 .progress-bar {
   height: 100%;
