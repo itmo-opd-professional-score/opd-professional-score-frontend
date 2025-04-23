@@ -18,6 +18,7 @@ import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
+import StraupTest from '../pages/StraupTest.vue';
 
 const routes = [
   {
@@ -108,6 +109,18 @@ const routes = [
     component: TestMapper,
   },
   {
+    path :'/test/stroop-test',
+    component: StraupTest,
+    meta: {
+      ruName: "похуй"
+    },
+    props: {
+      time: 120,
+      showTimer: true,
+      showProgressBar: true,
+    }
+  },
+  {
     path: '/testBlock/create',
     component: CreateTestBlockPage,
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
@@ -118,7 +131,7 @@ const routes = [
      props: true,
     },
   {
-    path: '/simple-reaction-test',
+    path: '/test/simple-reaction-test',
     name: 'SimpleReactionTest',
     component: SimpleReactionTest,
     props: {
