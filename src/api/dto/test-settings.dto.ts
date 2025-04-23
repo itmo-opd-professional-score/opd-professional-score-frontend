@@ -1,5 +1,5 @@
 export interface TestSettingsDto {
-  testName: string;
+  testType: string;
   duration: number;
   showTimer: boolean;
   showMinuteResults: boolean;
@@ -8,4 +8,5 @@ export interface TestSettingsDto {
   accelerationAmount: number;
   accelerationInterval: number;
   accelerationFrequency: number;
+  difficulty: number;
 }

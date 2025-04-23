@@ -112,7 +112,7 @@ const routes = [
     component: CreateTestBlockPage,
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
   },
-   {path: '/test/settings/:testName',
+   {path: '/test/settings/:testType',
       component: SelectSettingsPage,
       meta: { ruName: 'Настройки теста', requiresAuth: true },
      props: true,

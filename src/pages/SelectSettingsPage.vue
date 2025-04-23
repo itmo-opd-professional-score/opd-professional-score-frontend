@@ -1,15 +1,14 @@
 <script lang="ts">
-import {defineComponent} from 'vue';
+import { defineComponent } from 'vue';
 import CommonButton from '../components/UI/CommonButton.vue';
-import type {TestSettingsDto} from '../api/dto/test-settings.dto.ts';
+import type { TestSettingsDto } from '../api/dto/test-settings.dto.ts';
 import CustomInput from '../components/UI/inputs/CustomInput.vue';
-
 
 export default defineComponent({
   name: 'SelectSettingsPage',
-  components: {CustomInput, CommonButton},
+  components: { CustomInput, CommonButton },
   props: {
-    testName: {
+    testType: {
       type: String,
       default: 'No test name',
     },
@@ -24,21 +23,34 @@ export default defineComponent({
       accelerationAmount: 40,
       accelerationInterval: 60,
       accelerationFrequency: 10,
+      difficulty: 2,
+      testTypeLabels: {
+        lab4_3: 'Оценка простой реакции человека на движущийся объект',
+        lab4_4: 'Оценка сложной реакции человека на движущийся объект',
+        lab5_3: 'Оценка аналогового слежения',
+        lab5_4: 'Оценка слежения с преследованием',
+        lab6_3: 'Оценка внимания',
+        lab6_4: 'Оценка памяти',
+        lab6_5: 'Оценка мышления',
+      },
     };
   },
   computed: {
     formattedInterval() {
       const minutes = Math.floor(this.duration / 60);
-      const seconds = (this.duration % 60)
-          .toString()
-          .padStart(2, '0');
+      const seconds = (this.duration % 60).toString().padStart(2, '0');
       return `${minutes} мин ${seconds} сек`;
     },
+    testTitle(): string {
+      return this.testType in this.testTypeLabels
+        ? this.testTypeLabels[this.testType as keyof typeof this.testTypeLabels]
+        : this.testType;
+    }
   },
   methods: {
     saveSettings() {
       const settings: TestSettingsDto = {
-        testName: this.testName,
+        testType: this.testType,
         duration: this.duration,
         showTimer: this.showTimer,
         showMinuteResults: this.showMinuteResults,
@@ -46,10 +58,11 @@ export default defineComponent({
         showProgress: this.showProgress,
         accelerationAmount: this.accelerationAmount,
         accelerationInterval: this.accelerationInterval,
-        accelerationFrequency: this.accelerationFrequency
+        accelerationFrequency: this.accelerationFrequency,
+        difficulty: this.difficulty,
       };
       this.$emit('newSettings', settings);
-    }
+    },
   },
   emits: ['newSettings'],
 });
@@ -59,20 +72,20 @@ export default defineComponent({
   <div id="choose-settings">
     <div class="choose-settings-form">
       <div class="section header-section">
-        <h2>Выберите настройки теста: <br/>{{ testName }}</h2>
+        <h2>Выберите настройки теста: <br />{{ testTitle }}</h2>
       </div>
       <div class="settings-group">
         <div class="time-interval-selector">
           <label
-          >Время прохождения теста:
+            >Время прохождения теста:
             <strong>{{ formattedInterval }}</strong></label
           >
           <CustomInput
-              type="range"
-              v-model.number="duration"
-              :minNumber="120"
-              :maxNumber="2700"
-              class="custom-slider"
+            type="range"
+            v-model.number="duration"
+            :minNumber="120"
+            :maxNumber="2700"
+            class="custom-slider"
           />
           <div class="slider-labels">
             <span>2 мин</span>
@@ -80,62 +93,96 @@ export default defineComponent({
           </div>
           <div class="setting-item">
             <CustomInput
-                type="checkbox"
-                @change="showTimer=!showTimer"
-                labelText="Отображать оставшееся время"
+              type="checkbox"
+              @change="showTimer = !showTimer"
+              labelText="Отображать оставшееся время"
             />
           </div>
 
           <div class="setting-item">
             <CustomInput
-                type="checkbox"
-                @change="showMinuteResults=!showMinuteResults"
-                labelText="Показывать результаты за минуту"
+              type="checkbox"
+              @change="showMinuteResults = !showMinuteResults"
+              labelText="Показывать результаты за минуту"
             />
             <CustomInput
-                type="checkbox"
-                @change="showTotalResults=!showTotalResults"
-                labelText="Показывать общий результат"
+              type="checkbox"
+              @change="showTotalResults = !showTotalResults"
+              labelText="Показывать общий результат"
             />
           </div>
 
           <div class="setting-item">
             <CustomInput
-                type="checkbox"
-                @change="showProgress=!showProgress"
-                labelText="Отображать прогресс выполнения"
+              type="checkbox"
+              @change="showProgress = !showProgress"
+              labelText="Отображать прогресс выполнения"
             />
           </div>
-          <div class="acceleration-settings">
+          <div
+            class="special-settings"
+            v-if="['lab4_3', 'lab4_4', 'lab5_3', 'lab5_4'].includes(testType)"
+          >
             <h3>Настройки ускорения:</h3>
             <div class="acceleration-input">
               <CustomInput
-                  type="number"
-                  v-model.number="accelerationAmount"
-                  :minNumber="0"
-                  :maxNumber="100"
-                  labelText="Величина ускорения(%):"
+                type="number"
+                v-model.number="accelerationAmount"
+                :minNumber="0"
+                :maxNumber="100"
+                labelText="Величина ускорения(%):"
               />
             </div>
 
             <div class="acceleration-input">
               <CustomInput
-                  type="number"
-                  v-model.number="accelerationInterval"
-                  :minNumber="1"
-                  :maxNumber="1000"
-                  labelText="Интервал применения(от 1 до 1000):"
+                type="number"
+                v-model.number="accelerationInterval"
+                :minNumber="1"
+                :maxNumber="1000"
+                labelText="Интервал применения(от 1 до 1000):"
               />
             </div>
             <div class="acceleration-input">
               <CustomInput
-                  type="number"
-                  v-model.number="accelerationFrequency"
-                  :minNumber="1"
-                  :maxNumber="1000"
-                  labelText="Как часто(от 1 до 1000):"
+                type="number"
+                v-model.number="accelerationFrequency"
+                :minNumber="1"
+                :maxNumber="1000"
+                labelText="Как часто(от 1 до 1000):"
               />
             </div>
+          </div>
+          <div
+            class="special-settings"
+            v-if="['lab6_5', 'lab6_3', 'lab6_4'].includes(testType)"
+          >
+            <h3>Выберите уровень сложности:</h3>
+            <div class="radio-group">
+              <CustomInput
+                type="radio"
+                @change=""
+                labelText="Легкий"
+                name="diff"
+                @click="difficulty = 1"
+              />
+              <CustomInput
+                type="radio"
+                @change=""
+                labelText="Нормальный"
+                :checked="true"
+                name="diff"
+                @click="difficulty = 2"
+              />
+              <CustomInput
+                type="radio"
+                @change=""
+                labelText="Сложный"
+                name="diff"
+                @click="difficulty = 3"
+              />
+            </div>
+            <br />
           </div>
         </div>
       </div>
@@ -222,11 +269,15 @@ export default defineComponent({
   border-bottom: 1px solid #eee;
 }
 
-.acceleration-settings {
+.special-settings {
   margin-top: 2rem;
   padding: 1rem;
   background: #f5f5f5;
   border-radius: 8px;
+}
+
+.special-settings h3 {
+  margin: 0.5rem;
 }
 
 .acceleration-input {
@@ -243,4 +294,13 @@ export default defineComponent({
   position: relative;
   padding: 0.5rem 2rem 0.5rem 0.5rem;
 }
+
+.radio-group {
+  display: flex;
+  justify-content: space-around;
+}
+.custom-slider *{
+  padding: 0;
+}
+
 </style>

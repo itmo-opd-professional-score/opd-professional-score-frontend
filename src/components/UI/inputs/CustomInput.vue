@@ -55,6 +55,9 @@ export default {
     labelText: {
       type: String,
     },
+    checked:{
+      type: Boolean,
+    }
   },
   methods: {
     validate(event: InputEvent) {
@@ -108,6 +111,7 @@ export default {
       :required="required"
       :class="selector"
       :name="name"
+      :checked="checked"
       @input="update($event as InputEvent)"
       :id="id"
     />
