@@ -39,7 +39,7 @@ export const updateUserState = () => {
       UserState.status = 'authorized';
       UserState.username = userData.username;
       UserState.email = userData.email;
-      UserState.age = userData.age.substring(0, 10);
+      UserState.age = userData.age?.substring(0, 10);
       UserState.gender = userData.gender;
       if (userData.role) {
         UserState.role = userData.role;
