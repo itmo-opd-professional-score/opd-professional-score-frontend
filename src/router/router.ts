@@ -115,7 +115,7 @@ const routes = [
       ruName: "похуй"
     },
     props: {
-      time: 120,
+      time: 10,
       showTimer: true,
       showProgressBar: true,
     }

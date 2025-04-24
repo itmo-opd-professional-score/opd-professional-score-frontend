@@ -18,6 +18,7 @@ export default defineComponent({
       remainingTimeValue: 0,
       timerIntervalId: null as ReturnType<typeof setInterval> | null,
       testState: 'ready' as TestState,
+      result: 0,
     };
   },
   props: {
@@ -82,6 +83,12 @@ export default defineComponent({
     },
     stopTest() {
       this.testState = 'completed';
+      if(this.score == 0) {
+        this.result=0
+      }
+      else {
+        this.result = Math.round((this.score / (this.score + this.mistakes)) * 100);
+      }
     },
     resetTest() {
       this.cancelTimer();
@@ -170,6 +177,7 @@ export default defineComponent({
       <h2 class="title">Тест завершен!</h2>
       <p class="result">Правильных ответов: {{ score }}</p>
       <p class="result">Ошибок: {{ mistakes }}</p>
+      <p class="result">Результат: {{ result }}%</p>
       <CommonButton
         class="reaction-button"
         @click="resetTest"
