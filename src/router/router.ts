@@ -16,6 +16,8 @@ import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.v
 import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
+import HardTrackingTest from '../pages/tests/HardTrackingTest.vue';
+
 
 const routes = [
   {
@@ -108,6 +110,15 @@ const routes = [
     path: '/simple-reaction-test',
     name: 'SimpleReactionTest',
     component: SimpleReactionTest,
+    props: {
+      time: 120,
+      showTimer: true,
+      showProgressBar: true
+    }
+  },
+  {
+    path: '/hard-tracking-test',
+    component: HardTrackingTest,
     props: {
       time: 120,
       showTimer: true,
