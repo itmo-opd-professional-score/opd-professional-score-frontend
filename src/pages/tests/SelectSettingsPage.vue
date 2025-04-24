@@ -1,9 +1,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import CommonButton from '../components/UI/CommonButton.vue';
-import type { TestSettingsDto } from '../api/dto/test-settings.dto.ts';
-import CustomInput from '../components/UI/inputs/CustomInput.vue';
-import type { AccelerationMode } from './tests/types';
+import CustomInput from '../../components/UI/inputs/CustomInput.vue';
+import CommonButton from '../../components/UI/CommonButton.vue';
+import type { AccelerationMode } from './types';
+import type { TestSettingsDto } from '../../api/dto/test-settings.dto.ts';
+
 
 export default defineComponent({
   name: 'SelectSettingsPage',
