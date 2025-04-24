@@ -1,21 +1,25 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import CommonButton from '../components/UI/CommonButton.vue';
+import CustomInput from '../components/UI/inputs/CustomInput.vue';
 
 type TestState= 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
   name: 'NumericalSeriesTest',
-  components: { CommonButton },
+  components: { CustomInput, CommonButton },
   data() {
     return {
       countOfNumericInSeries: [6, 5, 4],
       levelOfDifficulty: 0,
       score: 0,
       mistakes: 0,
+      result: 0,
       minAndMaxForX: [1, 20],
       minAndMaxForY: [1, 5],
       testState: 'ready' as TestState,
+      remainingTimeValue: 0,
+      timerIntervalId:  null as ReturnType<typeof setInterval> | null,
       functionsForFirstDifficulty: [
         (x: number, y: number): string => (x + y).toString(),
         (x: number, y: number): string => (x - y).toString(),
@@ -33,12 +37,22 @@ export default defineComponent({
           return Math.round(fib).toString();
         },
         (x: number, y: number): string => ` ${x - y}/${x + y}`,
+  ],
+      functionsForThirdDifficulty: [
         (x: number, y: number) => (x * x + y).toString(),
         (x: number, y: number) => (x*x + x*y).toString(),
         (x: number, y: number): string =>  ` ${x-y}/${2*x + y}`,
         (x: number, y: number): string =>  (Math.pow(x, y)).toString()
-  ]
+      ]
     };
+  },
+  props: {
+    randomChangeOfDifficulty: { type: Boolean, default: false },
+    time: { type: Number, required: true },
+    showTimer: { type: Boolean, default: false },
+    showFinalResults: { type: Boolean, default: false },
+    showPerMinuteResults: { type: Boolean, default: false },
+    showProgressBar: { type: Boolean, default: false },
   },
   methods: {
     //лямбда принимает два парамета ВСЕГДА
@@ -60,14 +74,34 @@ export default defineComponent({
         this.startTest();
       }
     },
+    resetTest() {
+      this.testState = 'ready';
+      this.score = 0;
+      this.result = 0;
+      this.mistakes = 0;
+      this.startTimer(this.time);
+    },
     startTest() {
       this.testState = 'reacting';
+      this.nextRound();
+      this.startTimer(this.time);
     },
     stopTest() {
       this.testState = 'completed';
     },
     nextRound() {
 
+    },
+    startTimer(totalSeconds: number) {
+      this.remainingTimeValue = totalSeconds * 1000;
+      this.timerIntervalId = setInterval(() => {
+        this.remainingTimeValue -= 1000;
+        if (this.remainingTimeValue <= 0) {
+          this.remainingTimeValue = 0;
+          clearInterval(this.timerIntervalId!);
+          this.stopTest();
+        }
+      }, 1000);
     }
   }
 });
@@ -75,8 +109,10 @@ export default defineComponent({
 
 <template>
     <div class="container">
+
       <div class="instruction" v-if="testState == 'ready'">
         <h2 class="title">Тест Числовые последовательности</h2>
+        <CustomInput type=""></CustomInput>
         <p class="description">
         </p>
         <CommonButton
@@ -86,11 +122,21 @@ export default defineComponent({
             <template v-slot:placeholder>Начать тест</template>
         </CommonButton>
       </div>
+
       <div class="test-container" v-if="testState == 'reacting'" >
 
       </div>
       <div class="test-container" v-if="testState == 'completed'">
-
+        <h2 class="title">Тест завершен!</h2>
+        <p class="result">Правильных ответов: {{ score }}</p>
+        <p class="result">Ошибок: {{ mistakes }}</p>
+        <p class="result">Результат: {{ result }}%</p>
+        <CommonButton
+          class="reaction-button"
+          @click="resetTest"
+        >
+          <template v-slot:placeholder>Начать заново</template>
+        </CommonButton>
       </div>
     </div>
 </template>
