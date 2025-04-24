@@ -30,6 +30,7 @@ export default defineComponent({
       wordsPerLevel: 0,
       penaltyOnWrong: 2,
       requiredCorrect: 5,
+      result: 0,
     }
   },
 
@@ -128,7 +129,6 @@ export default defineComponent({
     checkResponse(response: boolean) {
       const isRepeated = this.shownWords.has(this.currentWord);
 
-
       const isCorrect = (isRepeated && response === true) || (!isRepeated && response === false);
 
       if (isCorrect) {
@@ -144,7 +144,6 @@ export default defineComponent({
         this.correctInRow = Math.max(0, this.correctInRow - this.penaltyOnWrong);
       }
 
-      // Добавляем слово в shownWords после проверки ответа
       this.shownWords.add(this.currentWord);
 
       this.nextWord();
@@ -167,6 +166,10 @@ export default defineComponent({
       }
       this.testState = 'completed';
       this.remainingTimeValue = 0;
+      this.result = Math.round((this.score / (this.score + this.mistakes)) * 100);
+      if (this.score == 0) {
+        this.result = 0;
+      }
     },
 
     resetTest() {
@@ -235,6 +238,7 @@ export default defineComponent({
       <h2 class="title">Тест завершен!</h2>
       <p class="result">Правильных ответов: {{ score }}</p>
       <p class="result">Ошибок: {{ mistakes }}</p>
+      <p class="result">Результат: {{ result }}%</p>
       <CommonButton class="restart-button" @click="resetTest">
         <template v-slot:placeholder>Начать заново</template>
       </CommonButton>
@@ -246,7 +250,6 @@ export default defineComponent({
 /* Основной контейнер */
 .container {
   max-width: 35vw;
-  margin: 0 auto;
   padding: 2rem;
   text-align: center;
 }
@@ -269,6 +272,7 @@ export default defineComponent({
   padding: 20px;
   border-radius: 15px;
   min-height: 50vh;
+  width: 80vh;
 }
 
 .description {
@@ -291,6 +295,7 @@ export default defineComponent({
   padding: 15px;
   border-radius: 15px;
   min-height: 50vh;
+  width: 80vh;
 }
 
 /* Таймер */
@@ -298,6 +303,7 @@ export default defineComponent({
   font-size: 24px;
   color: #fff;
   margin-bottom: 20px;
+  font-weight: bold;
 }
 
 /* Прогресс-бар */
@@ -318,10 +324,10 @@ export default defineComponent({
 
 /* Текущее слово */
 .current-word {
-  font-size: 24px;
+  font-size: 40px;
   font-weight: bold;
-  color: #333;
-  margin-top: 20px; /* Расстояние между прогресс-баром и словом */
+  color: #000000;
+  margin-top: 20px;
   margin-bottom: 20px;
 }
 
@@ -353,7 +359,7 @@ export default defineComponent({
 }
 
 .reaction-button:hover {
-  transform: scale(1.1); /* Увеличение при наведении */
+  transform: scale(1.1);
 }
 
 /* Кнопка "Начать тест" */

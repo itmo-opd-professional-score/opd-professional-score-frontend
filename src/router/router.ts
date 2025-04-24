@@ -133,7 +133,7 @@ const routes = [
     component: VerbalTest,
     meta: { requiresAuth: false, ruName: "Вербальный тест"},
     props: {
-      time: 30,
+      time: 10,
       showTimer: true,
       showProgressBar: true
     }
