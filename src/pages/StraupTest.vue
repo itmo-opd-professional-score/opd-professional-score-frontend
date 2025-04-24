@@ -16,6 +16,7 @@ export default defineComponent({
       score: 0,
       mistakes: 0,
       remainingTimeValue: 0,
+      elapsedTime: 0,
       timerIntervalId: null as ReturnType<typeof setInterval> | null,
       testState: 'ready' as TestState,
     };
@@ -70,9 +71,23 @@ export default defineComponent({
       this.startTimer(this.time);
     },
     startTimer(totalSeconds: number) {
-      this.remainingTimeValue = totalSeconds * 1000;
+      const totalMilliseconds = totalSeconds * 1000;
+      this.remainingTimeValue = totalMilliseconds;
+      this.elapsedTime = 0;
+      this.levelOfDifficulty = 0;
+
       this.timerIntervalId = setInterval(() => {
+        this.elapsedTime += 1000;
         this.remainingTimeValue -= 1000;
+        if (!this.randomChangeOfDifficulty) {
+          const oneThirdTime = totalMilliseconds / 3;
+          if (this.elapsedTime >= oneThirdTime && this.elapsedTime < 2 * oneThirdTime) {
+            this.levelOfDifficulty = 1;
+          } else if (this.elapsedTime >= 2 * oneThirdTime) {
+            this.levelOfDifficulty = 2;
+          }
+        }
+
         if (this.remainingTimeValue <= 0) {
           this.remainingTimeValue = 0;
           clearInterval(this.timerIntervalId!);
@@ -83,6 +98,20 @@ export default defineComponent({
     stopTest() {
       this.testState = 'completed';
     },
+    resetTest() {
+      this.cancelTimer();
+      this.testState = 'ready';
+      this.score = 0;
+      this.mistakes = 0;
+      this.currentWord = '';
+      this.levelOfDifficulty = 0;
+    },
+    cancelTimer() {
+      if (this.timerIntervalId) {
+        clearInterval(this.timerIntervalId);
+        this.timerIntervalId = null;
+      }
+    },
     remainingTime() {
       const minutes = Math.floor(this.remainingTimeValue / 60000);
       const seconds = Math.floor((this.remainingTimeValue % 60000) / 1000);
@@ -92,48 +121,101 @@ export default defineComponent({
       if (this.remainingTimeValue === 0) return '0%';
       return `${(1 - this.remainingTimeValue / (this.time * 1000)) * 100}%`;
     },
-  },
-  mounted() {
-    this.startTest();
+    clickButton() {
+      if (this.testState === 'ready') {
+        this.startTest();
+      }
+    },
   },
 });
 </script>
-
 <template>
   <div class="container">
-  <div class="test-container">
-
-    <div class="info-block" v-if="testState == 'reacting'">
-      <div v-if="showTimer" class="timer">
-        Осталось времени: {{ remainingTime() }}
-      </div>
-
-      <div v-if="showProgressBar" class="progress-bar-container">
-        <div class="progress-bar" :style="{ width: progressBarWidth() }"></div>
-      </div>
-    </div>
-
-    <h1 :style="{ color: currentColor }">{{ currentWord }}</h1>
-
-    <div class="buttons">
+    <div class="instruction" v-show="testState == 'ready'">
+      <h2 class="title">Тест Струпа</h2>
+      <p class="description">
+        В этом тесте вам нужно выбрать цвет слова, а не прочитать его. Например,
+        если слово "зелёный" написано красным цветом, правильный ответ —
+        "красный". Нажимайте на кнопку соответствующего цвета как можно быстрее!
+      </p>
       <CommonButton
-        v-for="color in colors"
-        :key="color"
-        :style="{ backgroundColor: color, color: color === 'yellow' ? 'black' : 'white' }"
         class="reaction-button"
-        :disabled="testState === 'completed'"
-        @click="checkAnswer(color)"
+        :class="{ active: testState == 'reacting' }"
+        :disabled="testState == 'completed'"
+        @click="clickButton"
       >
-        <template #placeholder>
-          {{ color }}
-        </template>
+        <template v-slot:placeholder>Начать тест</template>
       </CommonButton>
     </div>
+    <div class="test-container" v-show="testState == 'reacting'">
+      <div class="info-block" v-if="testState == 'reacting'">
+        <div v-if="showTimer" class="timer">
+          Осталось времени: {{ remainingTime() }}
+        </div>
+
+        <div v-if="showProgressBar" class="progress-bar-container">
+          <div
+            class="progress-bar"
+            :style="{ width: progressBarWidth() }"
+          ></div>
+        </div>
+      </div>
+      <div class="current-word">
+        <h1 :style="{ color: currentColor }">{{ currentWord }}</h1>
+      </div>
+      <div class="buttons">
+        <CommonButton
+          v-for="color in colors"
+          :key="color"
+          :style="{
+            backgroundColor: color,
+            color: color === 'yellow' ? 'black' : 'white',
+          }"
+          class="color-button"
+          :disabled="testState === 'completed'"
+          @click="checkAnswer(color)"
+        >
+          <template #placeholder>
+            {{ color }}
+          </template>
+        </CommonButton>
+      </div>
+    </div>
+    <div v-if="testState == 'completed'  && showFinalResults"  class="end">
+      <div class="test-container">
+        <h2 class="title">Тест завершен!</h2>
+        <p class="result">Правильных ответов: {{ score }}</p>
+        <p class="result">Ошибок: {{ mistakes }}</p>
+      </div>
+      <CommonButton
+        class="reaction-button"
+        :class="{ active: testState == 'completed' }"
+        @click="resetTest"
+      >
+        <template v-slot:placeholder>Начать заново</template>
+      </CommonButton>
+    </div>
+
   </div>
-  </div>
+
+
 </template>
 
 <style scoped>
+.description {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 15px;
+  margin: 20px 0;
+  color: black;
+}
+
+.title {
+  font-size: 36px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
 .container {
   display: flex;
   flex-direction: column;
@@ -155,36 +237,30 @@ export default defineComponent({
   justify-content: center;
 }
 
-.progress-bar-container {
-  width: 100%;
-  height: 8px;
-  background-color: #ddd;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  background-color: #4caf50;
-  transition: width 0.5s ease;
-}
 
 .timer {
   font-weight: bold;
 }
 
+.current-word {
+  margin-bottom: 10vh;
+  margin-top: 5vh;
+}
+
 .timer {
   font-size: 24px;
   color: #fff;
-  margin-bottom: 20px;
+  margin-bottom: 1vh;
 }
+
 .progress-bar-container {
   width: 80%;
   height: 10px;
   background-color: #ddd;
   border-radius: 5px;
-  margin: 10px auto;
+  margin: 3vh auto;
 }
+
 .test-container {
   background: #c1b9f6;
   display: flex;
@@ -195,20 +271,40 @@ export default defineComponent({
   border-radius: 15px;
   min-height: 50vh;
 }
+
 .container {
   max-width: 35vw;
   padding: 2rem;
   text-align: center;
 }
+
 .progress-bar {
   height: 100%;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   border-radius: 5px;
   transition: width 0.5s ease;
 }
-.standard-deviation, current-deviation {
-  margin-top: 10px;
-  font-size: 18px;
+
+.color-button {
+  width: 10vh;
+}
+
+.reaction-button {
+  display: flex;
+  width: 15vh;
+  height: 10vh;
+  background: rgba(128, 0, 128, 0.6);
+  border: none;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  box-shadow: 0 10px 20px rgba(128, 0, 128, 0.2);
+  outline: none;
+  margin: 3vh auto;
+}
+.result {
+  font-size: 20px;
   color: #333;
+  margin: 10px 0;
 }
 </style>
