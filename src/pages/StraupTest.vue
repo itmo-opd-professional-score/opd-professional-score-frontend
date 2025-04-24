@@ -15,6 +15,7 @@ export default defineComponent({
       levelOfDifficulty: 0,
       score: 0,
       mistakes: 0,
+      totalTime: 0,
       remainingTimeValue: 0,
       timerIntervalId: null as ReturnType<typeof setInterval> | null,
       roundTimeoutId: null as ReturnType<typeof setTimeout> | null,
@@ -64,6 +65,18 @@ export default defineComponent({
       this.nextRound();
     },
     nextRound() {
+      if (!this.randomChangeOfDifficulty) {
+        const timePassed = (this.totalTime * 1000 - this.remainingTimeValue) / 1000;
+        const thirdTime = this.totalTime / 3;
+        if (timePassed >= thirdTime * 2 && this.levelOfDifficulty < 2) {
+          this.levelOfDifficulty = 2;
+        } else if (timePassed >= thirdTime && this.levelOfDifficulty < 1) {
+          this.levelOfDifficulty = 1;
+        }
+      } else {
+
+        this.levelOfDifficulty = Math.floor(Math.random() * 3);
+      }
       this.clearRoundTimeout();
       this.giveColorName();
       this.giveColorOfWord();
@@ -73,6 +86,8 @@ export default defineComponent({
       }, 3000);
     },
     startTest() {
+      this.totalTime = this.time;
+      this.remainingTimeValue = this.time * 1000;
       this.testState = 'reacting';
       this.nextRound();
       this.startTimer(this.time);

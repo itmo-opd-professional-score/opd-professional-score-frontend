@@ -112,7 +112,7 @@ const routes = [
     path :'/test/stroop-test',
     component: StraupTest,
     meta: {
-      ruName: "похуй"
+      ruName: "Тест Струпа"
     },
     props: {
       time: 10,
