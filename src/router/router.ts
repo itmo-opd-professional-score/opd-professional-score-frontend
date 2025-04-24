@@ -14,11 +14,11 @@ import CreateTestBlockPage from '../pages/CreateTestBlockPage.vue';
 import AdditionVisualTest from '../pages/tests/addition/visual/AdditionVisualTest.vue';
 import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.vue';
 import SelectSettingsPage from '../pages/tests/SelectSettingsPage.vue';
-import SimpleReactionTest from "../pages/tests/simple/SimpleRdoTest.vue";
+import HardLightTest from '../pages/tests/hard/HardLightTest.vue';
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
-import HardLightTest from '../pages/tests/hard/HardLightTest.vue';
+import SimpleRdoTest from '../pages/tests/simple/SimpleRdoTest.vue';
 import HardRdoTest from '../pages/tests/hard/HardRdoTest.vue';
 
 const routes = [
@@ -100,7 +100,7 @@ const routes = [
   },
   {
     path: '/test/simple/rdo',
-    component: SimpleReactionTest,
+    component: SimpleRdoTest,
     meta: {ruName: "Оценка скорости простой реакции на движущийся объект", requiresAuth: true},
   },
   {
@@ -130,7 +130,7 @@ const routes = [
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
   },
    {
-     path: '/test/settings/:testName',
+     path: '/test/settings/:testType',
      component: SelectSettingsPage,
      meta: { ruName: 'Настройки теста', requiresAuth: true },
      props: true,

@@ -4,9 +4,13 @@ import { computed, type PropType, ref, watch } from 'vue';
 import CommonButton from './UI/CommonButton.vue';
 import type { TestDataOutputDto } from '../api/resolvers/test/dto/output/test-data-output.dto.ts';
 import TestFilter from './testFilter/TestFilter.vue';
-import type { UserSex } from '../utils/userState/UserState.types.ts';
+import type {
+  UserAgeRange,
+  UserSex,
+} from '../utils/userState/UserState.types.ts';
 import { UserResolver } from '../api/resolvers/user/user.resolver.ts';
 import type { EnabledFilters } from './testFilter/testFilter.types';
+import { calculateAge } from '../utils/userState/UserState.ts';
 
 const props = defineProps({
   maxElementsCount: {
@@ -21,16 +25,27 @@ const props = defineProps({
     type: {} as PropType<EnabledFilters>,
     default: {
       gender: false,
-      age: false
-    }
+      age: false,
+    },
   },
-  hideUserId: Boolean
+  hideUserId: Boolean,
 });
 
-const userResolver = new UserResolver()
+const userResolver = new UserResolver();
 const currentPage = ref(1);
-const currentGender = ref<UserSex | null>(null)
+const currentGender = ref<UserSex | null>(null);
 const filteredTests = ref<TestDataOutputDto[]>(props.tests);
+const currentAgeRange = ref<UserAgeRange | null>(null);
+
+const handleAgeUpdate = (ageRange: UserAgeRange | null) => {
+  currentAgeRange.value = ageRange;
+  applyFilters();
+};
+
+const handleGenderUpdate = (gender: UserSex | null) => {
+  currentGender.value = gender;
+  applyFilters();
+};
 
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * props.maxElementsCount;
@@ -54,35 +69,71 @@ const prevPage = () => {
   }
 };
 
-const filterByGender = async (gender: UserSex | null) => {
-  filteredTests.value = []
-  if (gender == null) {
-    filteredTests.value = props.tests
-  } else {
-    const filtered = await Promise.all(
-      props.tests.map(async (test) => {
-        if (test.userId == null) return false;
-        const user = await userResolver.getById(test.userId);
-        return user?.body.gender === gender ? test : false;
-      })
-    );
+const applyFilters = async () => {
+  filteredTests.value = [];
+  const filtered = await Promise.all(
+    props.tests.map(async (test) => {
+      if (test.userId == null) return false;
 
-    filteredTests.value = filtered.filter(test => test != false);
-  }
-  currentGender.value = gender
-}
+      const user = await userResolver.getById(test.userId);
+      if (!user?.body) return false;
 
-watch(() => props.tests, (newTests) => {
-  filteredTests.value = newTests;
-})
+      // Проверка пола
+      const genderMatch = currentGender.value
+        ? user.body.gender === currentGender.value
+        : true;
 
+      // Проверка возраста
+      let ageMatch = true;
+      if (currentAgeRange.value) {
+        const birthDate = user.body.age;
+        const ageStr = calculateAge(birthDate);
+        if (ageStr === undefined) {
+          ageMatch = false;
+        } else {
+          const ageNumber = parseInt(ageStr);
+          switch (currentAgeRange.value) {
+            case '<18':
+              ageMatch = ageNumber < 18;
+              break;
+            case '18-25':
+              ageMatch = ageNumber >= 18 && ageNumber <= 25;
+              break;
+            case '26-35':
+              ageMatch = ageNumber >= 26 && ageNumber <= 35;
+              break;
+            case '36+':
+              ageMatch = ageNumber >= 36;
+              break;
+            default:
+              ageMatch = true;
+          }
+        }
+      }
+
+      return genderMatch && ageMatch ? test : false;
+    }),
+  );
+
+  filteredTests.value = filtered.filter(
+    (test) => test !== false,
+  ) as TestDataOutputDto[];
+};
+
+watch(
+  () => props.tests,
+  (newTests) => {
+    filteredTests.value = newTests;
+  },
+);
 </script>
 
 <template>
   <div class="component_container">
     <TestFilter
       :enabledFilters="enabledFilters"
-      @gender-update="(gender: UserSex) => filterByGender(gender)"
+      @gender-update="handleGenderUpdate"
+      @age-update="handleAgeUpdate"
     />
     <div :class="hideUserId ? 'hide-username header' : 'header'">
       <div class="id" id="id">Id</div>
@@ -96,26 +147,21 @@ watch(() => props.tests, (newTests) => {
       v-for="item in paginatedData"
       :key="item.id"
       :class="hideUserId ? 'hide-username' : ''"
-      :user-id="
-      !hideUserId ?
-        item.userId ?
-          item.userId :
-          -1 :
-        undefined"
+      :user-id="!hideUserId ? (item.userId ? item.userId : -1) : undefined"
     >
       <template #id>{{ item.id }}</template>
-      <template #current_points>{{
-          item.misclicks != null ?
-            item.allSignals - item.misclicks :
-            item.allSignals - item.mistakes
-        }}</template>
+      <template #current_points
+        >{{
+          item.misclicks
+            ? item.allSignals - item.misclicks
+            : item.allSignals - item.mistakes!
+        }}
+      </template>
       <template #max_points>{{ item.allSignals }}</template>
       <template #time>{{ item.averageCallbackTime.toFixed(2) }}</template>
-      <template #username v-if="!hideUserId">{{ item.userId}}</template>
+      <template #username v-if="!hideUserId">{{ item.userId }}</template>
       <template #createdAt>{{ item.createdAt.substring(0, 10) }}</template>
-      <template #valid>{{ (item.misclicks != null ?
-        item.allSignals - item.misclicks :
-        item.allSignals - item.mistakes / item.allSignals) > 0.6 }}</template>
+      <template #valid>{{ item.valid }}</template>
     </TestScore>
 
     <div class="pagination_controls">
