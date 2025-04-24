@@ -25,7 +25,7 @@ interface SimpleRdoTest {
 }
 
 export default defineComponent({
-  name: "HardReactionTest",
+  name: "HardRdoTest",
   components: { SimpleRdoTest, CommonButton },
   props: {
     token: String,
