@@ -18,6 +18,7 @@ import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
+import NumericalSeriesTest from '../pages/NumericalSeriesTest.vue';
 
 const routes = [
   {
@@ -126,6 +127,12 @@ const routes = [
       showTimer: true,
       showProgressBar: true
     }
+  },
+  {
+    path: '/numerical-series-test',
+    name: 'NumericalSeriesTest',
+    component: NumericalSeriesTest,
+    meta: { ruName: 'Тест Числовые последовательности', requiresAuth: true },
   }
 ];
 
