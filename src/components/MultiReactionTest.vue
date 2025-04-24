@@ -6,14 +6,13 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import ReactionCircle from "../components/ReactionCircle.vue";
 import CommonButton from "../components/UI/CommonButton.vue";
 
 type BallState = 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
   name: "MultiReactionTest",
-  components: { CommonButton, ReactionCircle },
+  components: { CommonButton },
   data() {
     return {
       time: 60,
