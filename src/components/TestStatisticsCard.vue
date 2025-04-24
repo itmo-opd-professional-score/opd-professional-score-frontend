@@ -37,7 +37,6 @@ export default defineComponent({
   },
   computed: {
     scorePercentage(): string {
-      console.log(this.score)
       return ((this.score / this.maxScore) * 100).toFixed(2) + '%';
     },
     cardColors(): string {

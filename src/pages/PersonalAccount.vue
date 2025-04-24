@@ -341,7 +341,7 @@ onMounted(() => {
         </div>
 
         <div class="test-info" v-if="tests.hardLight.length > 0">
-          <p class="block_header">Реакция на сложение визуально</p>
+          <p class="block_header">Реакция на сложный световой сигнал</p>
           <TestsManagerList
             :tests="tests.hardLight"
             :max-elements-count="5"
@@ -349,7 +349,7 @@ onMounted(() => {
         </div>
 
         <div class="test-info" v-if="tests.simpleRdo.length > 0">
-          <p class="block_header">Реакция на сложение визуально</p>
+          <p class="block_header">Простая реакция на движущийся объект</p>
           <TestsManagerList
             :tests="tests.simpleRdo"
             :max-elements-count="5"
@@ -357,7 +357,7 @@ onMounted(() => {
         </div>
 
         <div class="test-info" v-if="tests.hardRdo.length > 0">
-          <p class="block_header">Реакция на сложение визуально</p>
+          <p class="block_header">Сложная реакция на движущийся объект</p>
           <TestsManagerList
             :tests="tests.hardRdo"
             :max-elements-count="5"

@@ -12,3 +12,6 @@ export interface TestJwt {
   iat: number;
   exp: number;
 }
+export type AccelerationMode =
+  | 'DISCRETE'
+  | 'STEADY'

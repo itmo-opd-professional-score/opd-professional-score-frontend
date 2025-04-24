@@ -102,11 +102,6 @@ const routes = [
     path: '/test/simple/rdo',
     component: SimpleReactionTest,
     meta: {ruName: "Оценка скорости простой реакции на движущийся объект", requiresAuth: true},
-    props: {
-      time: 10,
-      showTimer: true,
-      showProgressBar: true
-    }
   },
   {
     path: '/test/hard/rdo',

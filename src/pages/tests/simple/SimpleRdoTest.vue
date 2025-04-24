@@ -1,31 +1,27 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import ReactionCircle from "../../../components/ReactionCircle.vue";
 import CommonButton from "../../../components/UI/CommonButton.vue";
 import { usePopupStore } from '../../../store/popup.store.ts';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
 import router from '../../../router/router.ts';
 import { jwtDecode } from 'jwt-decode';
-import type { TestJwt } from '../types';
+import type { AccelerationMode, TestJwt } from '../types';
 import type { CreateRdoInputDto } from '../../../api/resolvers/test/dto/input/create-rdo-input.dto.ts';
-
-interface ReactionCircleInstance {
-  startAnimation(): void;
-  cancelAnimation(): void;
-  clickButton(time: number): void;
-  speed: number;
-  deviation: number;
-}
+import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
-type AccelerationMode = 'linear' | 'smooth'
 
 export default defineComponent({
-  name: "SimpleReactionTest",
-  components: { CommonButton, ReactionCircle },
+  name: "SimpleRdoTest",
+  components: { CommonButton },
+  emits: ['test completed'],
   props: {
     token: String,
+    presetId: Number,
+    isModule: Boolean,
+    startAcceleration: Number,
+    timeAsModule: Number
   },
   data() {
     return {
@@ -35,28 +31,31 @@ export default defineComponent({
       speed: 0.001,
       angle: 0,
       animationFrameId: 0,
+      loopStartTime: null as number | null,
       loopCount: 0,
-      acceleration: 1,
+      acceleration: 0.001,
 
       currentDeviation: 0,
       deviationHistory: [] as Array<number>,
       testState: 'ready' as TestState,
       remainingSeconds: 0,
-      startTime: 0,
-      time: 120,
+      time: 10,
 
       completedTestsLinks: [] as Array<string>,
       completedTestsResults: [] as Array<string>,
 
-      accelerationMode: 'linear' as AccelerationMode,
+      accelerationMode: 'DISCRETE' as AccelerationMode,
       timerIntervalId: 0,
-      showTimer: false,
-      showProgressBar: false,
+      showTimer: true,
+      showProgressBar: true,
+      showTotalResults: true,
+      loopChecked: false,
+      checkLooped: false
     };
   },
   computed: {
-    circleX() { return this.centerX + this.radius * Math.cos(this.angle); },
-    circleY() { return this.centerY + this.radius * Math.sin(this.angle); },
+    circleX() { return this.centerX + this.radius * Math.sin(this.angle); },
+    circleY() { return this.centerY + this.radius * Math.cos(this.angle); },
     standardDeviation(): number {
       const n = this.deviationHistory.length;
       if (n < 2) return 0;
@@ -82,80 +81,67 @@ export default defineComponent({
       if (this.remainingSeconds === 0) return '0%';
       return `${this.remainingSeconds / this.time * 100}%`;
     },
+    averageCallbackTime(): number {
+      if (this.deviationHistory.length == 0) return 0;
+      return this.deviationHistory.reduce((a, b) => a + b) / this.deviationHistory.length
+    },
     testResultsDto(): CreateRdoInputDto {
       return {
         userId: UserState.id ? UserState.id : null,
-        allSignals: this.deviationHistory.length,
+        allSignals: this.loopCount - 1,
         dispersion: this.standardDeviation,
-        mistakes: this.deviationHistory.filter(deviation => Math.abs(deviation) > 140).length,
-        averageCallbackTime: this.deviationHistory.reduce((a, b) => a + b) / this.deviationHistory.length,
+        mistakes: this.loopCount - 1 - this.deviationHistory.length,
+        averageCallbackTime: this.averageCallbackTime,
         testType: 'SIMPLE_RDO'
       }
     }
   },
   methods: {
-    animate(time: number) {
-      if (this.testState !== 'reacting') {
-        cancelAnimationFrame(this.animationFrameId!);
-        return;
-      }
-      const elapsed = time - this.startTime;
-      this.angle = Math.round((elapsed * this.speed) % (Math.PI * 2));
-      if (elapsed >= this.time * 1000) {
-        this.testState = 'completed';
-        cancelAnimationFrame(this.animationFrameId!);
-        this.stopTest();
-      } else {
-        this.animationFrameId = requestAnimationFrame(this.animate);
-      }
-    },
-    accelerate() {
-      const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
-      this.acceleration++
-      reactionCircle.speed = parseFloat((reactionCircle.speed *= 1.1).toFixed(4))
-      console.log(reactionCircle.speed);
-      this.speed = reactionCircle.speed
-      cancelAnimationFrame(this.animationFrameId!);
-      reactionCircle.cancelAnimation()
-      this.angle = 0
-      reactionCircle.startAnimation();
-      this.animationFrameId = requestAnimationFrame(this.animate);
-    },
-    startTest() {
-      this.testState = 'reacting';
-      this.startTime = performance.now();
-      this.angle = 0;
-      this.animationFrameId = requestAnimationFrame(this.animate);
-      this.startTimer(this.time);
-      const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
-      reactionCircle.startAnimation();
-    },
-    stopTest() {
-      const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
-      reactionCircle.cancelAnimation();
-      this.saveResults()
-    },
-    clickButton() {
+    handleClick() {
       if (this.testState === 'ready') {
-        this.startTest();
+        this.testState = 'reacting';
+        this.animationFrameId = requestAnimationFrame(this.animate)
+        this.remainingSeconds = this.time
+        this.startTimer()
       } else if (this.testState === 'reacting') {
-        const currentTime = performance.now();
-        const reactionCircle = this.$refs.reactionCircle as ReactionCircleInstance;
-        reactionCircle.clickButton(currentTime);
-        this.currentDeviation = reactionCircle.deviation;
-        this.deviationHistory.push(reactionCircle.deviation);
+        if (!this.checkLooped) {
+          if (this.circleX < 150) this.deviationHistory.push(-this.circleY * this.speed * 10)
+          else this.deviationHistory.push(this.circleY * this.speed * 10)
+          this.checkLooped = true;
+        }
+      } else {
+        router.go(0)
       }
     },
-    startTimer(totalSeconds: number) {
-      this.remainingSeconds = totalSeconds;
+    startTimer() {
       this.timerIntervalId = setInterval(() => {
+        if (this.remainingSeconds == 0) this.stopTest()
         this.remainingSeconds--
-        if (this.remainingSeconds <= 0) {
-          clearInterval(this.timerIntervalId!);
-          this.testState = 'completed';
-          this.stopTest();
+      }, 1000)
+    },
+    stopTest(){
+      this.testState = 'completed'
+      if (this.isModule) {
+        this.$emit("test completed", this.testResultsDto)
+      } else {
+        this.saveResults()
+      }
+    },
+    animate() {
+      if (this.testState == 'completed') cancelAnimationFrame(this.animationFrameId)
+      else {
+        this.angle -= (0.025 + this.acceleration)
+        if (50 <= this.circleY && this.circleY <= 51 && this.loopChecked) {
+          this.loopChecked = false
         }
-      }, 1000);
+        if (249 <= this.circleY && this.circleY <= 250 && !this.loopChecked) {
+          this.loopChecked = true
+          this.checkLooped = false
+          this.loopCount++
+        }
+        if (this.animationFrameId > 0) {}
+        requestAnimationFrame(this.animate)
+      }
     },
     saveResults(): void {
       const popUpStore = usePopupStore()
@@ -203,18 +189,41 @@ export default defineComponent({
           });
         }
       }
+      if (this.presetId != null) {
+        await this.loadSettings()
+      }
     },
+    async loadSettings() {
+      const testSetupResolver = new TestSetupsResolver()
+      const settings = await testSetupResolver.getById(this.presetId!)
+      if (settings) {
+        this.time = settings.duration
+        if (!this.isModule) {
+          this.showProgressBar = settings.showProgress
+          this.showTimer = settings.showTimer
+          this.accelerationMode = settings.accelerationMode
+        }
+        this.showTotalResults = settings.showTotalResults
+      }
+    }
   },
   mounted() {
-      this.load()
+    if (!this.isModule) this.load()
+    else {
+      if (this.timeAsModule) this.time = this.timeAsModule
+      this.showProgressBar = false
+      this.showTimer = false
+    }
+    if (this.startAcceleration) this.acceleration = this.startAcceleration
   },
   watch: {
-    angle(_, newAngle): void {
-      if (newAngle == 6) {
-        this.loopCount++
-        this.accelerate()
-        // console.log(this.loopCount, this.acceleration)
-        // if (this.loopCount >= this.acceleration ** 2) { this.accelerate() }
+    loopCount(): void {
+      if (this.loopCount % (this.acceleration * 1000  + 1) == 0) {
+        if (this.accelerationMode == 'DISCRETE') {
+          this.acceleration += 0.005
+        } else {
+          this.acceleration **= 1.01
+        }
       }
     }
   }
@@ -224,53 +233,77 @@ export default defineComponent({
 
 <template>
   <div class="container">
-  <div class="instruction" v-show="testState !== 'reacting'">
-    <h2 class="title">Тест на скорость реакции на движущиеся объекты</h2>
-    <p class="description">
-      Этот тест измеряет время вашей реакции на движущийся объект.
-      После начала теста фиолетовый круг начнет двигаться. Как только он будет находиться в начале своего пути (верхняя точка траектории) - как
-      можно быстрее нажмите большую кнопку. Старайтесь не нажимать кнопку до или после этой зоны!
-    </p>
-    <CommonButton
-      class="reaction-button"
-      :class="{ active: testState == 'reacting' }"
-      :disabled="testState == 'completed'"
-      @click="clickButton"
-    >
-      <template v-slot:placeholder>Начать тест</template>
-    </CommonButton>
-  </div>
-  <div class="test-container" v-show="testState === 'reacting'">
-    <div v-if="showTimer" class="timer">
-      Осталось времени: {{ remainingTime }}
-    </div>
-    <div v-if="showProgressBar" class="progress-bar-container">
-      <div class="progress-bar" :style="{ width: progressBarWidth }"></div>
-    </div>
-    <ReactionCircle ref="reactionCircle" :time="time"></ReactionCircle>
-    <div class="button-wrapper">
+    <div class="instruction" v-show="testState === 'ready'">
+      <h2 class="title">Тест на скорость реакции на движущиеся объекты</h2>
+      <p class="description">
+        Этот тест измеряет время вашей реакции на движущийся объект.
+        После начала теста фиолетовый круг начнет двигаться. Как только он будет находиться в начале своего пути (верхняя точка траектории) - как
+        можно быстрее нажмите большую кнопку. Старайтесь не нажимать кнопку до или после этой зоны!
+      </p>
       <CommonButton
-          class="reaction-button"
-          :class="{ active: testState == 'reacting' }"
-          :disabled="testState == 'completed'"
-          @click="clickButton"
+        class="reaction-button"
+        :class="{ active: testState == 'reacting' }"
+        :disabled="testState == 'completed'"
+        @click="handleClick"
       >
-        <template v-slot:placeholder> {{buttonText}}</template>
+        <template v-slot:placeholder>{{ buttonText }}</template>
       </CommonButton>
-      <div class="current-deviation">
-        Текущее отклонение:
-        {{
-          currentDeviation !== null ? currentDeviation.toFixed(2) : '0'
-        }} мс
+    </div>
+    <div class="test-container" v-show="testState === 'reacting'">
+      <div v-if="showTimer" class="timer">
+        Осталось времени: {{ remainingTime }}
       </div>
-      <div class="standard-deviation">
-        Стандартное отклонение:
-        {{
-          standardDeviation !== null ? standardDeviation.toFixed(2) : '0'
-        }} мс
+      <div v-if="showProgressBar" class="progress-bar-container">
+        <div class="progress-bar" :style="{ width: progressBarWidth }"></div>
+      </div>
+      <div class="circle" ref="reactionCircle">
+        <svg class="circles" width="300" height="300">
+          <circle cx="150" cy="150" r="100" stroke="black" stroke-width="2" fill="none" />
+          <circle cx="150" cy="50" r="10" fill="rgb(0,128,0)"/>
+          <circle :cx="circleX" :cy="circleY" r="10" fill="rgb(128, 0, 128)" />
+        </svg>
+      </div>
+      <div class="button-wrapper">
+        <CommonButton
+            class="reaction-button"
+            :class="{ active: testState == 'reacting' }"
+            :disabled="testState == 'completed'"
+            @click="handleClick"
+        >
+          <template v-slot:placeholder> {{ buttonText }}</template>
+        </CommonButton>
+        <div class="current-deviation">
+          Текущее отклонение:
+          {{ currentDeviation !== null ? currentDeviation.toFixed(2) : '0' }} мс
+        </div>
+        <div class="standard-deviation">
+          Стандартное отклонение:
+          {{ standardDeviation !== null ? standardDeviation.toFixed(2) : '0' }}с
+        </div>
       </div>
     </div>
-  </div>
+    <div class="results" v-show="testState === 'completed'">
+      <h2 class="title">Результаты</h2>
+      <div>
+        <p>Поздравляем с прохождением теста!</p>
+        <div v-if="showTotalResults">
+          <p>Ваши результаты:</p>
+          <ul>
+            <li :key="index" v-for="(deviation, index) in deviationHistory">
+              Реакция №{{index + 1}}: {{deviation.toFixed(2)}}
+            </li>
+          </ul>
+        </div>
+      </div>
+      <CommonButton
+        class="reaction-button"
+        :class="{ active: testState == 'reacting' }"
+        :disabled="testState == 'completed'"
+        @click="handleClick"
+      >
+        <template v-slot:placeholder>{{ buttonText }}</template>
+      </CommonButton>
+    </div>
   </div>
 
 </template>
@@ -282,18 +315,46 @@ export default defineComponent({
   margin-bottom: 20px;
   color: #fff;
 }
-.description {
+.results, .description {
   background: rgba(255, 255, 255, 0.9);
   padding: 20px;
   border-radius: 15px;
   margin: 20px 0;
   color: black;
+
+  ul {
+    list-style: none;
+  }
 }
 .container {
   max-width: 35vw;
   padding: 2rem;
   text-align: center;
+
+  .instruction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    button {
+      width: 100%;
+    }
+  }
 }
+
+.circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  border-radius: 15px;
+
+  .circles {
+    display: flex;
+  }
+}
+
 .test-container {
   background: #c1b9f6;
   display: flex;

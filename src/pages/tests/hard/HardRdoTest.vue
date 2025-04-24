@@ -1,54 +1,3 @@
-<template>
-  <div class="container">
-    <div class="instruction" v-if="balls.every(ball => ball.state !== 'reacting')">
-      <h2 class="title">Тест на скорость реакции на движущиеся объекты</h2>
-      <p class="description" v-if="balls.every(ball => ball.state === 'ready')">
-        Этот тест измеряет время вашей реакции на движущиеся объекты.
-        После начала теста фиолетовые круги начнут двигаться. Как только они будут находиться в начале своего пути (верхняя точка траектории) - как
-        можно быстрее нажмите соответствующие кнопки. Старайтесь не нажимать кнопки до или после этой зоны!
-      </p>
-      <p class="description" v-else>
-        Поздравляем с прохождением теста!
-        Ваши результаты:<br>
-        - Среднее время ответа: {{ testResultsDto.averageCallbackTime}}
-        - Среднее стандартное отклонение: {{ testResultsDto.dispersion }}
-        - Ошибки (недостаточно точные ответы): {{ testResultsDto.mistakes }}
-      </p>
-      <CommonButton
-        @click="startAllBalls(true)"
-        class="start-button"
-      >
-        <template #placeholder>
-          {{ balls.every(ball => ball.state === 'ready') ? 'Начать тест' : 'Пройти заново' }}
-        </template>
-      </CommonButton>
-    </div>
-    <div class="test" v-show="balls.some(ball => ball.state === 'reacting')">
-      <div v-if="showTimer" class="timer">
-        Осталось времени: {{ remainingTime }}
-      </div>
-      <div v-if="showProgressBar" class="progress-bar-container">
-        <div class="progress-bar" :style="{ width: progressBarWidth }"></div>
-      </div>
-      <div class="balls-row">
-        <div v-for="(ball, index) in balls" :key="index" class="ball-container">
-          <ReactionCircle ref="reactionCircle" :time="time" />
-          <CommonButton
-            class="reaction-button"
-            :disabled="ball.state === 'completed'"
-            @click="handleButtonClick(index)"
-          >
-            <template #placeholder>{{ ball.buttonText }}</template>
-          </CommonButton>
-          <div v-if="ball.currentDeviation" class="current-deviation">
-            Текущее отклонение: {{ ball.currentDeviation }} мс
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script lang="ts">
 import { defineComponent } from 'vue';
 import CommonButton from '../../../components/UI/CommonButton.vue';
@@ -61,59 +10,38 @@ import { jwtDecode } from 'jwt-decode';
 import type { TestJwt } from '../types';
 import type { CreateRdoInputDto } from '../../../api/resolvers/test/dto/input/create-rdo-input.dto.ts';
 import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import SimpleRdoTest from '../simple/SimpleRdoTest.vue';
 
-type State = 'ready' | 'reacting' | 'completed';
+type TestState = 'ready' | 'reacting' | 'completed';
 
-interface ReactionCircleInstance {
-  startAnimation(): void;
-  cancelAnimation(): void;
-  clickButton(time: number): void;
-  speed: number;
-  deviation: number;
+interface SimpleRdoTest {
+  testState: TestState,
+  currentDeviation: number;
+  deviationHistory: Array<number>,
+  speed: number,
+  loopCount: number,
+  buttonText(): String,
+  handleClick(): void,
+  stopTest(): void,
 }
 
 export default defineComponent({
   name: "HardReactionTest",
-  components: { ReactionCircle, CommonButton },
+  components: { SimpleRdoTest, ReactionCircle, CommonButton },
   props: {
     token: String,
+    presetId: Number
   },
   data() {
     return {
-      balls: [
-        {
-          state: 'ready' as State,
-          currentDeviation: null as number | null,
-          buttonText: 'Начать 1-й тест',
-          speed: 0.001,
-          deviationHistory: [] as Array<number>
-        },
-        {
-          state: 'ready' as State,
-          currentDeviation: null as number | null,
-          buttonText: 'Начать 2-й тест',
-          speed: 0.0015,
-          deviationHistory: [] as Array<number>
-        },
-        {
-          state: 'ready' as State,
-          currentDeviation: null as number | null,
-          buttonText: 'Начать 3-й тест',
-          speed: 0.002,
-          deviationHistory: [] as Array<number>},
-      ],
+      balls: [null, null, null] as Array<SimpleRdoTest | null>,
       completedTestsLinks: [] as Array<string>,
       completedTestsResults: [] as Array<string>,
-      time: 60,
-      showTimer: false,
-      showFinalResults: false,
-      showPerMinuteResults: false,
-      showProgressBar: false,
-      accelerationAmount: 0.1,
-      accelerationInterval: 60000,
-      accelerationFrequency: 10,
-      remainingTimeValue: 6000,
-      maxTime: 0,
+      time: 10,
+      showTimer: true,
+      showTotalResults: true,
+      showProgressBar: true,
+      remainingSeconds: 0,
       timerIntervalId: 0,
     };
   },
@@ -121,9 +49,9 @@ export default defineComponent({
     testResultsDto(): CreateRdoInputDto {
       return {
         userId: UserState.id ? UserState.id : null,
-        allSignals: this.balls[0].deviationHistory.length * 3,
+        allSignals: this.allSignals,
         dispersion: this.standardDeviations.length > 0 ?
-          this.standardDeviations.reduce((a, b) => a + b) / 3 : 0,
+          this.standardDeviations.reduce((a, b) => a + b) / this.standardDeviations.length : 0,
         mistakes: this.mistakes,
         averageCallbackTime: this.averageCallbackTime,
         testType: 'HARD_RDO'
@@ -132,98 +60,82 @@ export default defineComponent({
     standardDeviations(): number[] {
       const standardDeviations: number[] = []
       this.balls.forEach(ball => {
-        const n = ball.deviationHistory.length;
-        if (n < 2) return 0;
-        const mean = ball.deviationHistory.reduce((a, b) => a + b) / n;
-        const variance = ball.deviationHistory.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1);
-        standardDeviations.push(Math.sqrt(variance))
+        if (ball != null) {
+          const n = ball?.deviationHistory.length;
+          if (n < 2) return 0;
+          const mean = ball.deviationHistory.reduce((a, b) => a + b) / n;
+          const variance = ball.deviationHistory.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1);
+          standardDeviations.push(Math.sqrt(variance))
+        }
       })
       return standardDeviations;
     },
     averageCallbackTime(): number {
       let allDeviations: number = 0
+      let count = 0
       this.balls.forEach(ball => {
-        ball.deviationHistory.forEach(deviation => {
+        ball?.deviationHistory.forEach(deviation => {
           allDeviations += deviation
+          count++
         })
       })
-      const avg = allDeviations / this.balls[0].deviationHistory.length / 3;
+      const avg = allDeviations / count;
       if (isNaN(avg)) return 0;
       return avg
     },
     mistakes(): number {
       let count = 0
       this.balls.forEach(ball => {
-        ball.deviationHistory.forEach(deviation => {
-          if (Math.abs(deviation) > 300) count ++
-        })
+        if (ball != null) {
+          count += ball.loopCount - ball.deviationHistory.length;
+        }
+      })
+      return count
+    },
+    allSignals(): number {
+      let count = 0
+      this.balls.forEach(ball => {
+        if (ball != null) count += ball.loopCount
       })
       return count
     },
     remainingTime() {
-      if (this.balls.every(ball => ball.state === 'completed')) return null;
-      const minutes = Math.floor(this.remainingTimeValue / 60000);
-      const seconds = Math.floor((this.remainingTimeValue % 60000) / 1000);
+      if (this.balls.every(ball => ball?.testState === 'completed')) return null;
+      const minutes = Math.floor(this.remainingSeconds / 60);
+      const seconds = Math.floor(this.remainingSeconds % 60);
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
     progressBarWidth() {
-      if (this.remainingTimeValue === 0) return '0%';
-      return `${(1 - this.remainingTimeValue / (this.time * 1000)) * 100}%`;
+      if (this.remainingSeconds === 0) return '0%';
+      return `${this.remainingSeconds / this.time * 100}%`;
     },
   },
   methods: {
     startAllBalls(setTimer?: boolean) {
-      if (setTimer) {
-        clearInterval(this.timerIntervalId)
-        this.remainingTimeValue = this.maxTime
-        this.timerIntervalId = setInterval(() => {
-          this.remainingTimeValue -= 1000;
-          if (this.remainingTimeValue <= 0) {
-            clearInterval(this.timerIntervalId)
-            this.stopTest()
-          }
-        }, 1000);
-      }
-      this.balls.forEach((ball, index) => {
-        ball.state = 'reacting';
-        ball.currentDeviation = null;
-        if (this.$refs.reactionCircle && this.$refs.reactionCircle as ReactionCircleInstance[]) {
-          const reactionCircle = (this.$refs.reactionCircle as ReactionCircleInstance[])[index]
-          reactionCircle.startAnimation();
-          setTimeout(() => {
-            reactionCircle.speed = ball.speed;
-          }, 0);
+      if (this.balls.every(ball => ball?.testState === 'completed')) router.go(0)
+      else {
+        if (setTimer) {
+          clearInterval(this.timerIntervalId)
+          this.timerIntervalId = setInterval(() => {
+            if (this.remainingSeconds == 0) this.stopTest()
+            this.remainingSeconds--
+          }, 1000)
         }
-      });
-    },
-    handleButtonClick(index: number) {
-      const ball = this.balls[index];
-      if (ball.state === 'reacting') {
-        const currentTime = performance.now();
-        if (this.$refs.reactionCircle && this.$refs.reactionCircle as ReactionCircleInstance[]) {
-          const reactionCircle = (this.$refs.reactionCircle as ReactionCircleInstance[])[index]
-          reactionCircle.clickButton(currentTime);
-          const deviation = reactionCircle.deviation;
-          ball.currentDeviation = deviation;
-          ball.deviationHistory.push(deviation);
-          console.log(`Отклонение для шара ${index + 1}: ${deviation} мс`);
-          ball.state = 'completed';
-          reactionCircle.cancelAnimation()
-          if (this.balls.every(ball => ball.state == 'completed')) {
-            this.startAllBalls()
+        this.remainingSeconds = this.time
+        this.balls.forEach((ball) => {
+          if (ball != null) {
+            ball.testState = 'ready'
+            ball.handleClick()
           }
-        }
+        });
       }
     },
     stopTest() {
-      this.balls.forEach((ball, index) => {
-        if (this.$refs.reactionCircle && this.$refs.reactionCircle as ReactionCircleInstance[]) {
-          const reactionCircle = (this.$refs.reactionCircle as ReactionCircleInstance[])[index]
-          reactionCircle.cancelAnimation()
-          ball.state = 'completed';
+      this.balls.forEach((ball) => {
+        if (ball != null) {
+          ball.stopTest()
         }
       })
-      console.log('hi')
       this.saveResults()
     },
     saveResults(): void {
@@ -251,6 +163,16 @@ export default defineComponent({
         );
       });
     },
+    async loadSettings() {
+      const testSetupResolver = new TestSetupsResolver()
+      const settings = await testSetupResolver.getById(this.presetId!)
+      if (settings) {
+        this.time = settings.duration
+        this.showProgressBar = settings.showProgress
+        this.showTimer = settings.showTimer
+        this.showTotalResults = settings.showTotalResults
+      }
+    },
     async load () {
       if (UserState.id) {
         await router.push('/test/hard/rdo');
@@ -273,19 +195,69 @@ export default defineComponent({
           });
         }
       }
-      const settings = await new TestSetupsResolver().getById(1)
-      if (settings) {
-        this.maxTime = settings.duration * 10
-        this.showTimer = settings.showTimer
-        this.showProgressBar = settings.showProgress
-      }
     },
   },
   mounted() {
     this.load()
+    this.balls.forEach((_, index) => {
+      this.balls[index] = (this.$refs.simpleRdoTest as SimpleRdoTest[])[index];
+    })
   },
 });
 </script>
+
+<template>
+  <div class="container">
+    <div class="instruction" v-if="balls.every(ball => ball?.testState != 'reacting')">
+      <h2 class="title">Тест на скорость реакции на движущиеся объекты</h2>
+      <div class="description" v-if="balls.every(ball => ball?.testState === 'ready')">
+        <p>
+          Этот тест измеряет время вашей реакции на движущиеся объекты.<br>
+          После начала теста фиолетовые круги начнут двигаться. Как только они будут находиться в начале своего пути (верхняя точка траектории) - как
+          можно быстрее нажмите соответствующие кнопки. Старайтесь не нажимать кнопки до или после этой зоны!
+        </p>
+      </div>
+      <div class="description" v-else>
+        <p v-if="showTotalResults">
+          Поздравляем с прохождением теста!<br>
+          Ваши результаты:<br>
+          - Среднее время ответа: {{ testResultsDto.averageCallbackTime.toFixed(2) }}<br>
+          - Среднее стандартное отклонение: {{ testResultsDto.dispersion.toFixed(2) }}<br>
+          - Ошибки (недостаточно точные ответы): {{ testResultsDto.mistakes }}<br>
+        </p>
+      </div>
+      <CommonButton
+        @click="startAllBalls(true)"
+        class="start-button"
+      >
+        <template #placeholder>
+          {{ balls.every(ball => ball?.testState === 'ready') ? 'Начать тест' : 'Пройти заново' }}
+        </template>
+      </CommonButton>
+    </div>
+    <div class="test" v-show="balls.some(ball => ball?.testState === 'reacting')">
+      <div v-if="showTimer" class="timer">
+        Осталось времени: {{ remainingTime }}
+      </div>
+      <div v-if="showProgressBar" class="progress-bar-container">
+        <div class="progress-bar" :style="{ width: progressBarWidth }"></div>
+      </div>
+      <div class="balls-row">
+        <div v-for="(ball, index) in balls" :key="index" class="ball-container">
+          <SimpleRdoTest
+            ref="simpleRdoTest"
+            :is-module="true"
+            :start-acceleration="Math.random() * 0.009"
+            :preset-id="presetId"
+          />
+          <div v-if="ball?.currentDeviation" class="current-deviation">
+            Текущее отклонение: {{ ball?.currentDeviation.toFixed(2) }} мс
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .title {
@@ -297,13 +269,32 @@ export default defineComponent({
   background: rgba(255, 255, 255, 0.9);
   padding: 20px;
   border-radius: 15px;
-  margin: 20px 0;
   color: black;
+  text-align: left;
+  display: flex;
 }
 .container {
   max-width: 35vw;
   padding: 2rem;
   text-align: center;
+
+  .instruction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2vw;
+
+    button {
+      width: 100%;
+      color: white;
+      font-size: 1.2vw;
+      background-color: #4CAF50;
+    }
+
+    button:hover {
+      background-color: #28a745;
+    }
+  }
 }
 
 .test {
@@ -324,20 +315,6 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   margin: 0 20px;
-}
-
-.start-button {
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.start-button:hover {
-  background-color: #45a049;
 }
 
 .timer {
