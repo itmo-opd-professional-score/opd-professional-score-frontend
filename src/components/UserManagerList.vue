@@ -174,8 +174,7 @@ const prevPage = () => {
   text-align: center;
 }
 
-#id,
-#test_name {
+#id {
   text-align: left;
 }
 

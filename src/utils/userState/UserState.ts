@@ -29,7 +29,6 @@ export const updateUserState = () => {
     const birthYear = new Date(birthDate).getFullYear();
     const currentYear = today.getFullYear();
     let age = currentYear - birthYear;
-    // Adjust age if birthday hasn't occurred yet this year
     const birthMonth = new Date(birthDate).getMonth();
     const birthDay = new Date(birthDate).getDate();
     if (birthMonth > today.getMonth() || (birthMonth === today.getMonth() && birthDay > today.getDate())) { age--; }

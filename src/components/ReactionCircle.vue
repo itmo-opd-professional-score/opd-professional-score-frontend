@@ -82,7 +82,6 @@ export default defineComponent({
   justify-content: center;
   padding: 15px;
   border-radius: 15px;
-  min-height: 50vh;
 }
 .circles {
   display: flex;

@@ -1,20 +1,17 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, type PropType } from 'vue';
+import CommonButton from './UI/CommonButton.vue';
+import { TestResolver } from '../api/resolvers/test/test.resolver.ts';
+import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
+import router from '../router/router.ts';
 
 export default defineComponent({
   name: 'StatisticsCard',
+  components: { CommonButton },
   props: {
-    testName: {
-      type: String,
-      required: true,
-    },
     userName: {
       type: String,
       default: 'Anonymous',
-    },
-    testCategory: {
-      type: String,
-      default: 'Без категории',
     },
     score: {
       type: Number,
@@ -36,6 +33,7 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    testType: {} as PropType<TestTypeDataOutputDto>,
   },
   computed: {
     scorePercentage(): string {
@@ -45,37 +43,72 @@ export default defineComponent({
       const percentage = (this.score / this.maxScore) * 100;
       return percentage >= 80 ? 'green' : percentage >= 50 ? 'orange' : 'red';
     },
+    shareLink(): string {
+      const origin = window.location.origin;
+      return `${origin}/invitation/test/${this.invitationToken}`
+    }
   },
+  data() {
+    return {
+      invitationToken: null as string | null,
+    }
+  },
+  methods: {
+    async generateTestLink() {
+      if (this.testType?.name !== undefined) {
+        const testResolver = new TestResolver()
+        this.invitationToken = await testResolver.generateTestLink({
+          testType: this.testType?.name
+        })
+      }
+    },
+    copyLink() {
+      navigator.clipboard.writeText(this.shareLink)
+    }
+  }
 });
 </script>
 
 <template>
   <div class="statistics-card">
-    <h4 class="title">{{ testName }}</h4>
-    <p class="category fields">Категория: {{ testCategory }}</p>
-    <p class="user fields">Респондент: {{ userName }}</p>
+    <h4 class="title">{{ testType?.description }}</h4>
     <div class="result">
-      <div class="score-result">
-        <p class="score fields">
-          Результат: {{ score }} / {{ maxScore }} ({{ scorePercentage }})
-        </p>
-        <div class="progress-bar">
-          <div
-            class="progress"
-            :style="{ width: scorePercentage, backgroundColor: cardColors }"
-          ></div>
+      <div class="valid">
+        <p>{{ scorePercentage}}</p>
+      </div>
+      <div class="bar">
+        <div
+          class="progress"
+          :style="{ width: scorePercentage, backgroundColor: cardColors }"
+        ></div>
+      </div>
+      <p class="fields">Правильные ответы: {{ score }} / {{ maxScore }}</p>
+      <p class="fields">Респондент: {{ userName }}</p>
+      <p class="fields">Среднее время реакции: {{ time }} мс</p>
+      <p class="fields">Статус:
+        <span :style="{ color: valid ? 'green' : 'red'}">
+            {{ valid ? 'Сдан' : 'Не сдан' }}
+          </span>
+      </p>
+      <p class="fields">Дата: {{ date }}</p>
+    </div>
+    <div class="share-link">
+      <CommonButton>
+        <template #placeholder>Другие тесты</template>
+      </CommonButton>
+      <CommonButton class="submit_button" @click="generateTestLink()">
+        <template #placeholder>Поделиться тестом</template>
+      </CommonButton>
+      <div :class="invitationToken ? 'wrapper' : 'wrapper hidden'">
+        <div class="link">
+          <p class="fields">Your link is:</p>
+          <span>{{ shareLink }}</span>
+          <CommonButton :disabled="invitationToken == null" class="tranparent" @click="copyLink()">
+            <template #placeholder></template>
+          </CommonButton>
         </div>
       </div>
-      <div class="time-result">
-        <p class="text fields">Затраченное время:</p>
-        <p class="time fields">{{ time }}</p>
-      </div>
-      <div class="level-result">
-        <p class="level fields">Оценка:</p>
-      </div>
     </div>
-    <p class="date">Дата: {{ date }}</p>
-    <p class="valid">Валидность: {{ valid }}</p>
   </div>
 </template>
 
@@ -84,60 +117,114 @@ export default defineComponent({
   background-color: var(--background-primary);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 2vw;
   padding: 15px;
   border-radius: 15px;
-  width: 35vw;
+  overflow: hidden;
+  flex: 1;
 }
 
 .title {
   font-size: 24px;
-  margin: 15px 0;
+  margin-top: 1vw;
   color: #ffffff;
   font-weight: bold;
 }
-.result {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  background-color: var(--background-primary);
-  padding: 10px;
-  border-radius: 15px;
-}
-.score-result,
-.time-result,
-.level-result {
+.result, .share-link {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  justify-content: center;
+  background-color: var(--background-secondary);
+  padding: 1vw;
+  gap: 1vw;
+  border-radius: 15px;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+}
+
+.share-link {
+  margin-top: auto;
+
+  .wrapper {
+    transition: height 0.5s;
+    height: 3vw;
+    overflow: hidden;
+    .link {
+      display: flex;
+      align-items: center;
+      gap: 0.5vw;
+
+      p {
+        white-space: nowrap;
+      }
+
+      span {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        padding: 0.5vw;
+        color: blueviolet;
+        background-color: var(--background-secondary);
+        border-radius: 10px;
+        width: 100%;
+        height: 2.25vw;
+      }
+
+      button {
+        background: url("/copy.svg") center center no-repeat;
+        background-size: contain;
+        width: 3vw;
+        aspect-ratio: 1 / 1;
+      }
+    }
+  }
+
+  .wrapper.hidden {
+    height: 0;
+    margin-top: -1vw;
+  }
 }
 
 .fields {
-  font-size: 16px;
-  color: rgb(237, 227, 227, 0.9);
+  font-size: 18px;
   font-weight: 500;
+  display: flex;
 }
-.date {
-  margin-top: 30px;
+
+.valid p {
+  display: flex;
+  justify-content: center;
+  padding: 1vw;
+  font-size: 36px;
 }
-.date,
-.valid {
-  color: #3a3e53;
-}
-.valid {
-  margin-bottom: 15px;
-}
-.progress-bar {
-  max-width: 30rem;
-  height: 10px;
-  color: rgb(237, 227, 227, 0.9);
-  border-radius: 5px;
+
+.bar {
+  height: 1.2vw;
+  color: white;
+  border-radius: 15px;
   overflow: hidden;
-  margin-bottom: 30px;
+  border: solid 2px white;
+  position: relative;
+
+  &::before {
+    position: absolute;
+    content: 'df';
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-primary);
+  }
 }
 
 .progress {
   height: 100%;
   transition: width 0.5s ease-in-out;
+  border-radius: 15px;
+  position: absolute;
+  inset: 0;
 }
 </style>

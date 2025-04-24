@@ -2,6 +2,13 @@
 import { defineComponent } from 'vue';
 import ReactionCircle from "../components/ReactionCircle.vue";
 import CommonButton from "../components/UI/CommonButton.vue";
+import { usePopupStore } from '../store/popup.store.ts';
+import { TestResolver } from '../api/resolvers/test/test.resolver.ts';
+import { UserState } from '../utils/userState/UserState.ts';
+import router from '../router/router.ts';
+import { jwtDecode } from 'jwt-decode';
+import type { TestJwt } from './tests/types';
+import type { CreateRdoInputDto } from '../api/resolvers/test/dto/input/create-rdo-input.dto.ts';
 
 interface ReactionCircleInstance {
   startAnimation(): void;
@@ -33,10 +40,13 @@ export default defineComponent({
       timerIntervalId: null as number | null,
       remainingTimeValue: 0,
       accelerationCount: 0,
-      accelerationIntervalId: null as number | null
+      accelerationIntervalId: null as number | null,
+      completedTestsLinks: [] as Array<string>,
+      completedTestsResults: [] as Array<string>,
     };
   },
   props: {
+    token: { type: String, required: false},
     time: { type: Number, required: true },
     showTimer: { type: Boolean, default: false },
     showFinalResults: { type: Boolean, default: false },
@@ -49,9 +59,9 @@ export default defineComponent({
   computed: {
     circleX() { return this.centerX + this.radius * Math.cos(this.angle); },
     circleY() { return this.centerY + this.radius * Math.sin(this.angle); },
-    standardDeviation(): number | null {
+    standardDeviation(): number {
       const n = this.deviationHistory.length;
-      if (n < 2) return null;
+      if (n < 2) return 0;
       const mean = this.deviationHistory.reduce((a, b) => a + b) / n;
       const variance = this.deviationHistory.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1);
       return Math.sqrt(variance);
@@ -73,6 +83,15 @@ export default defineComponent({
     progressBarWidth() {
       if (this.remainingTimeValue === 0) return '0%';
       return `${(1 - this.remainingTimeValue / (this.time * 1000)) * 100}%`;
+    },
+    testResultsDto(): CreateRdoInputDto {
+      return {
+        userId: UserState.id ? UserState.id : null,
+        allSignals: this.deviationHistory.length,
+        dispersion: this.standardDeviation,
+        mistakes: this.deviationHistory.filter(deviation => Math.abs(deviation) > 140).length,
+        averageCallbackTime: this.deviationHistory.reduce((a, b) => a + b) / this.deviationHistory.length,
+      }
     }
   },
   methods: {
@@ -149,7 +168,56 @@ export default defineComponent({
         clearInterval(this.timerIntervalId);
         this.timerIntervalId = null;
       }
-    }
+    },
+    saveResults(): void {
+      this.buttonText = 'Тест окончен'
+
+      const popUpStore = usePopupStore()
+      const testResolver =
+        new TestResolver()
+      testResolver
+        .createRdo(this.testResultsDto).then((result) => {
+        if (!UserState.id) {
+          this.completedTestsLinks.push(this.token!);
+          this.completedTestsResults.push(result.body.testToken);
+          localStorage.setItem(
+            'completedTestsLinks',
+            JSON.stringify(this.completedTestsLinks),
+          );
+          localStorage.setItem(
+            'completedTestsResults',
+            JSON.stringify(this.completedTestsResults),
+          );
+        }
+        popUpStore.activateInfoPopup('Results were saved successfully!');
+      }).catch((error) => {
+        popUpStore.activateErrorPopup(
+          `Error code: ${error.status}. ${error.response.data.message}`,
+        );
+      });
+    },
+    async load () {
+      if (UserState.id) {
+        await router.push('/test/simple/light');
+      } else {
+        const linksData = localStorage.getItem('completedTestsLinks');
+        const resultsData = localStorage.getItem('completedTestsResults');
+        if (linksData) {
+          this.completedTestsLinks.push(...JSON.parse(linksData));
+        }
+        if (resultsData) {
+          this.completedTestsResults.push(...JSON.parse(resultsData));
+        }
+        if (this.token && this.completedTestsLinks.length != 0) {
+          this.completedTestsLinks.forEach((link) => {
+            const data = jwtDecode(link) as TestJwt;
+            if (data.testType != 'SIMPLE_LIGHT') {
+              router.back()
+            }
+          });
+        }
+      }
+    },
   },
   beforeUnmount() {
     this.cancelTimer();
@@ -160,19 +228,29 @@ export default defineComponent({
 
 <template>
   <div class="container">
-  <h2 class="title">Тест на скорость реакции на движущиеся объекты</h2>
+  <div class="instruction" v-show="testState !== 'reacting'">
+    <h2 class="title">Тест на скорость реакции на движущиеся объекты</h2>
     <p class="description">
       Этот тест измеряет время вашей реакции на движущийся объект.
       После начала теста фиолетовый круг начнет двигаться. Как только он будет находиться в начале своего пути (верхняя точка траектории) - как
       можно быстрее нажмите большую кнопку. Старайтесь не нажимать кнопку до или после этой зоны!
     </p>
+    <CommonButton
+      class="reaction-button"
+      :class="{ active: testState == 'reacting' }"
+      :disabled="testState == 'completed'"
+      @click="clickButton"
+    >
+      <template v-slot:placeholder>Начать тест</template>
+    </CommonButton>
+  </div>
+  <div class="test-container" v-show="testState === 'reacting'">
     <div v-if="showTimer" class="timer">
       Осталось времени: {{ remainingTime }}
     </div>
     <div v-if="showProgressBar" class="progress-bar-container">
       <div class="progress-bar" :style="{ width: progressBarWidth }"></div>
     </div>
-  <div class="test-container">
     <ReactionCircle ref="reactionCircle" :time="time"></ReactionCircle>
     <div class="button-wrapper">
       <CommonButton
@@ -183,11 +261,17 @@ export default defineComponent({
       >
         <template v-slot:placeholder> {{buttonText}}</template>
       </CommonButton>
-      <div v-if="currentDeviation" class="current-deviation">
-        Текущее отклонение: {{ currentDeviation.toFixed(2) }} мс
+      <div class="current-deviation">
+        Текущее отклонение:
+        {{
+          currentDeviation !== null ? currentDeviation.toFixed(2) : '0'
+        }} мс
       </div>
-      <div v-if="standardDeviation !== null" class="standard-deviation">
-        Стандартное отклонение: {{ standardDeviation.toFixed(2) }} мс
+      <div class="standard-deviation">
+        Стандартное отклонение:
+        {{
+          standardDeviation !== null ? standardDeviation.toFixed(2) : '0'
+        }} мс
       </div>
     </div>
   </div>
@@ -198,7 +282,7 @@ export default defineComponent({
 
 <style scoped>
 .title {
-  font-size: 46px;
+  font-size: 36px;
   margin-bottom: 20px;
   color: #fff;
 }
