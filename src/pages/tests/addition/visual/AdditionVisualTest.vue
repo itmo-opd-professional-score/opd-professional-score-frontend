@@ -121,8 +121,8 @@ export default {
         if (this.token && this.completedTestsLinks.length != 0) {
           this.completedTestsLinks.forEach((link) => {
             const data = jwtDecode(link) as TestJwt;
-            if (data.testType != 'VISUAL_ADDITION') {
-              this.$router.back()
+            if (data.testType == 'ADDITION_VISUAL') {
+              router.back()
             }
           });
         }
