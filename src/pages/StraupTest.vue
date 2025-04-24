@@ -16,7 +16,6 @@ export default defineComponent({
       score: 0,
       mistakes: 0,
       remainingTimeValue: 0,
-      elapsedTime: 0,
       timerIntervalId: null as ReturnType<typeof setInterval> | null,
       testState: 'ready' as TestState,
     };
@@ -71,23 +70,9 @@ export default defineComponent({
       this.startTimer(this.time);
     },
     startTimer(totalSeconds: number) {
-      const totalMilliseconds = totalSeconds * 1000;
-      this.remainingTimeValue = totalMilliseconds;
-      this.elapsedTime = 0;
-      this.levelOfDifficulty = 0;
-
+      this.remainingTimeValue = totalSeconds * 1000;
       this.timerIntervalId = setInterval(() => {
-        this.elapsedTime += 1000;
         this.remainingTimeValue -= 1000;
-        if (!this.randomChangeOfDifficulty) {
-          const oneThirdTime = totalMilliseconds / 3;
-          if (this.elapsedTime >= oneThirdTime && this.elapsedTime < 2 * oneThirdTime) {
-            this.levelOfDifficulty = 1;
-          } else if (this.elapsedTime >= 2 * oneThirdTime) {
-            this.levelOfDifficulty = 2;
-          }
-        }
-
         if (this.remainingTimeValue <= 0) {
           this.remainingTimeValue = 0;
           clearInterval(this.timerIntervalId!);
@@ -104,7 +89,6 @@ export default defineComponent({
       this.score = 0;
       this.mistakes = 0;
       this.currentWord = '';
-      this.levelOfDifficulty = 0;
     },
     cancelTimer() {
       if (this.timerIntervalId) {
@@ -129,6 +113,7 @@ export default defineComponent({
   },
 });
 </script>
+
 <template>
   <div class="container">
     <div class="instruction" v-show="testState == 'ready'">
@@ -181,21 +166,17 @@ export default defineComponent({
         </CommonButton>
       </div>
     </div>
-    <div v-if="testState == 'completed'  && showFinalResults"  class="end">
-      <div class="test-container">
-        <h2 class="title">Тест завершен!</h2>
-        <p class="result">Правильных ответов: {{ score }}</p>
-        <p class="result">Ошибок: {{ mistakes }}</p>
-      </div>
+    <div v-if="testState == 'completed'" class="test-container">
+      <h2 class="title">Тест завершен!</h2>
+      <p class="result">Правильных ответов: {{ score }}</p>
+      <p class="result">Ошибок: {{ mistakes }}</p>
       <CommonButton
         class="reaction-button"
-        :class="{ active: testState == 'completed' }"
         @click="resetTest"
       >
         <template v-slot:placeholder>Начать заново</template>
       </CommonButton>
     </div>
-
   </div>
 
 
@@ -237,6 +218,19 @@ export default defineComponent({
   justify-content: center;
 }
 
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background-color: #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #4caf50;
+  transition: width 0.5s ease;
+}
 
 .timer {
   font-weight: bold;
