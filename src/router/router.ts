@@ -18,6 +18,7 @@ import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
+import VerbalTest from "../pages/VerbalTest.vue";
 
 const routes = [
   {
@@ -123,6 +124,16 @@ const routes = [
     component: SimpleReactionTest,
     props: {
       time: 10,
+      showTimer: true,
+      showProgressBar: true
+    },
+  },
+  {
+    path: '/test/verbal',
+    component: VerbalTest,
+    meta: { requiresAuth: false, ruName: "Вербальный тест"},
+    props: {
+      time: 30,
       showTimer: true,
       showProgressBar: true
     }
