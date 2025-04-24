@@ -1,8 +1,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
+import CommonButton from '../components/UI/CommonButton.vue';
+
+type TestState= 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
   name: 'NumericalSeriesTest',
+  components: { CommonButton },
   data() {
     return {
       countOfNumericInSeries: [6, 5, 4],
@@ -11,6 +15,7 @@ export default defineComponent({
       mistakes: 0,
       minAndMaxForX: [1, 20],
       minAndMaxForY: [1, 5],
+      testState: 'ready' as TestState,
       functionsForFirstDifficulty: [
         (x: number, y: number): string => (x + y).toString(),
         (x: number, y: number): string => (x - y).toString(),
@@ -50,12 +55,44 @@ export default defineComponent({
     generateRandomNumeric( min: number, max:  number) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     },
+    clickButton() {
+      if(this.testState === 'ready') {
+        this.startTest();
+      }
+    },
+    startTest() {
+      this.testState = 'reacting';
+    },
+    stopTest() {
+      this.testState = 'completed';
+    },
+    nextRound() {
+
+    }
   }
 });
 </script>
 
 <template>
+    <div class="container">
+      <div class="instruction" v-if="testState == 'ready'">
+        <h2 class="title">Тест Числовые последовательности</h2>
+        <p class="description">
+        </p>
+        <CommonButton
+          class="reaction-button"
+          @click="clickButton"
+          >
+            <template v-slot:placeholder>Начать тест</template>
+        </CommonButton>
+      </div>
+      <div class="test-container" v-if="testState == 'reacting'" >
 
+      </div>
+      <div class="test-container" v-if="testState == 'completed'">
+
+      </div>
+    </div>
 </template>
 
 <style scoped>
