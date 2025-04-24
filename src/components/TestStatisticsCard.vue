@@ -54,6 +54,9 @@ export default defineComponent({
     }
   },
   methods: {
+    router() {
+      return router
+    },
     async generateTestLink() {
       if (this.testType?.name !== undefined) {
         const testResolver = new TestResolver()
@@ -84,16 +87,16 @@ export default defineComponent({
       </div>
       <p class="fields">Правильные ответы: {{ score }} / {{ maxScore }}</p>
       <p class="fields">Респондент: {{ userName }}</p>
-      <p class="fields">Среднее время реакции: {{ time }} мс</p>
+      <p class="fields">Среднее время реакции: {{ Math.abs(time) }}</p>
       <p class="fields">Статус:
-        <span :style="{ color: valid ? 'green' : 'red'}">
-            {{ valid ? 'Сдан' : 'Не сдан' }}
+        <span :style="{ color: (score / maxScore) > 0.6 ? 'green' : 'red'}">
+            {{ (score / maxScore) > 0.6 ? 'Сдан' : 'Не сдан' }}
           </span>
       </p>
       <p class="fields">Дата: {{ date }}</p>
     </div>
     <div class="share-link">
-      <CommonButton>
+      <CommonButton @click="router().push('/profile')">
         <template #placeholder>Другие тесты</template>
       </CommonButton>
       <CommonButton class="submit_button" @click="generateTestLink()">
@@ -211,7 +214,7 @@ export default defineComponent({
 
   &::before {
     position: absolute;
-    content: 'df';
+    content: '';
     inset: 0;
     display: block;
     width: 100%;

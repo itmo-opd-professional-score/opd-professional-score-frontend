@@ -9,6 +9,7 @@ import type { CreateTestBlockInputDto } from '../api/resolvers/testBlocks/dto/in
 import { usePopupStore } from '../store/popup.store.ts';
 import { useTestTypesStore } from '../store/test-types.store.ts';
 import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
+import router from '../router/router.ts';
 
 export default {
   name: 'CreateTestBlockPage',
@@ -53,7 +54,7 @@ export default {
         await this.testBlockResolver.createTestBlock(data).then((res) => {
           if (res.status == 200) {
             this.popupStore.activateInfoPopup('Блок тестов создан успешно!');
-            this.$router.push('/');
+            router.push('/');
           }
         });
       } else {
