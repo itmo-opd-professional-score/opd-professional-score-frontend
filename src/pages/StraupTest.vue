@@ -9,7 +9,7 @@ export default defineComponent({
   components: { CommonButton },
   data() {
     return {
-      colors: ['red', 'black', 'yellow', 'blue', 'purple'],
+      colors: ['red', 'green', 'yellow', 'blue', 'purple'],
       currentWord: '',
       currentColor: '',
       levelOfDifficulty: 0,
@@ -17,6 +17,7 @@ export default defineComponent({
       mistakes: 0,
       remainingTimeValue: 0,
       timerIntervalId: null as ReturnType<typeof setInterval> | null,
+      roundTimeoutId: null as ReturnType<typeof setTimeout> | null,
       testState: 'ready' as TestState,
       result: 0,
     };
@@ -42,7 +43,7 @@ export default defineComponent({
           let color;
           do {
             color = this.colors[Math.floor(Math.random() * this.colors.length)];
-          } while (color == this.currentWord);
+          } while (color === this.currentWord);
           this.currentColor = color;
         }
       }
@@ -54,7 +55,8 @@ export default defineComponent({
       return [0.7, 0.4, 0.1][this.levelOfDifficulty];
     },
     checkAnswer(selectedColor: string) {
-      if (this.currentColor === selectedColor) {
+      this.clearRoundTimeout();
+      if (this.currentColor == selectedColor) {
         this.score++;
       } else {
         this.mistakes++;
@@ -62,8 +64,13 @@ export default defineComponent({
       this.nextRound();
     },
     nextRound() {
+      this.clearRoundTimeout();
       this.giveColorName();
       this.giveColorOfWord();
+      this.roundTimeoutId = setTimeout(() => {
+        this.mistakes++;
+        this.nextRound();
+      }, 3000);
     },
     startTest() {
       this.testState = 'reacting';
@@ -83,6 +90,7 @@ export default defineComponent({
     },
     stopTest() {
       this.testState = 'completed';
+      this.clearRoundTimeout();
       if(this.score == 0) {
         this.result=0
       }
@@ -92,6 +100,7 @@ export default defineComponent({
     },
     resetTest() {
       this.cancelTimer();
+      this.clearRoundTimeout();
       this.testState = 'ready';
       this.score = 0;
       this.mistakes = 0;
@@ -101,6 +110,12 @@ export default defineComponent({
       if (this.timerIntervalId) {
         clearInterval(this.timerIntervalId);
         this.timerIntervalId = null;
+      }
+    },
+    clearRoundTimeout() {
+      if (this.roundTimeoutId) {
+        clearTimeout(this.roundTimeoutId);
+        this.roundTimeoutId = null;
       }
     },
     remainingTime() {
