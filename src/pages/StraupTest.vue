@@ -9,7 +9,7 @@ export default defineComponent({
   components: { CommonButton },
   data() {
     return {
-      colors: ['red', 'green', 'yellow', 'blue', 'purple'],
+      colors: ['red', 'black', 'yellow', 'blue', 'purple'],
       currentWord: '',
       currentColor: '',
       levelOfDifficulty: 0,
@@ -157,7 +157,7 @@ export default defineComponent({
             color: color === 'yellow' ? 'black' : 'white',
           }"
           class="color-button"
-          :disabled="testState === 'completed'"
+          :disabled="testState == 'completed'"
           @click="checkAnswer(color)"
         >
           <template #placeholder>
