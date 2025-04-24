@@ -55,9 +55,9 @@ export default {
     labelText: {
       type: String,
     },
-    checked:{
+    checked: {
       type: Boolean,
-    }
+    },
   },
   methods: {
     validate(event: InputEvent) {
@@ -122,6 +122,7 @@ export default {
 .input-wrapper {
   min-height: 2.5rem;
 }
+
 .input {
   width: 100%;
   height: 100%;
@@ -158,7 +159,6 @@ input[type='number'] {
   text-align: center;
 }
 
-
 input[type='date'] {
   padding: 1vw;
 }
@@ -178,10 +178,16 @@ input[type='number']::-webkit-inner-spin-button {
     border: none;
   }
 }
-input[type="radio"] {
+
+.input.range {
+  padding: 0;
+}
+
+.input.radio {
   width: min-content;
 }
-input[type="checkbox"] {
+
+.input.checkbox {
   width: min-content;
 }
 </style>

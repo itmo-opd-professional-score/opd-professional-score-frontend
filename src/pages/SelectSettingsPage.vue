@@ -80,6 +80,7 @@ export default defineComponent({
             v-model.number="duration"
             :minNumber="120"
             :maxNumber="2700"
+            selector="range"
             class="custom-slider"
           />
           <div class="slider-labels">
@@ -91,6 +92,7 @@ export default defineComponent({
               type="checkbox"
               @change="showTimer = !showTimer"
               labelText="Отображать оставшееся время"
+              selector="checkbox"
             />
           </div>
 
@@ -99,6 +101,7 @@ export default defineComponent({
               type="checkbox"
               @change="showTotalResults = !showTotalResults"
               labelText="Показывать общий результат"
+              selector="checkbox"
             />
           </div>
 
@@ -107,6 +110,7 @@ export default defineComponent({
               type="checkbox"
               @change="showProgress = !showProgress"
               labelText="Отображать прогресс выполнения"
+              selector="checkbox"
             />
           </div>
           <div
@@ -143,12 +147,14 @@ export default defineComponent({
                 name="diff"
                 @click="difficultyMode = true"
                 :checked="true"
+                selector="radio"
               />
               <CustomInput
                 type="radio"
                 labelText="Режим от простого к сложному"
                 name="diff"
                 @click="difficultyMode = false"
+                selector="radio"
               />
             </div>
             <br />
@@ -174,7 +180,8 @@ export default defineComponent({
 }
 
 .choose-settings-form {
-  width: 40%;
+  width: 100%;
+  max-width: 700px;
   margin: auto;
   background: rgba(255, 255, 255, 1);
   border-radius: 1.4rem;
@@ -242,7 +249,7 @@ export default defineComponent({
   margin-top: 2rem;
   padding: 1rem;
   background: #f5f5f5;
-  border-radius: 8px;
+  border-radius: 1rem;
 }
 
 .special-settings h3 {
@@ -265,25 +272,15 @@ export default defineComponent({
   justify-content: space-around;
 }
 
-.custom-slider * {
-  padding: 0;
-}
-
-
-.input-wrapper{
-  all: unset;
+.input-wrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.input-wrapper>* {
-  margin: 0.3rem;
+.special-settings .input-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
-
-
-.select-mode>* {
-  margin-bottom: 0.5rem;
-}
-
 </style>
