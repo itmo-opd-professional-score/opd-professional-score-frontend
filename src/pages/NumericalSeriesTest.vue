@@ -10,6 +10,7 @@ export default defineComponent({
   components: { CustomInput, CommonButton },
   data() {
     return {
+      userAnswer: '',
       countOfNumericInSeries: [6, 5, 4],
       levelOfDifficulty: 0,
       score: 0,
@@ -90,7 +91,9 @@ export default defineComponent({
       this.testState = 'completed';
     },
     nextRound() {
+      if(!this.randomChangeOfDifficulty) {
 
+      }
     },
     startTimer(totalSeconds: number) {
       this.remainingTimeValue = totalSeconds * 1000;
@@ -102,6 +105,9 @@ export default defineComponent({
           this.stopTest();
         }
       }, 1000);
+    },
+    checkAnswer() {
+
     }
   }
 });
@@ -124,6 +130,17 @@ export default defineComponent({
       </div>
 
       <div class="test-container" v-if="testState == 'reacting'" >
+        <div class="sequence">
+          Последовательность:
+          <CustomInput type="text"
+                       v-model="userAnswer"
+                       placeholder="Введите следующий элемент"
+                       @keyup.enter="checkAnswer"/>
+          <CommonButton class="check-button"
+                        @click="checkAnswer">
+            <template>Далее</template>
+          </CommonButton>
+        </div>
 
       </div>
       <div class="test-container" v-if="testState == 'completed'">
