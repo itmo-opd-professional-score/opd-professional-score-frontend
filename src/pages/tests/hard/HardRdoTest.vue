@@ -1,7 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import CommonButton from '../../../components/UI/CommonButton.vue';
-import ReactionCircle from '../../../components/ReactionCircle.vue';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
@@ -27,7 +26,7 @@ interface SimpleRdoTest {
 
 export default defineComponent({
   name: "HardReactionTest",
-  components: { SimpleRdoTest, ReactionCircle, CommonButton },
+  components: { SimpleRdoTest, CommonButton },
   props: {
     token: String,
     presetId: Number
