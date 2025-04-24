@@ -18,6 +18,7 @@ import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
+import SimpleTrackingTest from '../pages/SimpleTrackingTest.vue';
 
 const routes = [
   {
@@ -121,6 +122,16 @@ const routes = [
     path: '/simple-reaction-test',
     name: 'SimpleReactionTest',
     component: SimpleReactionTest,
+    props: {
+      time: 10,
+      showTimer: true,
+      showProgressBar: true
+    }
+  },
+  {
+    path: '/simple-tracking-test',
+    name: 'SimpleTrackingTest',
+    component: SimpleTrackingTest,
     props: {
       time: 10,
       showTimer: true,
