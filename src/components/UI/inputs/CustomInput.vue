@@ -158,6 +158,7 @@ input[type='number'] {
   text-align: center;
 }
 
+
 input[type='date'] {
   padding: 1vw;
 }
@@ -176,5 +177,11 @@ input[type='number']::-webkit-inner-spin-button {
   :focus {
     border: none;
   }
+}
+input[type="radio"] {
+  width: min-content;
+}
+input[type="checkbox"] {
+  width: min-content;
 }
 </style>
