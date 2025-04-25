@@ -1,12 +1,17 @@
 export type TestType =
-  | 'SOUND_ADDITION'
-  | 'VISUAL_ADDITION'
+  | 'ADDITION_SOUND'
+  | 'ADDITION_VISUAL'
   | 'SIMPLE_LIGHT'
   | 'SIMPLE_SOUND'
-  | 'HARD_LIGHT';
+  | 'HARD_LIGHT'
+  | 'SIMPLE_RDO'
+  | 'HARD_RDO';
 export interface TestJwt {
   testId: number | null;
   testType: TestType;
   iat: number;
   exp: number;
 }
+export type AccelerationMode =
+  | 'DISCRETE'
+  | 'STEADY'

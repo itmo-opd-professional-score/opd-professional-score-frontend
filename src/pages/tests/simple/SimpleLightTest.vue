@@ -47,12 +47,13 @@ export default defineComponent({
         times.reduce((acc, val) => acc + Math.pow(val - average, 2), 0) /
         times.length;
       const deviation = Math.round(Math.sqrt(variance));
+      console.log(this.reactionTimes)
       return {
         average,
         deviation,
         best: Math.min(...times),
         worst: Math.max(...times),
-        missedCount: this.reactionTimes.filter(reaction => reaction > 1).length
+        missedCount: this.reactionTimes.filter(reaction => reaction > 600).length
       };
     },
     testResultDto(): CreateSimpleInputDto {
@@ -91,9 +92,9 @@ export default defineComponent({
     },
     resetTest(): void {
       if (UserState) {
-        this.$router.go(0);
+        router.go(0);
       } else {
-        this.$router.push('/auth/login');
+        router.push('/auth/login');
       }
     },
     saveResults(): void {
@@ -141,8 +142,8 @@ export default defineComponent({
         if (this.token && this.completedTestsLinks.length != 0) {
           this.completedTestsLinks.forEach((link) => {
             const data = jwtDecode(link) as TestJwt;
-            if (data.testType != 'SIMPLE_LIGHT') {
-              this.$router.back()
+            if (data.testType == 'SIMPLE_LIGHT') {
+              router.back()
             }
           });
         }

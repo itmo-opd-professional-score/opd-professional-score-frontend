@@ -6,6 +6,10 @@ import type { TestDataOutputDto } from './dto/output/test-data-output.dto.ts';
 import type { CreateAdditionInputDto } from './dto/input/create-addition-input.dto.ts';
 import type { CreateOutputDto } from './dto/output/create-output.dto.ts';
 import type { CreateSimpleInputDto } from './dto/input/create-simple-input.dto.ts';
+import type { CreateRdoInputDto } from './dto/input/create-rdo-input.dto.ts';
+import type { TestType } from '../../../pages/tests/types';
+import type { CreateHardLightInputDto } from './dto/input/create-hard-light-input.dto.ts';
+
 
 export class TestResolver {
   private apiResolver = new ApiResolverUtil('test');
@@ -19,6 +23,15 @@ export class TestResolver {
       null,
       this.token ? this.token : undefined,
     );
+  }
+
+  public async getByTypeById(typeEndpoint: string, id: number) {
+    return await this.apiResolver.request<null, TestDataOutputDto>(
+      `${typeEndpoint}/getById/${id}`,
+      'GET',
+      null,
+      this.token ? this.token : undefined,
+    )
   }
 
   public async getTestsByTypeByUserId(userId: number, typeEndpoint: string) {
@@ -54,6 +67,27 @@ export class TestResolver {
     )
   }
 
+  public async createHardLight(data: CreateHardLightInputDto) {
+    return await this.apiResolver.request<
+      CreateSimpleInputDto,
+      CreateOutputDto
+    >(
+      'hlt/create',
+      'POST',
+      data,
+      this.token ? this.token : undefined,
+    )
+  }
+
+  public async createRdo(data: CreateRdoInputDto) {
+    return await this.apiResolver.request<CreateRdoInputDto, CreateOutputDto>(
+      'rdo/createRDOTest',
+      'POST',
+      data,
+      this.token ? this.token : undefined,
+    )
+  }
+
   public async updateUserIDs(data: UpdateUserIdsInputDto) {
     return await this.apiResolver
       .request<UpdateUserIdsInputDto, DefaultInputDto<string>>(
@@ -70,5 +104,17 @@ export class TestResolver {
       .catch((error) => {
         this.usePopUp.activateErrorPopup(error.message);
       });
+  }
+
+  public async generateTestLink(testType: {testType: TestType}) {
+    return await this.apiResolver.request<{testType: TestType}, string>(
+      'getInvitationTestToken',
+      'POST',
+      testType,
+      this.token ? this.token : undefined,
+    ).catch((err) => {
+      this.usePopUp.activateErrorPopup(err.message);
+      return null
+    })
   }
 }

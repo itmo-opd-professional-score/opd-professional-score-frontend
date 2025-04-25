@@ -20,4 +20,17 @@ export class TestTypeResolver {
         return null;
       });
   }
+
+  public async getById(id: number) {
+    return await this.apiResolver.request<null, TestTypeDataOutputDto>(
+      `getById/${id}`,
+      'GET',
+      null,
+      this.token ? this.token : undefined,
+    ).catch((err) => {
+      const error = err as DefaultErrorDto;
+      this.usePopUp.activateErrorPopup(error.message);
+      return null;
+    })
+  }
 }
