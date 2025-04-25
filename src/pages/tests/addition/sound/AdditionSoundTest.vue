@@ -49,7 +49,7 @@ const convertTextToSpeech = (str: string) => {
     if (!str) return;
     utterance.text = str;
     utterance.voice = voice;
-    utterance.rate = 2;
+    utterance.rate = 1.5;
     utterance.lang = voice.lang;
     speechSynthesis.speak(utterance);
   });
@@ -165,7 +165,7 @@ onMounted(async () => {
     if (props.token && completedTestsLinks.length != 0) {
       completedTestsLinks.forEach((link) => {
         const data = jwtDecode(link) as TestJwt;
-        if (data.testType == 'SOUND_ADDITION') {
+        if (data.testType == 'ADDITION_SOUND') {
           step.value = -1;
         }
       });

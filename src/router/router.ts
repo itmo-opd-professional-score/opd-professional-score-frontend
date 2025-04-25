@@ -13,12 +13,14 @@ import TestMapper from '../pages/tests/TestMapper.vue';
 import CreateTestBlockPage from '../pages/CreateTestBlockPage.vue';
 import AdditionVisualTest from '../pages/tests/addition/visual/AdditionVisualTest.vue';
 import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.vue';
-import SelectSettingsPage from '../pages/SelectSettingsPage.vue';
-import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
+import SelectSettingsPage from '../pages/tests/SelectSettingsPage.vue';
+import HardLightTest from '../pages/tests/hard/HardLightTest.vue';
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
 import SimpleTrackingTest from '../pages/SimpleTrackingTest.vue';
+import SimpleRdoTest from '../pages/tests/simple/SimpleRdoTest.vue';
+import HardRdoTest from '../pages/tests/hard/HardRdoTest.vue';
 
 const routes = [
   {
@@ -98,6 +100,21 @@ const routes = [
     meta: {ruName: "Оценка скорости простых реакции на свет", requiresAuth: true}
   },
   {
+    path: '/test/simple/rdo',
+    component: SimpleRdoTest,
+    meta: {ruName: "Оценка скорости простой реакции на движущийся объект", requiresAuth: true},
+  },
+  {
+    path: '/test/hard/rdo',
+    component: HardRdoTest,
+    meta: { ruName: "Оценки скорости сложной реакции на движущийся объект", requiresAuth: true },
+  },
+  {
+    path: '/test/hard/light',
+    component: HardLightTest,
+    meta: { ruName: "Оценка скорости реакции на сложный световой сигнал", requiresAuth: true },
+  },
+  {
     path: '/test/results/:testTypeId/:testId',
     props: true,
     component: TestResultsPage,
@@ -113,20 +130,11 @@ const routes = [
     component: CreateTestBlockPage,
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
   },
-   {path: '/test/settings/:testName',
-      component: SelectSettingsPage,
-      meta: { ruName: 'Настройки теста', requiresAuth: true },
-     props: true,
-    },
   {
-    path: '/simple-reaction-test',
-    name: 'SimpleReactionTest',
-    component: SimpleReactionTest,
-    props: {
-      time: 10,
-      showTimer: true,
-      showProgressBar: true
-    }
+    path: '/test/settings/:testType',
+    component: SelectSettingsPage,
+    meta: { ruName: 'Настройки теста', requiresAuth: true },
+    props: true,
   },
   {
     path: '/simple-tracking-test',

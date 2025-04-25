@@ -55,6 +55,9 @@ export default {
     labelText: {
       type: String,
     },
+    checked: {
+      type: Boolean,
+    },
   },
   methods: {
     validate(event: InputEvent) {
@@ -108,6 +111,7 @@ export default {
       :required="required"
       :class="selector"
       :name="name"
+      :checked="checked"
       @input="update($event as InputEvent)"
       :id="id"
     />
@@ -118,6 +122,7 @@ export default {
 .input-wrapper {
   min-height: 2.5rem;
 }
+
 .input {
   width: 100%;
   height: 100%;
@@ -172,5 +177,17 @@ input[type='number']::-webkit-inner-spin-button {
   :focus {
     border: none;
   }
+}
+
+.input.range {
+  padding: 0;
+}
+
+.input.radio {
+  width: min-content;
+}
+
+.input.checkbox {
+  width: min-content;
 }
 </style>

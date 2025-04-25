@@ -1,5 +1,6 @@
 export type UserStatus = 'unauthorized' | 'unverified' | 'authorized';
 export type UserSex = 'MALE' | 'FEMALE';
+export type UserAgeRange = '<18' | '18-25' | '26-35' | '36+';
 
 export enum UserRole {
   USER = 'USER',
