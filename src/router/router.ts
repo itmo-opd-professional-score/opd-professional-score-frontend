@@ -115,7 +115,7 @@ const routes = [
       ruName: "Тест Струпа"
     },
     props: {
-      time: 10,
+      time: 30,
       showTimer: true,
       showProgressBar: true,
     }

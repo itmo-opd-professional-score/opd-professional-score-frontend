@@ -153,23 +153,22 @@ export default defineComponent({
 
 <template>
   <div class="container">
-    <div class="instruction" v-show="testState == 'ready'">
+    <div class="instruction" v-if="testState == 'ready'">
       <h2 class="title">Тест Струпа</h2>
       <p class="description">
         В этом тесте вам нужно выбрать цвет слова, а не прочитать его. Например,
         если слово "зелёный" написано красным цветом, правильный ответ —
-        "красный". Нажимайте на кнопку соответствующего цвета как можно быстрее!
+        "красный". Нажимайте на кнопку соответствующего цвета как можно быстрее.
+        Внимание! На каждый ответ дается до 3 секунд!
       </p>
       <CommonButton
         class="reaction-button"
-        :class="{ active: testState == 'reacting' }"
-        :disabled="testState == 'completed'"
         @click="clickButton"
       >
         <template v-slot:placeholder>Начать тест</template>
       </CommonButton>
     </div>
-    <div class="test-container" v-show="testState == 'reacting'">
+    <div class="test-container" v-if="testState == 'reacting'">
       <div class="info-block" v-if="testState == 'reacting'">
         <div v-if="showTimer" class="timer">
           Осталось времени: {{ remainingTime() }}
@@ -194,7 +193,6 @@ export default defineComponent({
             color: color === 'yellow' ? 'black' : 'white',
           }"
           class="color-button"
-          :disabled="testState == 'completed'"
           @click="checkAnswer(color)"
         >
           <template #placeholder>
@@ -235,12 +233,7 @@ export default defineComponent({
   color: #fff;
 }
 
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-}
+
 
 .info-block {
   display: flex;
@@ -256,23 +249,6 @@ export default defineComponent({
   justify-content: center;
 }
 
-.progress-bar-container {
-  width: 100%;
-  height: 8px;
-  background-color: #ddd;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  background-color: #4caf50;
-  transition: width 0.5s ease;
-}
-
-.timer {
-  font-weight: bold;
-}
 
 .current-word {
   margin-bottom: 10vh;
@@ -283,6 +259,7 @@ export default defineComponent({
   font-size: 24px;
   color: #fff;
   margin-bottom: 1vh;
+  font-weight: bold;
 }
 
 .progress-bar-container {
@@ -305,6 +282,10 @@ export default defineComponent({
 }
 
 .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
   max-width: 35vw;
   padding: 2rem;
   text-align: center;
