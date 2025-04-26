@@ -11,6 +11,8 @@ export default defineComponent({
   data() {
     return {
       userAnswer: '',
+      correctAnswer: '',
+      currentSequence: [] as string[],
       countOfNumericInSeries: [6, 5, 4],
       levelOfDifficulty: 0,
       score: 0,
@@ -19,8 +21,11 @@ export default defineComponent({
       minAndMaxForX: [1, 20],
       minAndMaxForY: [1, 5],
       testState: 'ready' as TestState,
+      totalTime: 0,
       remainingTimeValue: 0,
+      roundTime: 30,
       timerIntervalId:  null as ReturnType<typeof setInterval> | null,
+      roundTimeoutId:  null as ReturnType<typeof setInterval> | null,
       functionsForFirstDifficulty: [
         (x: number, y: number): string => (x + y).toString(),
         (x: number, y: number): string => (x - y).toString(),
@@ -55,11 +60,19 @@ export default defineComponent({
     showPerMinuteResults: { type: Boolean, default: false },
     showProgressBar: { type: Boolean, default: false },
   },
+  computed: {
+    displayedSequence(): string [] {
+      return this.currentSequence.slice(0,-1);
+    }
+  },
   methods: {
     //лямбда принимает два парамета ВСЕГДА
-    generateSequence(initial: number, step: number, iterations: number, lambda: (current: number, step: number) => string): string[] {
+    generateSequence(lambda: (current: number, step: number) => string): string[] {
+      let current = this.generateRandomNumeric(this.minAndMaxForX[0], this.minAndMaxForX[1]);
+      const step = this.generateRandomNumeric(this.minAndMaxForY[0], this.minAndMaxForY[1]);
+      let iterations = this.countOfNumericInSeries[this.levelOfDifficulty];
+
       const result: string[] = [];
-      let current: number = initial;
       while(iterations > 0) {
         result.push(lambda(current, step));
         current+=step
@@ -83,6 +96,8 @@ export default defineComponent({
       this.startTimer(this.time);
     },
     startTest() {
+      this.totalTime = this.time;
+      this.remainingTimeValue = this.time;
       this.testState = 'reacting';
       this.nextRound();
       this.startTimer(this.time);
@@ -92,7 +107,8 @@ export default defineComponent({
     },
     nextRound() {
       if(!this.randomChangeOfDifficulty) {
-
+        const timePassed = this.totalTime - this.remainingTimeValue;
+        if()
       }
     },
     startTimer(totalSeconds: number) {
