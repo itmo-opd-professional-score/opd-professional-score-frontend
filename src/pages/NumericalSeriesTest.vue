@@ -77,7 +77,6 @@ export default defineComponent({
     },
   },
   methods: {
-    //лямбда принимает два парамета ВСЕГДА
     generateSequence(lambda: (current: number, step: number) => string): string[] {
       let current = this.generateRandomNumeric(this.minAndMaxForX[0], this.minAndMaxForX[1]);
       const step = this.generateRandomNumeric(this.minAndMaxForY[0], this.minAndMaxForY[1]);
@@ -116,11 +115,15 @@ export default defineComponent({
     stopTest() {
       this.testState = 'completed';
       this.stopRoundTimer();
+      if(this.score == 0) {
+        this.result=0
+      }
+      else {
+        this.result = Math.round((this.score / (this.score + this.mistakes)) * 100);
+      }
     },
     nextRound() {
       if (this.testState !== 'reacting') return;
-
-      // Выбор сложности на основе времени, если randomChangeOfDifficulty выключен
       if (!this.randomChangeOfDifficulty) {
         const timePassed = this.totalTime - this.remainingTimeValue / 1000;
         if (timePassed > this.totalTime * 0.66) {
