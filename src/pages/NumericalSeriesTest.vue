@@ -51,7 +51,7 @@ export default defineComponent({
         (x: number, y: number) => (x*x + x*y).toString(),
         (x: number, y: number): string =>  ` ${x-y}/${2*x + y}`,
         (x: number, y: number): string =>   {
-            const safeY = y <= 3 ? 3 : y;
+            const safeY = y > 3 ? 3 : y;
             return (Math.pow(x, safeY)).toString();
         }
       ]
