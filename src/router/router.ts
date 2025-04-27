@@ -129,7 +129,7 @@ const routes = [
     }
   },
   {
-    path: '/test/numerical-series-test',
+    path: '/test/numerical',
     name: 'NumericalSeriesTest',
     component: NumericalSeriesTest,
     meta: { ruName: 'Тест Числовые последовательности' },

@@ -13,7 +13,7 @@ export default defineComponent({
       userAnswer: '',
       correctAnswer: '',
       currentSequence: [] as string[],
-      countOfNumericInSeries: [6, 5, 4],
+      countOfNumericInSeries: [4, 6, 7],
       levelOfDifficulty: 0,
       score: 0,
       mistakes: 0,
@@ -109,8 +109,9 @@ export default defineComponent({
       this.totalTime = this.time;
       this.remainingTimeValue = this.time;
       this.testState = 'reacting';
-      this.nextRound();
       this.startTimer(this.time);
+      this.levelOfDifficulty = 0;
+      this.nextRound();
     },
     stopTest() {
       this.testState = 'completed';
@@ -124,6 +125,8 @@ export default defineComponent({
     },
     nextRound() {
       if (this.testState !== 'reacting') return;
+
+      this.stopRoundTimer(); // Остановить предыдущий раунд
       if (!this.randomChangeOfDifficulty) {
         const timePassed = this.totalTime - this.remainingTimeValue / 1000;
         if (timePassed > this.totalTime * 0.66) {
@@ -134,14 +137,15 @@ export default defineComponent({
           this.levelOfDifficulty = 0;
         }
       } else {
-        this.levelOfDifficulty = Math.floor(Math.random() * 3); // случайная сложность
+        this.levelOfDifficulty = this.generateRandomNumeric(0, 2);
       }
+
       let lambda: (current: number, step: number) => string;
-      if (this.levelOfDifficulty === 0) {
+      if (this.levelOfDifficulty == 0) {
         lambda = this.functionsForFirstDifficulty[
           Math.floor(this.generateRandomNumeric(0, this.functionsForFirstDifficulty.length - 1))
           ];
-      } else if (this.levelOfDifficulty === 1) {
+      } else if (this.levelOfDifficulty == 1) {
         lambda = this.functionsForSecondDifficulty[
           Math.floor(this.generateRandomNumeric(0, this.functionsForSecondDifficulty.length - 1))
           ];
@@ -150,25 +154,27 @@ export default defineComponent({
           Math.floor(this.generateRandomNumeric(0, this.functionsForThirdDifficulty.length - 1))
           ];
       }
+
       this.currentSequence = this.generateSequence(lambda);
       this.correctAnswer = this.currentSequence[this.currentSequence.length - 1];
       this.userAnswer = '';
-      this.startRoundTimer();
-      if (this.roundTimeoutId) clearTimeout(this.roundTimeoutId);
-      this.roundTimeoutId = setTimeout(() => {
-        this.mistakes++;
-        this.nextRound();
-      }, this.roundTime * 1000);
+
+      this.startRoundTimer(); // Запустить новый таймер раунда
     },
     startRoundTimer() {
       this.stopRoundTimer();
-      if (this.roundTimerIntervalId) clearInterval(this.roundTimerIntervalId);
       this.roundRemainingTime = this.roundTime * 1000;
+
       this.roundTimerIntervalId = setInterval(() => {
         this.roundRemainingTime -= 1000;
+
         if (this.roundRemainingTime <= 0) {
           this.roundRemainingTime = 0;
           clearInterval(this.roundTimerIntervalId!);
+          this.roundTimerIntervalId = null;
+
+          this.mistakes++;
+          this.nextRound();
         }
       }, 1000);
     },
@@ -179,6 +185,9 @@ export default defineComponent({
       }
     },
     startTimer(totalSeconds: number) {
+      if (this.timerIntervalId) {
+        clearInterval(this.timerIntervalId);
+      }
       this.remainingTimeValue = totalSeconds * 1000;
       this.timerIntervalId = setInterval(() => {
         this.remainingTimeValue -= 1000;
@@ -195,11 +204,11 @@ export default defineComponent({
       } else {
         this.mistakes++;
       }
+
       if (this.remainingTimeValue <= 0) {
         this.stopTest();
       } else {
         this.nextRound();
-        this.stopRoundTimer();
       }
     },
     roundTimeFormatted() {
