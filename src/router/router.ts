@@ -133,11 +133,6 @@ const routes = [
     name: 'NumericalSeriesTest',
     component: NumericalSeriesTest,
     meta: { ruName: 'Тест Числовые последовательности' },
-    props: {
-      time: 40,
-      showTimer: true,
-      showProgressBar: true
-    }
   }
 ];
 

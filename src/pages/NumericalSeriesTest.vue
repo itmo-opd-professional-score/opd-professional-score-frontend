@@ -50,13 +50,16 @@ export default defineComponent({
         (x: number, y: number) => (x * x + y).toString(),
         (x: number, y: number) => (x*x + x*y).toString(),
         (x: number, y: number): string =>  ` ${x-y}/${2*x + y}`,
-        (x: number, y: number): string =>  (Math.pow(x, y)).toString()
+        (x: number, y: number): string =>   {
+            const safeY = y <= 3 ? 3 : y;
+            return (Math.pow(x, safeY)).toString();
+        }
       ]
     };
   },
   props: {
     randomChangeOfDifficulty: { type: Boolean, default: false },
-    time: { type: Number, required: true },
+    time: { type: Number, default: 120 },
     showTimer: { type: Boolean, default: false },
     showFinalResults: { type: Boolean, default: false },
     showPerMinuteResults: { type: Boolean, default: false },
@@ -345,17 +348,17 @@ export default defineComponent({
 }
 .sequence {
   background: rgba(255, 255, 255, 0.8);
-  border-radius: 1em;
-  padding: 2em;
+  border-radius: 1vh;
+  padding: 2vh;
   margin: 2vh 0;
   width: 90%;
-  max-width: 50em;
-  min-width: 30em;
+  max-width: 50vh;
+  min-width: 30vh;
   text-align: center;
   font-size: 1.4rem;
   font-weight: bold;
   color: #4a4a4a;
-  box-shadow: 0 0.5em 1.2em rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0.5vh 1.2vh rgba(0, 0, 0, 0.15);
   transition: background-color 0.3s ease;
 }
 
