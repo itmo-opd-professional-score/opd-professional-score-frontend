@@ -131,13 +131,13 @@ const routes = [
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
   },
   {
-    path: '/hard-tracking-test',
+    path: '/test/hard/tracking',
     component: HardTrackingTest,
     props: {
       time: 120,
       showTimer: true,
       showProgressBar: true
-    }
+    },
   },
   {
     path: '/test/settings/:testType',
