@@ -1,7 +1,6 @@
 
 <template>
   <div class="test-wrapper">
-    <!-- Стартовый экран -->
     <div v-if="introVisible" class="intro-screen">
       <h2>Тест на координацию</h2>
       <div class="instructions">
@@ -25,7 +24,6 @@
       </CommonButton>
     </div>
 
-    <!-- Основной тест -->
     <div
       v-if="!introVisible"
       class="test-container"
@@ -36,31 +34,26 @@
     >
       <div class="track-line"></div>
 
-      <!-- Автоматический шарик -->
       <div
         class="auto-ball"
         :style="{ left: autoBallPosition + 'px' }"
       ></div>
 
-      <!-- Управляемый шарик -->
       <div
         class="ball"
         :style="{ left: userBallPosition + 'px' }"
         ref="ball"
       ></div>
 
-      <!-- Время -->
       <div class="timer" v-if="showTimer && !testEnded">
         Осталось: {{ formattedTime }}
       </div>
 
-      <!-- Индикатор совпадения -->
       <div class="overlap-indicator" v-if="isOverlapping && !testEnded">
         Совпадение: +{{ currentOverlap.toFixed(1) }} сек
       </div>
     </div>
 
-    <!-- Экран результатов -->
     <div v-if="testEnded" class="results-screen">
       <h2>Тест завершён!</h2>
 
@@ -85,6 +78,10 @@
 <script lang="ts">
 import CommonButton from '../../components/UI/CommonButton.vue';
 import { defineComponent } from 'vue';
+import type {
+  CreateHardTrackingTestInputDto
+} from '../../api/resolvers/test/dto/input/create-hard-tracking-test-input.dto.ts';
+
 
 export default defineComponent({
   name: 'HardTrackingTest',
@@ -107,11 +104,9 @@ export default defineComponent({
       trackWidth: 800,
       ballRadius: 20,
 
-      // Позиции
       autoBallPosition: 200,
       userBallPosition: 400,
 
-      // Движение
       autoDirection: 1,
       userDirection: 1,
       autoSpeed: 0.1,
@@ -121,13 +116,11 @@ export default defineComponent({
 
       isDragging: false,
 
-      // Перекрытие
       isOverlapping: false,
       overlapStart: null as number | null,
       overlapTimes: [] as number[],
       currentOverlap: 0,
 
-      // Таймер
       elapsedTime: 0,
       lastFrameTime: null as number | null,
       testEnded: false,
@@ -158,7 +151,6 @@ export default defineComponent({
     },
 
     restartTest() {
-      // Сброс всех данных
       this.autoBallPosition = 200;
       this.userBallPosition = 400;
       this.overlapTimes = [];
@@ -204,19 +196,16 @@ export default defineComponent({
         return;
       }
 
-      // Оптимизированное обновление скорости
       if (now - this.lastAutoSpeedChange > 2000) {
         this.autoSpeed = 0.15 + Math.random() * 0.2;
         this.lastAutoSpeedChange = now;
       }
 
-      // Движение автошарика
       this.autoBallPosition += this.autoDirection * this.autoSpeed * deltaTime;
       if (this.autoBallPosition <= this.ballRadius || this.autoBallPosition >= this.trackWidth - this.ballRadius) {
         this.autoDirection *= -1;
       }
 
-      // Движение пользовательского шарика
       if (!this.isDragging && now - this.lastUserSpeedChange > 2500) {
         this.userSpeed = 0.1 + Math.random() * 0.2;
         this.lastUserSpeedChange = now;
@@ -226,7 +215,6 @@ export default defineComponent({
         }
       }
 
-      // Оптимизированная проверка пересечения
       const distance = Math.abs(this.autoBallPosition - this.userBallPosition);
       const isOverlappingNow = distance <= this.ballRadius * 2;
 
@@ -255,6 +243,22 @@ export default defineComponent({
         const overlapDuration = (now - this.overlapStart) / 1000;
         this.overlapTimes.push(overlapDuration);
       }
+
+      const stats: CreateHardTrackingTestInputDto = {
+        userId: 123,
+        duration: this.duration,
+        totalOverlapTime: this.overlapTimes.reduce((sum, t) => sum + t, 0),
+        bestOverlap: this.bestOverlap,
+        averageOverlap: this.overlapTimes.length
+          ? this.overlapTimes.reduce((sum, t) => sum + t, 0) / this.overlapTimes.length
+          : 0,
+        overlapCount: this.overlapTimes.length,
+        successRate:
+          (this.overlapTimes.reduce((sum, t) => sum + t, 0) / this.duration) *
+          100,
+      };
+
+      console.log('Результаты теста:', stats);
     }
   },
 
@@ -272,7 +276,6 @@ export default defineComponent({
   color: #333;
 }
 
-/* Стартовый экран */
 .intro-screen {
   text-align: center;
   padding: 2rem;
@@ -358,7 +361,6 @@ export default defineComponent({
   color: #28a745;
 }
 
-/* Экран результатов */
 .results-screen {
   text-align: center;
   padding: 2rem;
@@ -391,7 +393,6 @@ export default defineComponent({
   color: #6c757d;
 }
 
-/* Стили для CommonButton */
 .start-button,
 .restart-button {
   margin: 0 auto;

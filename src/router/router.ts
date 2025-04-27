@@ -117,12 +117,12 @@ const routes = [
     }
   },
   {
-    path: '/hard-tracking-test',
+    path: '/test/hard/test',
     component: HardTrackingTest,
     props: {
       time: 120,
       showTimer: true,
-      showProgressBar: true
+      showProgressBar: true,
     }
   }
 ];
