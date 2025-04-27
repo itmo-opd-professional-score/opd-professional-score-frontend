@@ -14,7 +14,6 @@ import CreateTestBlockPage from '../pages/CreateTestBlockPage.vue';
 import AdditionVisualTest from '../pages/tests/addition/visual/AdditionVisualTest.vue';
 import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.vue';
 import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
-import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 import HardTrackingTest from '../pages/tests/HardTrackingTest.vue';
 
@@ -85,11 +84,6 @@ const routes = [
       ruName:
         'Оценка скорости реакции на сложный звуковой сигнал - сложение в уме',
     },
-  },
-  {
-    path: '/test/simple/sound',
-    component: SimpleSoundTest,
-    meta: { ruName: 'Простой звуковой тест', requiresAuth: true },
   },
   {
     path: '/test/simple/light',
