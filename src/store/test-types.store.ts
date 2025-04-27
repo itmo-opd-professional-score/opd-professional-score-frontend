@@ -20,14 +20,14 @@ export const useTestTypesStore = defineStore('testTypes', {
         this.types = types;
       }
     },
-    checkTestType(test: TestDataOutputDto) {
-      let typeName;
+    checkTestType(test: TestDataOutputDto): TestTypeDataOutputDto {
+      let testType;
       this.types.map((type) => {
         if (test.testTypeId == type.id) {
-          typeName = type.name;
+          testType = type;
         }
       });
-      return typeName;
+      return testType!;
     },
   },
 });

@@ -16,6 +16,15 @@ export class TestBlockResolver {
     );
   }
 
+  public async getById(id: number) {
+    return await this.apiResolver.request<null, GetTestBlockOutputDto>(
+      `getById/${id}`,
+      'GET',
+      null,
+      this.token ? this.token : undefined,
+    );
+  }
+
   public async getByUserId(id: number) {
     return await this.apiResolver.request<null, GetTestBlockOutputDto[]>(
       `getByUserId/${id}`,

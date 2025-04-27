@@ -24,17 +24,6 @@ interface UserJwt {
 }
 
 export const updateUserState = () => {
-  const calculateAge = (birthDate: string) => {
-    const today = new Date();
-    const birthYear = new Date(birthDate).getFullYear();
-    const currentYear = today.getFullYear();
-    let age = currentYear - birthYear;
-    // Adjust age if birthday hasn't occurred yet this year
-    const birthMonth = new Date(birthDate).getMonth();
-    const birthDay = new Date(birthDate).getDate();
-    if (birthMonth > today.getMonth() || (birthMonth === today.getMonth() && birthDay > today.getDate())) { age--; }
-    return !isNaN(age) ? age.toString() : undefined;
-  }
 
   const token = localStorage.getItem('token');
   const userToVerify = JSON.parse(localStorage.getItem('userToVerify')!);
@@ -50,9 +39,8 @@ export const updateUserState = () => {
       UserState.status = 'authorized';
       UserState.username = userData.username;
       UserState.email = userData.email;
-      UserState.age = calculateAge(userData.age);
+      UserState.age = userData.age?.substring(0, 10);
       UserState.gender = userData.gender;
-
       if (userData.role) {
         UserState.role = userData.role;
       } else {
@@ -70,3 +58,14 @@ export const updateUserState = () => {
     UserState.status = 'unauthorized';
   }
 };
+
+export const calculateAge = (birthDate: string) => {
+  const today = new Date();
+  const birthYear = new Date(birthDate).getFullYear();
+  const currentYear = today.getFullYear();
+  let age = currentYear - birthYear;
+  const birthMonth = new Date(birthDate).getMonth();
+  const birthDay = new Date(birthDate).getDate();
+  if (birthMonth > today.getMonth() || (birthMonth === today.getMonth() && birthDay > today.getDate())) { age--; }
+  return !isNaN(age) ? age.toString() : undefined;
+}
