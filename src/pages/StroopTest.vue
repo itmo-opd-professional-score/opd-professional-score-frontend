@@ -5,7 +5,7 @@ import CommonButton from '../components/UI/CommonButton.vue';
 type TestState = 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
-  name: 'StraupTest',
+  name: 'StroopTest',
   components: { CommonButton },
   data() {
     return {
@@ -38,7 +38,7 @@ export default defineComponent({
     },
     giveColorOfWord() {
       if (this.currentWord) {
-        if (Math.random() < this.givePropabilityOfWordAndColorMatch()) {
+        if (Math.random() < this.giveProbabilityOfWordAndColorMatch()) {
           this.currentColor = this.currentWord;
         } else {
           let color;
@@ -49,7 +49,7 @@ export default defineComponent({
         }
       }
     },
-    givePropabilityOfWordAndColorMatch() {
+    giveProbabilityOfWordAndColorMatch() {
       if (this.randomChangeOfDifficulty) {
         return [0.7, 0.4, 0.1][Math.floor(Math.random() * 3)];
       }

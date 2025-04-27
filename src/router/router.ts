@@ -14,11 +14,10 @@ import CreateTestBlockPage from '../pages/CreateTestBlockPage.vue';
 import AdditionVisualTest from '../pages/tests/addition/visual/AdditionVisualTest.vue';
 import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.vue';
 import SelectSettingsPage from '../pages/SelectSettingsPage.vue';
-import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
-import StraupTest from '../pages/StraupTest.vue';
+import StroopTest from '../pages/StroopTest.vue';
 
 const routes = [
   {
@@ -109,15 +108,10 @@ const routes = [
     component: TestMapper,
   },
   {
-    path :'/test/stroop-test',
-    component: StraupTest,
+    path :'/test/stroop',
+    component: StroopTest,
     meta: {
       ruName: "Тест Струпа"
-    },
-    props: {
-      time: 30,
-      showTimer: true,
-      showProgressBar: true,
     }
   },
   {
@@ -129,17 +123,7 @@ const routes = [
       component: SelectSettingsPage,
       meta: { ruName: 'Настройки теста', requiresAuth: true },
      props: true,
-    },
-  {
-    path: '/test/simple-reaction-test',
-    name: 'SimpleReactionTest',
-    component: SimpleReactionTest,
-    props: {
-      time: 10,
-      showTimer: true,
-      showProgressBar: true
     }
-  }
 ];
 
 const router = createRouter({
