@@ -81,6 +81,7 @@ import { defineComponent } from 'vue';
 import type {
   CreateHardTrackingTestInputDto
 } from '../../api/resolvers/test/dto/input/create-hard-tracking-test-input.dto.ts';
+import { UserState } from '../../utils/userState/UserState.ts';
 
 
 export default defineComponent({
@@ -149,7 +150,7 @@ export default defineComponent({
 
 
       return {
-        userId: 123,
+        userId: UserState.id,
         duration: this.duration,
         totalOverlapTime,
         bestOverlap: this.bestOverlap,

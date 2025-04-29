@@ -133,6 +133,7 @@ const routes = [
   {
     path: '/test/hard/tracking',
     component: HardTrackingTest,
+    meta: { ruName: "Тест на координацию", requiresAuth: true },
   },
   {
     path: '/test/settings/:testType',
