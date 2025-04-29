@@ -119,11 +119,8 @@ export default defineComponent({
           this.checkLooped = true;
         }
       } else {
-        if (this.testBlockId) {
-          await router.push(`/testblock/${this.testBlockId}`);
-        } else {
-          router.go(0)
-        }
+        if (this.testBlockId) await router.push(`/testblock/${this.testBlockId}`);
+        else router.go(0)
       }
     },
     startTimer() {
