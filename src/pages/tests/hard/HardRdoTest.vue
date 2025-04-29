@@ -35,7 +35,7 @@ export default defineComponent({
       balls: [null, null, null] as Array<SimpleRdoTest | null>,
       completedTestsLinks: [] as Array<string>,
       completedTestsResults: [] as Array<string>,
-      time: 10,
+      duration: 10,
       showTimer: true,
       showTotalResults: true,
       showProgressBar: true,
@@ -105,7 +105,7 @@ export default defineComponent({
     },
     progressBarWidth() {
       if (this.remainingSeconds === 0) return '0%';
-      return `${this.remainingSeconds / this.time * 100}%`;
+      return `${this.remainingSeconds / this.duration * 100}%`;
     },
   },
   methods: {
@@ -119,7 +119,7 @@ export default defineComponent({
             this.remainingSeconds--
           }, 1000)
         }
-        this.remainingSeconds = this.time
+        this.remainingSeconds = this.duration
         this.balls.forEach((ball) => {
           if (ball != null) {
             ball.testState = 'ready'
@@ -158,7 +158,7 @@ export default defineComponent({
       if (this.setupId && !isNaN(parseInt(this.setupId))) {
         const settings = await new TestSetupsResolver().getById(parseInt(this.setupId))
         if (settings) {
-          this.time = settings.duration
+          this.duration = settings.duration
           this.showProgressBar = settings.showProgress
           this.showTimer = settings.showTimer
           this.showTotalResults = settings.showTotalResults

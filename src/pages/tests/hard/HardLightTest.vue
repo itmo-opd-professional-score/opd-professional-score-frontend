@@ -213,11 +213,8 @@ function endTest() {
 }
 
 async function restartTest() {
-  if (props.testBlockId) {
-    await router.push(`/testblock/${props.testBlockId}`);
-  } else {
-    router.go(0)
-  }
+  if (props.testBlockId) await router.push(`/testblock/${props.testBlockId}`);
+  else router.go(0)
 }
 
 onUnmounted(() => {
