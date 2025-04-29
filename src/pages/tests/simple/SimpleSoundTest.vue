@@ -4,10 +4,10 @@ import { defineComponent } from 'vue';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import CommonButton from '../../../components/UI/CommonButton.vue';
 import { UserState } from '../../../utils/userState/UserState.ts';
-import router from '../../../router/router.ts';
-import { jwtDecode } from 'jwt-decode';
-import type { TestJwt } from '../types';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
+import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
+import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
@@ -15,7 +15,8 @@ export default defineComponent({
   name: 'SimpleSoundTest',
   components: { CommonButton },
   props: {
-    token: String
+    testBlockId: String,
+    setupId: String,
   },
   data() {
     return {
@@ -31,7 +32,8 @@ export default defineComponent({
       missedCount: 0,
       completedTestsLinks: [] as Array<string>,
       completedTestsResults: [] as Array<string>,
-      buttonText: 'Начать тест'
+      buttonText: 'Начать тест',
+      showTotalResults: false,
     };
   },
   computed: {
@@ -167,49 +169,28 @@ export default defineComponent({
     },
     saveResults() {
       const popUpStore = usePopupStore()
-      const testResolver =
-        new TestResolver()
-      testResolver
-        .createSimple(this.testResultDto, "sst").then((result) => {
-        if (!UserState.id) {
-          this.completedTestsLinks.push(this.token!);
-          this.completedTestsResults.push(result.body.testToken);
-          localStorage.setItem(
-            'completedTestsLinks',
-            JSON.stringify(this.completedTestsLinks),
-          );
-          localStorage.setItem(
-            'completedTestsResults',
-            JSON.stringify(this.completedTestsResults),
-          );
-        }
-        popUpStore.activateInfoPopup('Results were saved successfully!');
-      }).catch((error) => {
+      new TestResolver().createSimple(this.testResultDto, "slt").catch((error) => {
         popUpStore.activateErrorPopup(
           `Error code: ${error.status}. ${error.response.data.message}`,
         );
       });
+      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
+        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
+        if (setupId && isNaN(setupId)) setupId = undefined
+        new TestBlockResolver().updateTestBlock({
+          testBlockId: parseInt(this.testBlockId),
+          updatedTest: {
+            name: "SIMPLE_SOUND",
+            setupId: setupId,
+            available: false
+          }
+        })
+      }
     },
     async load () {
-      if (UserState.id) {
-        await router.push('/test/simple/sound');
-      } else {
-        const linksData = localStorage.getItem('completedTestsLinks');
-        const resultsData = localStorage.getItem('completedTestsResults');
-        if (linksData) {
-          this.completedTestsLinks.push(...JSON.parse(linksData));
-        }
-        if (resultsData) {
-          this.completedTestsResults.push(...JSON.parse(resultsData));
-        }
-        if (this.token && this.completedTestsLinks.length != 0) {
-          this.completedTestsLinks.forEach((link) => {
-            const data = jwtDecode(link) as TestJwt;
-            if (data.testType != 'SIMPLE_SOUND') {
-              this.$router.back()
-            }
-          });
-        }
+      if (this.setupId && !isNaN(parseInt(this.setupId))) {
+        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
+        if (settings) this.showTotalResults = settings.showTotalResults
       }
     },
   },
@@ -217,9 +198,7 @@ export default defineComponent({
     this.clearTimeouts();
     clearTimeout(this.inactivityTimeout!);
   },
-  mounted() {
-      this.load()
-  },
+  mounted() {this.load() },
 });
 </script>
 
