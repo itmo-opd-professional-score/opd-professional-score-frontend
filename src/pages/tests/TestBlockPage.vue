@@ -10,6 +10,7 @@ import { usePopupStore } from '../../store/popup.store.ts';
 
 const props = defineProps<{
   testBlockId: string,
+  testBlockToken: string,
   token?: string
 }>()
 const token = ref<string | undefined>(props.token);
@@ -28,6 +29,7 @@ onMounted(async () => {
     } else usePopUp.activateErrorPopup("Test Block token isn't specified!")
   } else token.value = props.token
   if (token.value) {
+    if (token.value !== props.token) await router.push('/profile')
     testTypes.value = (jwtDecode(token.value) as TestBlockJwt).tests
   }
 })

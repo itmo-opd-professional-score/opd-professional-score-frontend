@@ -61,7 +61,12 @@ export default {
       <div class="field">Открыть блок</div>
     </div>
 
-    <TestBlockElement :block-id="testBlock.id" v-for="(testBlock, index) in paginatedData" :key="index">
+    <TestBlockElement
+      :block-id="testBlock.id"
+      :token="testBlock.testBlockToken"
+      v-for="(testBlock, index) in paginatedData"
+      :key="index"
+    >
       <template v-slot:id> {{ testBlock.id }} </template>
       <template v-slot:name> Блок тестов #{{ testBlock.id }} </template>
     </TestBlockElement>

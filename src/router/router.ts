@@ -139,7 +139,7 @@ const routes = [
      props: true,
    },
   {
-    path: '/testBlock/:testBlockId',
+    path: '/testBlock/:testBlockId/:testBlockToken',
     component: TestBlockPage,
     meta: { ruName: 'Блок тестов'},
     props: true,

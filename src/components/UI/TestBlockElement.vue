@@ -4,6 +4,7 @@ import router from '../../router/router.ts';
 
 defineProps<{
   blockId: number
+  token: string
 }>()
 </script>
 
@@ -13,7 +14,7 @@ defineProps<{
     <div class="field" id="name">
       <slot name="name">Название</slot>
     </div>
-    <CommonButton class="open-button" id="btn" @click="router.push(`/testBlock/${blockId}`)">
+    <CommonButton class="open-button" id="btn" @click="router.push(`/testBlock/${blockId}/${token}`)">
       <template v-slot:placeholder>Перейти</template>
     </CommonButton>
   </div>
