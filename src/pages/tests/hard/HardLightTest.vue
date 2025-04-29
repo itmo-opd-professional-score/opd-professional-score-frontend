@@ -1,4 +1,4 @@
-f<template>
+<template>
   <div class="container">
     <div v-if="!testStarted">
       <h1>Тест на реакцию на цвета</h1>
@@ -13,7 +13,7 @@ f<template>
     </div>
 
     <div v-else-if="!testCompleted" class="test-screen">
-      <div class="timer-container">
+      <div class="timer-container" v-if="showProgress">
         <div class="timer-bar" :style="timerStyle"></div>
       </div>
       <div class="attempt-counter">Попытка: {{ currentAttempt }} / {{ ALL_SIGNALS }}</div>
@@ -37,10 +37,15 @@ f<template>
     </div>
 
     <div v-else class="results">
-      <h2>Результаты теста</h2>
-      <p>Среднее время реакции: <strong>{{ avgTime }} мс</strong></p>
-      <p>Правильных ответов: <strong>{{ correctAnswers }}</strong></p>
-      <p>Лучшее время: <strong>{{ bestTime }} мс</strong></p>
+      <div class="short">
+        <h2>Поздравляем с прохождением теста!</h2>
+      </div>
+      <div class="full" v-if="showTotalResults">
+        <h2>Результаты теста</h2>
+        <p>Среднее время реакции: <strong>{{ avgTime }} мс</strong></p>
+        <p>Правильных ответов: <strong>{{ correctAnswers }}</strong></p>
+        <p>Лучшее время: <strong>{{ bestTime }} мс</strong></p>
+      </div>
       <CommonButton class="restart-btn submit_button" @click="restartTest">
         <template #placeholder>Пройти снова</template>
       </CommonButton>
@@ -54,13 +59,13 @@ import CommonButton from '../../../components/UI/CommonButton.vue'
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
-import router from '../../../router/router.ts';
-import { jwtDecode } from 'jwt-decode';
-import type { TestJwt } from '../types';
-import type { CreateHardLightInputDto } from '../../../api/resolvers/test/dto/input/create-hard-light-input.dto.ts';
+import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
+import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
 
 const props = defineProps<{
-  token?: string
+  testBlockId?: string,
+  setupId?: string
 }>()
 
 type Color = 'red' | 'blue' | 'green' | 'yellow'
@@ -71,7 +76,9 @@ const colorMap = {
   green: '#44ff44',
   yellow: '#ffff44'
 }
-const TIME_LIMIT = 2000
+const duration = ref<number>(2000)
+const showTotalResults = ref<boolean>(true)
+const showProgress = ref<boolean>(true)
 const ALL_SIGNALS = 15
 
 const testStarted = ref(false)
@@ -83,11 +90,9 @@ const missedAnswers = ref(0)
 const wrongAnswers = ref(0)
 const reactionTimes = ref<number[]>([])
 const startTime = ref<number | null>(null)
-const timeLeft = ref(TIME_LIMIT)
+const timeLeft = ref(duration.value)
 const flashTimeouts = ref<number[]>([])
 
-let completedTestsLinks = [];
-let completedTestsResults = [];
 let timeoutId: number | undefined
 let timerInterval: number | undefined
 
@@ -104,7 +109,7 @@ const bestTime = computed(() => {
 })
 
 const timerStyle = computed(() => {
-  const percentage = (timeLeft.value / TIME_LIMIT) * 100
+  const percentage = (timeLeft.value / duration.value) * 100
   return {
     width: percentage + '%',
     backgroundColor: percentage <= 30 ? '#ff4444' : '#4CAF50'
@@ -143,7 +148,7 @@ function showNextColor() {
 }
 
 function startTimer() {
-  timeLeft.value = TIME_LIMIT
+  timeLeft.value = duration.value
   clearInterval(timerInterval)
 
   timerInterval = setInterval(() => {
@@ -227,58 +232,37 @@ onUnmounted(() => {
 })
 
 const saveResults = () => {
-  const testResolver = new TestResolver();
-  const popUpStore = usePopupStore();
-  const data: CreateHardLightInputDto = {
+  const usePopUp = usePopupStore()
+  new TestResolver().createHardLight({
     allSignals: ALL_SIGNALS,
     averageCallbackTime: avgTime.value,
     dispersion: calculateDispersion(reactionTimes.value),
     misclicks: missedAnswers.value,
     mistakes: wrongAnswers.value,
     userId: UserState.id ? UserState.id : null,
-  };
-  testResolver
-    .createHardLight(data)
-    .then((result) => {
-      if (!UserState.id) {
-        completedTestsLinks.push(props.token);
-        completedTestsResults.push(result.body.testToken);
-        localStorage.setItem(
-          'completedTestsLinks',
-          JSON.stringify(completedTestsLinks),
-        );
-        localStorage.setItem(
-          'completedTestsResults',
-          JSON.stringify(completedTestsResults),
-        );
+  }).catch((error) => {
+    usePopUp.activateErrorPopup(error.message)
+  })
+  if (props.testBlockId && !isNaN(parseInt(props.testBlockId))) {
+    let setupId = props.setupId ? parseInt(props.setupId) : undefined;
+    if (setupId && isNaN(setupId)) setupId = undefined
+    new TestBlockResolver().updateTestBlock({
+      testBlockId: parseInt(props.testBlockId),
+      updatedTest: {
+        name: "HARD_LIGHT",
+        setupId: setupId,
+        available: false
       }
-      popUpStore.activateInfoPopup('Results were saved successfully!');
     })
-    .catch((error) => {
-      popUpStore.activateErrorPopup(
-        `Error code: ${error.status}. ${error.response.data.message}`,
-      );
-    });
-};
+  }
+}
 onMounted(async () => {
-  if (UserState.id) {
-    await router.push('/test/hard/light');
-  } else {
-    const linksData = localStorage.getItem('completedTestsLinks');
-    const resultsData = localStorage.getItem('completedTestsResults');
-    if (linksData) {
-      completedTestsLinks.push(...JSON.parse(linksData));
-    }
-    if (resultsData) {
-      completedTestsResults.push(...JSON.parse(resultsData));
-    }
-    if (props.token && completedTestsLinks.length != 0) {
-      completedTestsLinks.forEach((link) => {
-        const data = jwtDecode(link) as TestJwt;
-        if (data.testType != 'HARD_LIGHT') {
-          router.back()
-        }
-      });
+  if (props.setupId && !isNaN(parseInt(props.setupId))) {
+    const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(props.setupId))
+    if (settings) {
+      showTotalResults.value = settings.showTotalResults
+      duration.value = settings.duration
+      showProgress.value = settings.showProgress
     }
   }
 });
