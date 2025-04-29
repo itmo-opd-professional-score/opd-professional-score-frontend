@@ -95,15 +95,15 @@ export default {
 <style scoped>
 .wrapper {
   width: 100%;
-  padding: 0.5rem 1rem;
   border-radius: 10px;
+  padding: 1vh;
   border: 1px solid var(--input-border);
   background: white;
   display: grid;
   grid-template-columns: 30% auto;
   align-items: center;
   column-gap: 3%;
-
+  height: 8vh;
   .buttons {
     display: flex;
     gap: 1vw;
@@ -113,6 +113,7 @@ export default {
       max-width: 30%;
       display: flex;
       justify-content: center;
+      height: 100%;
     }
   }
 }

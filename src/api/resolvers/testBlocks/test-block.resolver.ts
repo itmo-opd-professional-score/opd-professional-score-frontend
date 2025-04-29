@@ -1,7 +1,7 @@
 import ApiResolverUtil from '../../../utils/ApiResolver.ts';
 import type { CreateTestBlockInputDto } from './dto/input/create-test-block-input.dto.ts';
 import type { GetTestBlockOutputDto } from './dto/output/get-test-block-output.dto.ts';
-import type { DefaultInputDto } from '../../dto/common/default-input.dto.ts';
+import type { DefaultOutputDto } from '../../dto/common/default-output.dto.ts';
 
 export class TestBlockResolver {
   private apiResolver = new ApiResolverUtil('testBlock');
@@ -37,7 +37,7 @@ export class TestBlockResolver {
   public async createTestBlock(data: CreateTestBlockInputDto) {
     return await this.apiResolver.request<
       CreateTestBlockInputDto,
-      DefaultInputDto<GetTestBlockOutputDto>
+      DefaultOutputDto<GetTestBlockOutputDto>
     >('create', 'POST', data, this.token ? this.token : undefined);
   }
 }

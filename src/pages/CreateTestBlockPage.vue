@@ -34,9 +34,7 @@ export default {
     const usersFromApi = await this.userResolver.getAll();
     const testTypesStore = useTestTypesStore();
     await testTypesStore.loadTestTypes();
-
     this.tests = testTypesStore.getTestTypes;
-
     if (usersFromApi?.body) {
       this.users = usersFromApi?.body.sort((a, b) => a.id - b.id);
     }
@@ -71,7 +69,7 @@ export default {
   <div class="container">
     <h1 class="container-header">Создание блока тестов</h1>
 
-    <h2 class="block-header">Выберите тесты для блока тестов</h2>
+    <h2 class="block-header">Выберите тесты:</h2>
     <div class="tests-container">
       <TestRowElement
         v-for="(test, index) in tests"
@@ -91,7 +89,7 @@ export default {
         "
       />
     </div>
-    <h2 class="block-header">Выберите пользователей для блока тестов</h2>
+    <h2 class="block-header">Выберите пользователей:</h2>
     <div class="user-container">
       <UserRowElement
         v-for="(user, index) in users"
@@ -112,7 +110,7 @@ export default {
       />
     </div>
 
-    <CommonButton class="submit_button" @click="save">
+    <CommonButton class="submit_button save" @click="save">
       <template v-slot:placeholder> Сохранить </template>
     </CommonButton>
   </div>
@@ -125,8 +123,8 @@ export default {
   padding: 3vw 2vw;
   background-color: white;
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  column-gap: 3vw;
+  grid-template-columns: 1.4fr 1fr;
+  column-gap: 2vw;
   grid-template-rows: repeat(3, auto);
 }
 
@@ -139,6 +137,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 100%;
 }
 
 .user-container {
@@ -149,17 +148,25 @@ export default {
 
 .tests-container, .user-container {
   overflow-y: scroll;
-  padding: 1vw 0;
-  height: 46vh;
-  gap: 1vw;
+  height: 43vh;
+  width: 100%;
+  gap: 1vh;
   grid-row: 3 / 4;
 }
 
 .block-header {
-  margin-top: 1rem;
+  margin: 2vw 0;
 }
 
-@media only screen and (max-width: 600px) {
+.save {
+  grid-column: 1 / 3;
+  margin-left: auto;
+  margin-bottom: -2vw;
+  margin-right: -1vw;
+  width: 20%;
+}
+
+@media only screen and (max-width: 900px) {
   .container {
     display: flex;
     flex-direction: column;

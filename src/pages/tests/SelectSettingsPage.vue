@@ -3,10 +3,13 @@ import { defineComponent } from 'vue';
 import CustomInput from '../../components/UI/inputs/CustomInput.vue';
 import CommonButton from '../../components/UI/CommonButton.vue';
 import type { AccelerationMode, TestType } from './types';
-import type { TestSettingsDto } from '../../api/dto/test-settings.dto.ts';
 import type { TestTypeDataOutputDto } from '../../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver.ts';
 import { TestSetupsResolver } from '../../api/resolvers/testSetup/test-setups.resolver.ts';
+import type { TestSetupInputDto } from '../../api/resolvers/testSetup/dto/input/test-setup-input.dto.ts';
+import { UserState } from '../../utils/userState/UserState.ts';
+import { UserRole } from '../../utils/userState/UserState.types.ts';
+import router from '../../router/router.ts';
 
 
 export default defineComponent({
@@ -43,8 +46,8 @@ export default defineComponent({
     },
   },
   methods: {
-    saveSettings() {
-      const settings: TestSettingsDto = {
+    async saveSettings() {
+      const settings: TestSetupInputDto = {
         testTypeId: parseInt(this.testTypeId),
         duration: this.duration,
         showTimer: this.showTimer,
@@ -53,17 +56,19 @@ export default defineComponent({
         accelerationMode: this.accelerationMode,
         difficultyMode: this.difficultyMode,
       };
-      new TestSetupsResolver()
+      await new TestSetupsResolver().create(settings)
+      await router.push('/testBlock/create')
     },
   },
   async mounted() {
+    if ( [UserRole.EXPERT, UserRole.ADMIN].includes(UserState.role!) ) await router.push('/profile')
     this.currentTestType = await new TestTypeResolver().getById(parseInt(this.testTypeId))
   }
 });
 </script>
 
 <template>
-  <div id="choose-settings">
+  <div class="choose-settings">
     <div class="choose-settings-form">
       <div class="section header-section">
         <h2>Выберите настройки теста: <br />{{ currentTestType ? currentTestType.description : "Load error" }}</h2>
@@ -170,26 +175,22 @@ export default defineComponent({
 </template>
 
 <style scoped>
-#choose-settings {
-  position: relative;
+.choose-settings {
   width: 100%;
   height: 100%;
-  z-index: 2;
-  transition: all 0.3s ease-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .choose-settings-form {
-  width: 100%;
-  max-width: 700px;
+  width: 50%;
   margin: auto;
-  background: rgba(255, 255, 255, 1);
-  border-radius: 1.4rem;
-  color: black;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-clip-margin: 0.02rem;
-  overflow: clip;
+  background-color: white;
+  border-radius: 10px;
 }
 
 .choose-settings-form h2 {
@@ -199,7 +200,7 @@ export default defineComponent({
   padding: 0 2rem;
 }
 
-#choose-settings button {
+.choose-settings button {
   margin: 0.3vh auto;
 }
 
@@ -207,6 +208,7 @@ export default defineComponent({
   width: 100%;
   background: rgb(16, 73, 231);
   padding: 0.5rem;
+  border-radius: 10px;
 }
 
 .time-interval-selector {
@@ -262,7 +264,6 @@ export default defineComponent({
 }
 
 .header-section {
-  position: relative;
   padding: 0.5rem 2rem 0.5rem 0.5rem;
 }
 
