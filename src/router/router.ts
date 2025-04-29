@@ -122,7 +122,7 @@ const routes = [
     meta: {ruName: "Результаты прохождения теста", requiresAuth: true},
   },
   {
-    path: `/invitation/test/:token`,
+    path: `/testBlock/:testBlockId/test/:testTypeId`,
     props: true,
     component: TestMapper,
   },

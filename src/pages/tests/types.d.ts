@@ -16,10 +16,15 @@ export interface TestJwt {
 }
 export interface TestBlockJwt {
   testBlockId: number;
-  tests: string[];
+  tests: TestBlockTest[];
   userIDs: number[];
   iat: number;
   exp: number;
+}
+export interface TestBlockTest {
+  name: string;
+  setupId?: number;
+  available: boolean;
 }
 export type AccelerationMode =
   | 'DISCRETE'

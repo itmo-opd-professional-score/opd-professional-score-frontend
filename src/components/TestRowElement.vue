@@ -3,6 +3,7 @@ import CommonButton from './UI/CommonButton.vue';
 import CustomSelect from './UI/inputs/CustomSelect.vue';
 import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resolver.ts';
 import router from '../router/router.ts';
+import type { TestBlockTest } from '../pages/tests/types';
 
 export default {
   name: 'TestRowElement',
@@ -25,6 +26,7 @@ export default {
       added: false,
       buttonClass: 'submit_button',
       setups: [] as { value: string; text: string }[],
+      currentSetup: '',
     };
   },
   computed: {
@@ -44,8 +46,16 @@ export default {
     },
     applyTest() {
       this.added
-        ? this.$emit('removeTest', this.testMeta)
-        : this.$emit('applyTest', this.testMeta);
+        ? this.$emit('removeTest', {
+            name: this.testMeta,
+            setup: this.currentSetup,
+            available: true
+          } as TestBlockTest)
+        : this.$emit('applyTest', {
+            name: this.testMeta,
+            setup: this.currentSetup,
+            available: true
+          } as TestBlockTest);
       this.added = !this.added;
     },
   },
@@ -69,6 +79,7 @@ export default {
     <div class="buttons">
       <CustomSelect
         v-if="setups.length > 0"
+        v-model="currentSetup"
         :options="setups"
         class="select"
       />

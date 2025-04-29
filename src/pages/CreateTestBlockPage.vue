@@ -10,6 +10,7 @@ import { usePopupStore } from '../store/popup.store.ts';
 import { useTestTypesStore } from '../store/test-types.store.ts';
 import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 import router from '../router/router.ts';
+import type { TestBlockTest } from './tests/types';
 
 export default {
   name: 'CreateTestBlockPage',
@@ -22,7 +23,7 @@ export default {
 
     return {
       approvedUsers: [] as number[],
-      approvedTests: [] as string[],
+      approvedTests: [] as TestBlockTest[],
       tests: [] as TestTypeDataOutputDto[],
       users,
       testBlockResolver,
@@ -43,9 +44,7 @@ export default {
     async save() {
       if (this.approvedTests.length > 0 && this.approvedUsers.length > 0) {
         const data: CreateTestBlockInputDto = {
-          tests: {
-            tests: this.approvedTests,
-          },
+          tests: this.approvedTests,
           userIDs: this.approvedUsers,
         };
 
@@ -77,9 +76,9 @@ export default {
         :test-type-id="test.id"
         :test-name="test.description"
         :test-meta="test.name"
-        @apply-test="(meta: string) => approvedTests.push(meta)"
+        @apply-test="(meta: TestBlockTest) => approvedTests.push(meta)"
         @remove-test="
-          (meta: string) => {
+          (meta) => {
             const i = approvedTests.indexOf(meta);
             approvedTests = [
               ...approvedTests.slice(0, i),

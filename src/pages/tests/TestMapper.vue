@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { InvalidTokenError, jwtDecode } from 'jwt-decode';
-import type { TestJwt } from './types';
+import type { TestBlockJwt, TestType } from './types';
 import { usePopupStore } from '../../store/popup.store.ts';
 import NotFound from '../NotFound.vue';
 import AdditionSoundTest from './addition/sound/AdditionSoundTest.vue';
@@ -11,14 +11,18 @@ import SimpleLightTest from './simple/SimpleLightTest.vue';
 import HardLightTest from './hard/HardLightTest.vue';
 import SimpleRdoTest from './simple/SimpleRdoTest.vue';
 import HardRdoTest from './hard/HardRdoTest.vue';
+import { TestBlockResolver } from '../../api/resolvers/testBlocks/test-block.resolver.ts';
+import router from '../../router/router.ts';
 
+const usePopUp = usePopupStore()
+const testType = ref<TestType | null>(null)
 const props = defineProps<{
-  token: string;
+  testBlockId: string;
+  testTypeName: string;
 }>();
 const testComponent = computed(() => {
   try {
-    const data = jwtDecode(props.token) as TestJwt;
-    switch (data.testType) {
+    switch (testType.value) {
       case 'ADDITION_SOUND':
         return AdditionSoundTest;
       case 'ADDITION_VISUAL':
@@ -44,10 +48,23 @@ const testComponent = computed(() => {
     return NotFound;
   }
 });
+
+onMounted(async () => {
+  try {
+    const testBlockId = !isNaN(parseInt(props.testBlockId)) ? parseInt(props.testBlockId) : -1;
+    if (testBlockId < 0) usePopUp.activateErrorPopup("Test Block id is incorrect!");
+    else {
+      const testBlockToken = (await new TestBlockResolver().getById(testBlockId)).testBlockToken
+      const data = jwtDecode(testBlockToken) as TestBlockJwt
+      const test = data.tests.find(test => test.name === props.testTypeName)
+      if (!test || !test.available) await router.push(`/testBlock/${testBlockId}`)
+    }
+  } catch (error) {}
+})
 </script>
 
 <template>
-  <component :token="token" :is="testComponent"></component>
+  <component :is="testComponent"></component>
 </template>
 
 <style scoped></style>
