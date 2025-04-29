@@ -14,6 +14,13 @@ export interface TestJwt {
   iat: number;
   exp: number;
 }
+export interface TestBlockJwt {
+  testBlockId: number;
+  tests: string[];
+  userIDs: number[];
+  iat: number;
+  exp: number;
+}
 export type AccelerationMode =
   | 'DISCRETE'
   | 'STEADY'

@@ -20,6 +20,8 @@ import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
 import SimpleRdoTest from '../pages/tests/simple/SimpleRdoTest.vue';
 import HardRdoTest from '../pages/tests/hard/HardRdoTest.vue';
+import TestBlockPage from '../pages/tests/TestBlockPage.vue';
+import NotFound from '../pages/NotFound.vue';
 
 const routes = [
   {
@@ -135,6 +137,18 @@ const routes = [
      meta: { ruName: 'Настройки теста', requiresAuth: true },
      props: true,
    },
+  {
+    path: '/testBlock/:testBlockId',
+    component: TestBlockPage,
+    meta: { ruName: 'Блок тестов'},
+    props: true,
+  },
+  {
+    path: '/:catchAll(.*)*',
+    component: NotFound,
+    name: 'NotFound',
+    meta: { ruName: 'Страница не найдена'}
+  }
 ];
 
 const router = createRouter({

@@ -56,9 +56,7 @@ export default {
     <p class="wrapper-block user-name">{{ userName }}</p>
     <p class="wrapper-block user-email">{{ userEmail }}</p>
     <CommonButton class="user-button" :class="buttonClass" @click="applyTest">
-      <template v-slot:placeholder>
-        {{ buttonText }} </template
-      >x
+      <template v-slot:placeholder>{{ buttonText }}</template>
     </CommonButton>
   </div>
 </template>
