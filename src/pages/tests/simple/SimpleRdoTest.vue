@@ -106,8 +106,16 @@ export default defineComponent({
         this.startTimer()
       } else if (this.testState === 'reacting') {
         if (!this.checkLooped) {
-          if (this.circleX < 150) this.deviationHistory.push(-this.circleY * this.speed * 10)
-          else this.deviationHistory.push(this.circleY * this.speed * 10)
+          const score = this.circleY * this.speed * 10 - 0.5
+          if (this.circleX < 150) {
+            this.deviationHistory.push(-score)
+            this.currentDeviation = -score
+          }
+          else {
+            this.deviationHistory.push(score)
+            this.currentDeviation =score
+          }
+
           this.checkLooped = true;
         }
       } else {
@@ -159,7 +167,7 @@ export default defineComponent({
         new TestBlockResolver().updateTestBlock({
           testBlockId: parseInt(this.testBlockId),
           updatedTest: {
-            name: "HARD_LIGHT",
+            name: "SIMPLE_RDO",
             setupId: setupId,
             available: false
           }
@@ -248,7 +256,7 @@ export default defineComponent({
         </CommonButton>
         <div class="current-deviation">
           Текущее отклонение:
-          {{ currentDeviation !== null ? currentDeviation.toFixed(2) : '0' }} мс
+          {{currentDeviation.toFixed(2) }}с
         </div>
         <div class="standard-deviation">
           Стандартное отклонение:
@@ -272,7 +280,6 @@ export default defineComponent({
       <CommonButton
         class="reaction-button"
         :class="{ active: testState == 'reacting' }"
-        :disabled="testState == 'completed'"
         @click="handleClick"
       >
         <template v-slot:placeholder>{{ buttonText }}</template>
