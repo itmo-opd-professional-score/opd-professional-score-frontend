@@ -10,6 +10,7 @@ import type { TestSetupInputDto } from '../../api/resolvers/testSetup/dto/input/
 import { UserState } from '../../utils/userState/UserState.ts';
 import { UserRole } from '../../utils/userState/UserState.types.ts';
 import router from '../../router/router.ts';
+import { max, min } from '@floating-ui/utils';
 
 
 export default defineComponent({
@@ -44,8 +45,28 @@ export default defineComponent({
       const seconds = (this.duration % 60).toString().padStart(2, '0');
       return `${minutes} мин ${seconds} сек`;
     },
+    minTimeValue() {
+      if (this.currentTestType === null) return 120
+      switch (this.currentTestType.name) {
+        case "HARD_LIGHT":
+          return 0.5
+        default:
+          return 120
+      }
+    },
+    maxTimeValue() {
+      if (this.currentTestType === null) return 2700
+      switch (this.currentTestType.name) {
+        case "HARD_LIGHT":
+          return 3
+        default:
+          return 2700
+      }
+    }
   },
   methods: {
+    min,
+    max,
     async saveSettings() {
       const settings: TestSetupInputDto = {
         testTypeId: parseInt(this.testTypeId),
@@ -61,7 +82,7 @@ export default defineComponent({
     },
   },
   async mounted() {
-    if ( [UserRole.EXPERT, UserRole.ADMIN].includes(UserState.role!) ) await router.push('/profile')
+    if ( ![UserRole.EXPERT, UserRole.ADMIN].includes(UserState.role!) ) await router.push('/profile')
     this.currentTestType = await new TestTypeResolver().getById(parseInt(this.testTypeId))
   }
 });
@@ -82,14 +103,14 @@ export default defineComponent({
           <CustomInput
             type="range"
             v-model.number="duration"
-            :minNumber="120"
-            :maxNumber="2700"
+            :minNumber="minTimeValue"
+            :maxNumber="maxTimeValue"
             selector="range"
             class="custom-slider"
           />
           <div class="slider-labels">
-            <span>2 мин</span>
-            <span>45 мин</span>
+            <span>{{ minTimeValue > 60 ? (minTimeValue / 60).toFixed(1) + ' мин' : minTimeValue + ' сек'}}</span>
+            <span>{{ maxTimeValue > 60 ? (minTimeValue / 60).toFixed(1) + ' мин' : maxTimeValue + ' сек'}}</span>
           </div>
           <div class="setting-item">
             <CustomInput
