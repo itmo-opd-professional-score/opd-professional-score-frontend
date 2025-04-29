@@ -22,6 +22,7 @@ import SimpleRdoTest from '../pages/tests/simple/SimpleRdoTest.vue';
 import HardRdoTest from '../pages/tests/hard/HardRdoTest.vue';
 import TestBlockPage from '../pages/tests/TestBlockPage.vue';
 import NotFound from '../pages/NotFound.vue';
+import TestsCatalogPage from '../pages/TestsCatalogPage.vue';
 
 const routes = [
   {
@@ -142,6 +143,11 @@ const routes = [
     component: TestBlockPage,
     meta: { ruName: 'Блок тестов'},
     props: true,
+  },
+  {
+    path: '/tests',
+    component: TestsCatalogPage,
+    meta: { ruName: 'Доступные тесты', requiresAuth: true },
   },
   {
     path: '/:catchAll(.*)*',
