@@ -21,6 +21,7 @@ defineProps<{ disabled?: boolean }>();
   background: var(--button-primary);
   transition-duration: 0.2s;
   user-select: none;
+  outline: none;
 }
 
 .wrapper:hover {

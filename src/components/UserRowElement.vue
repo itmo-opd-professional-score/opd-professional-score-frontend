@@ -25,16 +25,16 @@ export default {
   data() {
     return {
       added: false,
-      buttonClass: 'add-test',
+      buttonClass: 'submit_button',
     };
   },
   computed: {
     buttonText() {
       if (this.added) {
-        this.buttonClass = 'remove-user';
+        this.buttonClass = 'logout_button';
         return 'Удалить';
       } else {
-        this.buttonClass = 'add-user';
+        this.buttonClass = 'submit_button';
         return 'Добавить';
       }
     },
@@ -55,7 +55,7 @@ export default {
     <p class="wrapper-block user-id">{{ userId }}</p>
     <p class="wrapper-block user-name">{{ userName }}</p>
     <p class="wrapper-block user-email">{{ userEmail }}</p>
-    <CommonButton class="user-button" :class="buttonClass" @click="applyTest">
+    <CommonButton :class="buttonClass" @click="applyTest">
       <template v-slot:placeholder class="user-button">
         {{ buttonText }} </template
       >x
@@ -87,12 +87,6 @@ export default {
 .user-button:hover {
   padding: 0.5rem 0;
   width: 100%;
-}
-
-.add-user,
-.add-user:hover {
-  background-color: #4127e4;
-  color: white;
 }
 
 .remove-user,

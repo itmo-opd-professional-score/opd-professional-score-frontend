@@ -17,10 +17,10 @@ body {
   --background-secondary: rgba(240, 242, 245, 0.4);
   --button-primary: rgb(240, 240, 245, 0.65);
   --button-secondary: rgb(240, 240, 245, 0.4);
-  --danger-button-primary: rgba(255, 15, 15, 0.75);
-  --danger-button-secondary: rgba(255, 83, 83, 0.6);
-  --submit-button-primary: rgba(40, 76, 243, 0.75);
-  --submit-button-secondary: rgba(56, 119, 232, 0.8);
+  --danger-button-primary: #e01212;
+  --danger-button-secondary: #e84e4e;
+  --submit-button-primary: #4127e4;
+  --submit-button-secondary: #2f60dc;
   --input-border: rgba(0, 0, 0, 0.2);
   overflow-y: scroll;
   overflow-x: hidden;

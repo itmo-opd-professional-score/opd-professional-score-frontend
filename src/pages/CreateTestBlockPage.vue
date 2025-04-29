@@ -90,7 +90,6 @@ export default {
         "
       />
     </div>
-
     <h2 class="block-header">Выберите пользователей для блока тестов</h2>
     <div class="user-container">
       <UserRowElement
@@ -112,7 +111,7 @@ export default {
       />
     </div>
 
-    <CommonButton class="approve-button" @click="save">
+    <CommonButton class="submit_button" @click="save">
       <template v-slot:placeholder> Сохранить </template>
     </CommonButton>
   </div>
@@ -120,50 +119,49 @@ export default {
 
 <style scoped>
 .container {
-  width: 50vw;
+  width: 80vw;
   border-radius: 10px;
-  padding: 2rem 1rem;
+  padding: 3vw 2vw;
   background-color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  column-gap: 3vw;
+  grid-template-rows: repeat(3, auto);
 }
 
 .container-header {
   margin-bottom: 1rem;
+  grid-column: 1 / 3;
 }
 
 .tests-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  width: 95%;
   align-items: center;
-  justify-content: center;
-  margin: 1rem;
 }
 
 .user-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  width: 95%;
   align-items: center;
-  justify-content: center;
-  margin: 1rem;
 }
 
-.approve-button,
-.approve-button:hover {
-  margin-top: 1rem;
-  width: 40%;
-  height: 3rem;
-  background-color: #4127e4;
-  color: white;
+.tests-container, .user-container {
+  overflow-y: scroll;
+  padding: 1vw 0;
+  height: 46vh;
+  gap: 1vw;
+  grid-row: 3 / 4;
 }
 
 .block-header {
   margin-top: 1rem;
+}
+
+@media only screen and (max-width: 600px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+  }
 }
 </style>

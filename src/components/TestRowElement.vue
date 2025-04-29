@@ -19,17 +19,17 @@ export default {
   data() {
     return {
       added: false,
-      buttonClass: 'add-test',
+      buttonClass: 'submit_button',
     };
   },
   computed: {
     buttonText() {
       if (this.added) {
-        this.buttonClass = 'remove-test';
-        return 'Удалить тест';
+        this.buttonClass = 'logout_button';
+        return 'Удалить';
       } else {
-        this.buttonClass = 'add-test';
-        return 'Добавить тест';
+        this.buttonClass = 'submit_button';
+        return 'Добавить';
       }
     },
   },
@@ -74,18 +74,5 @@ export default {
 .btn,
 .btn:hover {
   width: 20%;
-  background-color: #4127e4;
-  color: white;
-}
-
-.add-test,
-.add-test:hover {
-  background-color: #4127e4;
-  color: white;
-}
-
-.remove-test,
-.remove-test:hover {
-  background-color: #e13a3a;
 }
 </style>
