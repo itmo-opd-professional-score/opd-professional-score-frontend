@@ -62,6 +62,7 @@ import { UserState } from '../../../utils/userState/UserState.ts';
 import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
 import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
+import router from '../../../router/router.ts';
 
 const props = defineProps<{
   testBlockId?: string,
@@ -211,18 +212,12 @@ function endTest() {
   clearFlashTimeouts() // Добавлена очистка таймаутов
 }
 
-function restartTest() {
-  testStarted.value = false
-  testCompleted.value = false
-  currentColor.value = 'white'
-  currentAttempt.value = 0
-  correctAnswers.value = 0
-  wrongAnswers.value = 0
-  reactionTimes.value = []
-  startTime.value = null
-  clearTimeout(timeoutId)
-  clearInterval(timerInterval)
-  clearFlashTimeouts() // Добавлена очистка таймаутов
+async function restartTest() {
+  if (props.testBlockId) {
+    await router.push(`/testblock/${props.testBlockId}`);
+  } else {
+    router.go(0)
+  }
 }
 
 onUnmounted(() => {

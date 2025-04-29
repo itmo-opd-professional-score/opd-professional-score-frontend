@@ -8,6 +8,7 @@ import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
 import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
+import router from '../../../router/router.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
@@ -154,14 +155,12 @@ export default defineComponent({
       this.buttonText = 'Тест окончен'
       this.saveResults()
     },
-    resetTest() {
-      this.clearTimeouts();
-      clearTimeout(this.inactivityTimeout!);
-      this.testState = 'ready';
-      this.reactionTimes = [];
-      this.currentTrial = 0;
-      this.missedCount = 0;
-      this.startTime = 0;
+    async resetTest() {
+      if (this.testBlockId) {
+        await router.push(`/testblock/${this.testBlockId}`);
+      } else {
+        router.go(0)
+      }
     },
     clearTimeouts() {
       this.timeoutIds.forEach((id) => clearTimeout(id));
