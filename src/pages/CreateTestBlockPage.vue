@@ -76,6 +76,7 @@ export default {
       <TestRowElement
         v-for="(test, index) in tests"
         :key="index"
+        :test-type-id="test.id"
         :test-name="test.description"
         :test-meta="test.name"
         @apply-test="(meta: string) => approvedTests.push(meta)"

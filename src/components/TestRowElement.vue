@@ -1,9 +1,12 @@
 <script lang="ts">
 import CommonButton from './UI/CommonButton.vue';
+import CustomSelect from './UI/inputs/CustomSelect.vue';
+import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resolver.ts';
+import router from '../router/router.ts';
 
 export default {
   name: 'TestRowElement',
-  components: { CommonButton },
+  components: { CustomSelect, CommonButton },
   emits: ['removeTest', 'applyTest'],
   props: {
     testName: {
@@ -15,11 +18,13 @@ export default {
       type: String,
       required: true,
     },
+    testTypeId: Number,
   },
   data() {
     return {
       added: false,
       buttonClass: 'submit_button',
+      setups: [] as { value: string; text: string }[],
     };
   },
   computed: {
@@ -34,6 +39,9 @@ export default {
     },
   },
   methods: {
+    router() {
+      return router
+    },
     applyTest() {
       this.added
         ? this.$emit('removeTest', this.testMeta)
@@ -41,21 +49,46 @@ export default {
       this.added = !this.added;
     },
   },
+  async mounted() {
+    if (this.testTypeId) {
+      const presets = await new TestSetupsResolver().getAllByTestTypeId(this.testTypeId)
+      presets.forEach((preset) => {
+        this.setups.push({
+          value: preset.id.toString(),
+          text: `Конфиг №${preset.id}`,
+        });
+      })
+    }
+  },
 };
 </script>
 
 <template>
   <div class="wrapper">
     <p class="wrapper-block test-name">{{ testName }}</p>
-    <CommonButton
-      class="wrapper-block btn"
-      :class="buttonClass"
-      @click="applyTest"
-    >
-      <template v-slot:placeholder>
-        {{ buttonText }}
-      </template>
-    </CommonButton>
+    <div class="buttons">
+      <CustomSelect
+        v-if="setups.length > 0"
+        :options="setups"
+        class="select"
+      />
+      <CommonButton
+        v-if="testTypeId"
+        @click="router().push(`/test/settings/${testTypeId}`)"
+        class="submit_button btn"
+      >
+        <template v-slot:placeholder>Настроить</template>
+      </CommonButton>
+      <CommonButton
+        class="wrapper-block btn"
+        :class="buttonClass"
+        @click="applyTest"
+      >
+        <template v-slot:placeholder>
+          {{ buttonText }}
+        </template>
+      </CommonButton>
+    </div>
   </div>
 </template>
 
@@ -66,13 +99,21 @@ export default {
   border-radius: 10px;
   border: 1px solid var(--input-border);
   background: white;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 30% auto;
   align-items: center;
-}
+  column-gap: 3%;
 
-.btn,
-.btn:hover {
-  width: 20%;
+  .buttons {
+    display: flex;
+    gap: 1vw;
+    justify-content: flex-end;
+
+    .btn, .select {
+      max-width: 30%;
+      display: flex;
+      justify-content: center;
+    }
+  }
 }
 </style>

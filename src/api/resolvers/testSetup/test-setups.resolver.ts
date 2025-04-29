@@ -21,4 +21,16 @@ export class TestSetupsResolver {
     })
   }
 
+  public async getAllByTestTypeId(testTypeId: number): Promise<Promise<TestSetupOutputDTO[]>> {
+    return await this.apiResolver.request<null, TestSetupOutputDTO[]>(
+      `getAllSetupsByTestType/${testTypeId}`,
+      'GET',
+      null,
+      this.token ? this.token : undefined,
+    ).catch((err) => {
+      const error = err as DefaultErrorDto;
+      console.log(error)
+      return []
+    })
+  }
 }

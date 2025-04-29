@@ -2,17 +2,20 @@
 import { defineComponent } from 'vue';
 import CustomInput from '../../components/UI/inputs/CustomInput.vue';
 import CommonButton from '../../components/UI/CommonButton.vue';
-import type { AccelerationMode } from './types';
+import type { AccelerationMode, TestType } from './types';
 import type { TestSettingsDto } from '../../api/dto/test-settings.dto.ts';
+import type { TestTypeDataOutputDto } from '../../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
+import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver.ts';
+import { TestSetupsResolver } from '../../api/resolvers/testSetup/test-setups.resolver.ts';
 
 
 export default defineComponent({
   name: 'SelectSettingsPage',
   components: { CustomInput, CommonButton },
   props: {
-    testType: {
+    testTypeId: {
       type: String,
-      default: 'No test name',
+      required: true,
     },
   },
   data() {
@@ -23,15 +26,13 @@ export default defineComponent({
       showProgress: false,
       difficultyMode: true,
       accelerationMode: 'DISCRETE' as AccelerationMode,
-      testTypeLabels: {
-        lab4_3: 'Оценка простой реакции человека на движущийся объект',
-        lab4_4: 'Оценка сложной реакции человека на движущийся объект',
-        lab5_3: 'Оценка аналогового слежения',
-        lab5_4: 'Оценка слежения с преследованием',
-        lab6_3: 'Оценка внимания',
-        lab6_4: 'Оценка памяти',
-        lab6_5: 'Оценка мышления',
-      },
+      currentTestType: null as TestTypeDataOutputDto | null,
+      specialTypes: [
+        "SIMPLE_RDO",
+        "HARD_RDO",
+        "SIMPLE_TRACKING",
+        "HARD_TRACKING"
+      ] as Array<TestType>
     };
   },
   computed: {
@@ -40,16 +41,11 @@ export default defineComponent({
       const seconds = (this.duration % 60).toString().padStart(2, '0');
       return `${minutes} мин ${seconds} сек`;
     },
-    testTitle(): string {
-      return this.testType in this.testTypeLabels
-        ? this.testTypeLabels[this.testType as keyof typeof this.testTypeLabels]
-        : this.testType;
-    },
   },
   methods: {
     saveSettings() {
       const settings: TestSettingsDto = {
-        testType: this.testType,
+        testTypeId: parseInt(this.testTypeId),
         duration: this.duration,
         showTimer: this.showTimer,
         showTotalResults: this.showTotalResults,
@@ -57,10 +53,12 @@ export default defineComponent({
         accelerationMode: this.accelerationMode,
         difficultyMode: this.difficultyMode,
       };
-      this.$emit('newSettings', settings);
+      new TestSetupsResolver()
     },
   },
-  emits: ['newSettings'],
+  async mounted() {
+    this.currentTestType = await new TestTypeResolver().getById(parseInt(this.testTypeId))
+  }
 });
 </script>
 
@@ -68,9 +66,9 @@ export default defineComponent({
   <div id="choose-settings">
     <div class="choose-settings-form">
       <div class="section header-section">
-        <h2>Выберите настройки теста: <br />{{ testTitle }}</h2>
+        <h2>Выберите настройки теста: <br />{{ currentTestType ? currentTestType.description : "Load error" }}</h2>
       </div>
-      <div class="settings-group">
+      <div v-if="currentTestType" class="settings-group">
         <div class="time-interval-selector">
           <label
             >Время прохождения теста:
@@ -116,7 +114,7 @@ export default defineComponent({
           </div>
           <div
             class="special-settings"
-            v-if="['lab4_3', 'lab4_4', 'lab5_3', 'lab5_4'].includes(testType)"
+            v-if="specialTypes.includes(currentTestType.name)"
           >
             <h3>Ускорения:</h3>
             <div class="radio-group">
@@ -138,7 +136,7 @@ export default defineComponent({
           </div>
           <div
             class="special-settings"
-            v-if="['lab6_5', 'lab6_3', 'lab6_4'].includes(testType)"
+            v-if="specialTypes.includes(currentTestType.name)"
           >
             <h3>Выберите уровень сложности:</h3>
             <div class="radio-group">

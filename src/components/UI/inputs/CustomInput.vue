@@ -23,6 +23,7 @@ export default {
           'checkbox',
           'tel',
           'date',
+          'range',
         ].includes(v),
     },
     selector: String,

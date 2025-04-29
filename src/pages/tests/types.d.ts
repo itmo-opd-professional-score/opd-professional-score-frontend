@@ -5,7 +5,9 @@ export type TestType =
   | 'SIMPLE_SOUND'
   | 'HARD_LIGHT'
   | 'SIMPLE_RDO'
-  | 'HARD_RDO';
+  | 'HARD_RDO'
+  | 'SIMPLE_TRACKING'
+  | 'HARD_TRACKING'
 export interface TestJwt {
   testId: number | null;
   testType: TestType;
