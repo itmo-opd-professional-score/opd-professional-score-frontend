@@ -22,7 +22,7 @@ export interface TestBlockJwt {
   exp: number;
 }
 export interface TestBlockTest {
-  name: string;
+  name: TestType;
   setupId?: number;
   available: boolean;
 }

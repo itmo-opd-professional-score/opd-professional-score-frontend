@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { InvalidTokenError, jwtDecode } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import type { TestBlockJwt, TestType } from './types';
 import { usePopupStore } from '../../store/popup.store.ts';
 import NotFound from '../NotFound.vue';
@@ -16,36 +16,29 @@ import router from '../../router/router.ts';
 
 const usePopUp = usePopupStore()
 const testType = ref<TestType | null>(null)
+const testSetupId = ref<number | undefined>(undefined)
 const props = defineProps<{
   testBlockId: string;
   testTypeName: string;
 }>();
 const testComponent = computed(() => {
-  try {
-    switch (testType.value) {
-      case 'ADDITION_SOUND':
-        return AdditionSoundTest;
-      case 'ADDITION_VISUAL':
-        return AdditionVisualTest;
-      case 'SIMPLE_SOUND':
-        return SimpleSoundTest;
-      case 'SIMPLE_LIGHT':
-        return SimpleLightTest;
-      case 'HARD_LIGHT':
-        return HardLightTest;
-      case 'SIMPLE_RDO':
-        return SimpleRdoTest;
-      case 'HARD_RDO':
-        return HardRdoTest;
-      default:
-        return NotFound;
-    }
-  } catch (error: unknown) {
-    if (error instanceof InvalidTokenError) {
-      const usePopUp = usePopupStore();
-      usePopUp.activateErrorPopup(error.message);
-    }
-    return NotFound;
+  switch (testType.value) {
+    case 'ADDITION_SOUND':
+      return AdditionSoundTest;
+    case 'ADDITION_VISUAL':
+      return AdditionVisualTest;
+    case 'SIMPLE_SOUND':
+      return SimpleSoundTest;
+    case 'SIMPLE_LIGHT':
+      return SimpleLightTest;
+    case 'HARD_LIGHT':
+      return HardLightTest;
+    case 'SIMPLE_RDO':
+      return SimpleRdoTest;
+    case 'HARD_RDO':
+      return HardRdoTest;
+    default:
+      return NotFound;
   }
 });
 
@@ -57,14 +50,19 @@ onMounted(async () => {
       const testBlockToken = (await new TestBlockResolver().getById(testBlockId)).testBlockToken
       const data = jwtDecode(testBlockToken) as TestBlockJwt
       const test = data.tests.find(test => test.name === props.testTypeName)
-      if (!test || !test.available) await router.push(`/testBlock/${testBlockId}`)
+      if (test && test.available) testSetupId.value = test.setupId
+      else await router.push(`/testBlock/${testBlockId}`)
     }
   } catch (error) {}
 })
 </script>
 
 <template>
-  <component :is="testComponent"></component>
+  <component
+    :test-block-id="testBlockId"
+    :setup-id="testSetupId"
+    :is="testComponent"
+  />
 </template>
 
 <style scoped></style>
