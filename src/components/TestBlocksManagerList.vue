@@ -13,7 +13,7 @@ export default {
       default: 5,
     },
     testBlocks: {
-      type: Array as PropType<GetTestBlockOutputDto[]> | null,
+      type: Array as PropType<GetTestBlockOutputDto[] | null>,
       required: true,
     },
   },
@@ -33,6 +33,7 @@ export default {
       return [];
     },
     totalPages(): number {
+      if (this.testBlocks == null) return 0
       const _ = Math.ceil(this.testBlocks.length / this.maxElementsCount);
       return _ > 0 ? _ : 1;
     },

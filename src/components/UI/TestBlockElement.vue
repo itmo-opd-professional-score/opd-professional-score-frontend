@@ -1,32 +1,10 @@
 <script setup lang="ts">
 import CommonButton from './CommonButton.vue';
-import { TestBlockResolver } from '../../api/resolvers/testBlocks/test-block.resolver.ts';
-import { jwtDecode } from 'jwt-decode';
-import { ref } from 'vue';
 import router from '../../router/router.ts';
 
-interface TestBlockJwt {
-  tests: string,
-  iat: number,
-  exp: number
-}
-
-const testLink = (testType: string) => {
-  return `/test/${testType.split('_')[0].toLowerCase()}/${testType.split('_')[1].toLowerCase()}`
-}
-
-const props = defineProps<{
+defineProps<{
   blockId: number
 }>()
-
-const isOpen = ref<boolean>(false);
-const testsTypes = ref<string[]>()
-const testBlockResolver = new TestBlockResolver()
-const openBlock = async () => {
-  const testBlock = await testBlockResolver.getById(props.blockId)
-  testsTypes.value = (jwtDecode(testBlock.testBlockToken) as TestBlockJwt).tests.split(' ')
-  isOpen.value = !isOpen.value
-}
 </script>
 
 <template>
@@ -35,20 +13,9 @@ const openBlock = async () => {
     <div class="field" id="name">
       <slot name="name">Название</slot>
     </div>
-    <CommonButton class="open-button" id="btn" @click="openBlock()">
-      <template v-slot:placeholder>Открыть</template>
+    <CommonButton class="open-button" id="btn" @click="router.push(`/testBlock/${blockId}`)">
+      <template v-slot:placeholder>Перейти</template>
     </CommonButton>
-    <div class="block-links" v-if="isOpen">
-      <div
-        class="link"
-        v-for="(testType, index) in testsTypes"
-        :key="index"
-      >
-       <CommonButton @click="router.push(testLink(testType))">
-         <template #placeholder>Пройти тест #{{ index + 1 }}</template>
-       </CommonButton>
-      </div>
-    </div>
   </div>
 </template>
 
