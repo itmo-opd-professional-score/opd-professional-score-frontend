@@ -133,11 +133,6 @@ const routes = [
   {
     path: '/test/hard/tracking',
     component: HardTrackingTest,
-    props: {
-      time: 120,
-      showTimer: true,
-      showProgressBar: true
-    },
   },
   {
     path: '/test/settings/:testType',

@@ -88,16 +88,6 @@ export default defineComponent({
   components: {
     CommonButton
   },
-  props: {
-    duration: {
-      type: Number,
-      default: 30,
-    },
-    showTimer: {
-      type: Boolean,
-      default: true,
-    }
-  },
 
   data() {
     return {
@@ -127,6 +117,9 @@ export default defineComponent({
 
       animationFrame: null as number | null,
       introVisible: true,
+
+      duration: 30,
+      showTimer: true,
     };
   },
 
@@ -139,7 +132,32 @@ export default defineComponent({
     bestOverlap() {
       if (!this.overlapTimes.length) return 0;
       return Math.max(...this.overlapTimes);
-    }
+    },
+
+
+    testResults() {
+      if (!this.testEnded) {
+        return null;
+      }
+
+
+      const totalOverlapTime = this.overlapTimes.reduce((sum, t) => sum + t, 0);
+      const averageOverlap = this.overlapTimes.length
+        ? totalOverlapTime / this.overlapTimes.length
+        : 0;
+      const successRate = (totalOverlapTime / this.duration) * 100;
+
+
+      return {
+        userId: 123,
+        duration: this.duration,
+        totalOverlapTime,
+        bestOverlap: this.bestOverlap,
+        averageOverlap,
+        overlapCount: this.overlapTimes.length,
+        successRate,
+      };
+    },
   },
 
   methods: {
@@ -297,7 +315,6 @@ export default defineComponent({
   margin-bottom: 2rem;
 }
 
-/* Основной тест */
 .test-container {
   position: relative;
   width: 800px;
