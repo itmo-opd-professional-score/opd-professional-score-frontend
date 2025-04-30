@@ -2,6 +2,7 @@
 import { defineComponent } from 'vue';
 import CommonButton from '../components/UI/CommonButton.vue';
 import CustomInput from '../components/UI/inputs/CustomInput.vue';
+import { UserState } from '../utils/userState/UserState.ts';
 
 type TestState= 'ready' | 'reacting' | 'completed';
 
@@ -28,6 +29,12 @@ export default defineComponent({
       roundTimeoutId:  null as ReturnType<typeof setInterval> | null,
       roundRemainingTime: 0,
       roundTimerIntervalId: null as ReturnType<typeof setInterval> | null,
+
+      duration: 120,
+      randomChangeOfDifficulty: false,
+      showTimer: false,
+      showFinalResults: false,
+      showProgressBar: false,
       functionsForFirstDifficulty: [
         (x: number, y: number): string => (x + y).toString(),
         (x: number, y: number): string => (x - y).toString(),
@@ -58,12 +65,8 @@ export default defineComponent({
     };
   },
   props: {
-    randomChangeOfDifficulty: { type: Boolean, default: false },
-    time: { type: Number, default: 120 },
-    showTimer: { type: Boolean, default: false },
-    showFinalResults: { type: Boolean, default: false },
-    showPerMinuteResults: { type: Boolean, default: false },
-    showProgressBar: { type: Boolean, default: false },
+    testBlockId: String,
+    setupId: String
   },
   computed: {
     displayedSequence(): string [] {
@@ -71,13 +74,21 @@ export default defineComponent({
     },
     progressBarWidth() {
       if (this.remainingTimeValue === 0) return '0%';
-      return `${(1 - this.remainingTimeValue / (this.time * 1000)) * 100}%`;
+      return `${(1 - this.remainingTimeValue / (this.duration * 1000)) * 100}%`;
     },
     remainingTime() {
       const minutes = Math.floor(this.remainingTimeValue / 60000);
       const seconds = Math.floor((this.remainingTimeValue % 60000) / 1000);
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
+    testResultsDto() {
+      return {
+        userId: UserState.id,
+        allSignals: this.score + this.mistakes,
+        score: this.score,
+        mistakes: this.mistakes,
+      }
+    }
   },
   methods: {
     generateSequence(lambda: (current: number, step: number) => string): string[] {
@@ -106,13 +117,13 @@ export default defineComponent({
       this.score = 0;
       this.result = 0;
       this.mistakes = 0;
-      this.startTimer(this.time);
+      this.startTimer(this.duration);
     },
     startTest() {
-      this.totalTime = this.time;
-      this.remainingTimeValue = this.time;
+      this.totalTime = this.duration;
+      this.remainingTimeValue = this.duration;
       this.testState = 'reacting';
-      this.startTimer(this.time);
+      this.startTimer(this.duration);
       this.levelOfDifficulty = 0;
       this.nextRound();
     },
