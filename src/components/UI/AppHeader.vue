@@ -39,6 +39,7 @@ const authResolver = new AuthResolver();
             "
             >Создать блок
           </router-link>
+          <router-link to="/tests" class="btn login">Каталог тестов</router-link>
           <router-link to="" class="btn login" @click="authResolver.logout"
             >Выход</router-link
           >
