@@ -8,6 +8,7 @@ export type TestType =
   | 'HARD_RDO'
   | 'SIMPLE_TRACKING'
   | 'HARD_TRACKING'
+  | 'NUMERICAL'
 export interface TestJwt {
   testId: number | null;
   testType: TestType;

@@ -1,8 +1,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import CommonButton from '../components/UI/CommonButton.vue';
-import CustomInput from '../components/UI/inputs/CustomInput.vue';
-import { UserState } from '../utils/userState/UserState.ts';
+import CommonButton from '../../../components/UI/CommonButton.vue';
+import CustomInput from '../../../components/UI/inputs/CustomInput.vue';
+import { UserState } from '../../../utils/userState/UserState.ts';
+import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
+import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
+import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
+import { usePopupStore } from '../../../store/popup.store.ts';
+import type { CreateCognitiveInputDto } from '../../../api/resolvers/test/dto/input/create-cognitive-input.dto.ts';
 
 type TestState= 'ready' | 'reacting' | 'completed';
 
@@ -30,11 +36,12 @@ export default defineComponent({
       roundRemainingTime: 0,
       roundTimerIntervalId: null as ReturnType<typeof setInterval> | null,
 
-      duration: 120,
+      duration: 12,
       randomChangeOfDifficulty: false,
       showTimer: false,
-      showFinalResults: false,
-      showProgressBar: false,
+      showTotalResults: false,
+      showProgressBar: true,
+
       functionsForFirstDifficulty: [
         (x: number, y: number): string => (x + y).toString(),
         (x: number, y: number): string => (x - y).toString(),
@@ -81,7 +88,7 @@ export default defineComponent({
       const seconds = Math.floor((this.remainingTimeValue % 60000) / 1000);
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
-    testResultsDto() {
+    testResultsDto(): CreateCognitiveInputDto {
       return {
         userId: UserState.id,
         allSignals: this.score + this.mistakes,
@@ -135,6 +142,25 @@ export default defineComponent({
       }
       else {
         this.result = Math.round((this.score / (this.score + this.mistakes)) * 100);
+      }
+      this.saveResults()
+    },
+    saveResults(): void {
+      const popUpStore = usePopupStore()
+      new TestResolver().createCognitive(this.testResultsDto).catch((err) => {
+        popUpStore.activateErrorPopup(err.message)
+      })
+      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
+        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
+        if (setupId && isNaN(setupId)) setupId = undefined
+        new TestBlockResolver().updateTestBlock({
+          testBlockId: parseInt(this.testBlockId),
+          updatedTest: {
+            name: "NUMERICAL",
+            setupId: setupId,
+            available: false
+          }
+        })
       }
     },
     nextRound() {
@@ -213,24 +239,38 @@ export default defineComponent({
       }, 1000);
     },
     checkAnswer() {
-      if (this.userAnswer.trim() === this.correctAnswer.trim()) {
-        this.score++;
-      } else {
-        this.mistakes++;
-      }
+      if (this.userAnswer.trim().length > 0 && !isNaN(parseInt(this.userAnswer.trim()))) {
+        if (this.userAnswer.trim() === this.correctAnswer.trim()) {
+          this.score++;
+        } else {
+          this.mistakes++;
+        }
 
-      if (this.remainingTimeValue <= 0) {
-        this.stopTest();
-      } else {
-        this.nextRound();
+        if (this.remainingTimeValue <= 0) {
+          this.stopTest();
+        } else {
+          this.nextRound();
+        }
       }
     },
     roundTimeFormatted() {
       const effectiveRoundTime = Math.min(this.roundRemainingTime, this.remainingTimeValue);
       const seconds = Math.floor(effectiveRoundTime / 1000);
       return `${seconds < 10 ? '0' : ''}${seconds}`;
-    }
-  }
+    },
+    async load () {
+      if (this.setupId && !isNaN(parseInt(this.setupId))) {
+        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
+        if (settings) {
+          this.duration = settings.duration
+          this.showTotalResults = settings.showTotalResults
+          this.showTimer = settings.showTimer
+          this.showProgressBar = settings.showProgress
+        }
+      }
+    },
+  },
+  mounted() { this.load( )},
 });
 </script>
 
@@ -280,9 +320,11 @@ export default defineComponent({
       </div>
       <div class="test-container" v-if="testState == 'completed'">
         <h2 class="title">Тест завершен!</h2>
-        <p class="result">Правильных ответов: {{ score }}</p>
-        <p class="result">Ошибок: {{ mistakes }}</p>
-        <p class="result">Результат: {{ result }}%</p>
+        <div class="full" v-if="showTotalResults">
+          <p class="result">Правильных ответов: {{ score }}</p>
+          <p class="result">Ошибок: {{ mistakes }}</p>
+          <p class="result">Результат: {{ result }}%</p>
+        </div>
         <CommonButton
           class="reaction-button"
           @click="resetTest"
