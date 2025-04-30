@@ -95,6 +95,7 @@ export default defineComponent({
         allSignals: this.score + this.mistakes,
         score: this.score,
         mistakes: this.mistakes,
+        testType: 'NUMERICAL'
       }
     }
   },

@@ -72,7 +72,8 @@ export default defineComponent({
         userId: UserState.id,
         allSignals: this.score + this.mistakes,
         mistakes: this.mistakes,
-        score: this.score
+        score: this.score,
+        testType: 'VERBAL'
       }
     }
   },

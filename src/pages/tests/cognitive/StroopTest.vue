@@ -4,11 +4,11 @@ import CommonButton from '../../../components/UI/CommonButton.vue';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
-import type { CreateCognitiveInputDto } from '../../../api/resolvers/test/dto/input/create-cognitive.dto.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
 import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
 import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 import router from '../../../router/router.ts';
+import type { CreateCognitiveInputDto } from '../../../api/resolvers/test/dto/input/create-cognitive-input.dto.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
@@ -46,7 +46,8 @@ export default defineComponent({
         userId: UserState.id,
         allSignals: this.score + this.mistakes,
         mistakes: this.mistakes,
-        score: this.score
+        score: this.score,
+        testType: 'STROOP'
       }
     }
   },

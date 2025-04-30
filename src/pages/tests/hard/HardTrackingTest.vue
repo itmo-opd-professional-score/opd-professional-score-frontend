@@ -57,7 +57,7 @@
     <div v-if="testEnded" class="results-screen">
       <h2>Тест завершён!</h2>
 
-      <div class="result-card">
+      <div class="result-card" v-if="showTotalResults">
         <div class="result-value">{{ bestOverlap.toFixed(2) }} сек</div>
         <div class="result-label">Лучшее совпадение</div>
       </div>
@@ -78,10 +78,14 @@
 <script lang="ts">
 import CommonButton from '../../../components/UI/CommonButton.vue';
 import { defineComponent } from 'vue';
-import type {
-  CreateHardTrackingTestInputDto
-} from '../../../api/resolvers/test/dto/input/create-hard-tracking-test-input.dto.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
+import type {
+  CreateHardTrackingInputDto
+} from '../../../api/resolvers/test/dto/input/create-hard-tracking-input.dto.ts';
+import { usePopupStore } from '../../../store/popup.store.ts';
+import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
+import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
+import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 
 
 export default defineComponent({
@@ -89,7 +93,10 @@ export default defineComponent({
   components: {
     CommonButton
   },
-
+  props: {
+    testBlockId: String,
+    setupId: String,
+  },
   data() {
     return {
       trackWidth: 800,
@@ -121,6 +128,8 @@ export default defineComponent({
 
       duration: 30,
       showTimer: true,
+      showProgressBar: true,
+      showTotalResults: false,
     };
   },
 
@@ -136,11 +145,7 @@ export default defineComponent({
     },
 
 
-    testResults() {
-      if (!this.testEnded) {
-        return null;
-      }
-
+    testResults(): CreateHardTrackingInputDto {
 
       const totalOverlapTime = this.overlapTimes.reduce((sum, t) => sum + t, 0);
       const averageOverlap = this.overlapTimes.length
@@ -150,7 +155,7 @@ export default defineComponent({
 
 
       return {
-        userId: UserState.id,
+        userId: UserState.id ? UserState.id : null,
         duration: this.duration,
         totalOverlapTime,
         bestOverlap: this.bestOverlap,
@@ -262,25 +267,38 @@ export default defineComponent({
         const overlapDuration = (now - this.overlapStart) / 1000;
         this.overlapTimes.push(overlapDuration);
       }
-
-      const stats: CreateHardTrackingTestInputDto = {
-        userId: 123,
-        duration: this.duration,
-        totalOverlapTime: this.overlapTimes.reduce((sum, t) => sum + t, 0),
-        bestOverlap: this.bestOverlap,
-        averageOverlap: this.overlapTimes.length
-          ? this.overlapTimes.reduce((sum, t) => sum + t, 0) / this.overlapTimes.length
-          : 0,
-        overlapCount: this.overlapTimes.length,
-        successRate:
-          (this.overlapTimes.reduce((sum, t) => sum + t, 0) / this.duration) *
-          100,
-      };
-
-      console.log('Результаты теста:', stats);
+    },
+    saveResults(): void {
+      const popUpStore = usePopupStore()
+      new TestResolver().createHardTracking(this.testResults).catch((err) => {
+        popUpStore.activateErrorPopup(err.message)
+      })
+      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
+        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
+        if (setupId && isNaN(setupId)) setupId = undefined
+        new TestBlockResolver().updateTestBlock({
+          testBlockId: parseInt(this.testBlockId),
+          updatedTest: {
+            name: "HARD_TRACKING",
+            setupId: setupId,
+            available: false
+          }
+        })
+      }
+    },
+    async load() {
+      if (this.setupId && !isNaN(parseInt(this.setupId))) {
+        const settings = await new TestSetupsResolver().getById(parseInt(this.setupId))
+        if (settings) {
+          this.duration = settings.duration
+          this.showProgressBar = settings.showProgress
+          this.showTimer = settings.showTimer
+          this.showTotalResults = settings.showTotalResults
+        }
+      }
     }
   },
-
+  mounted() { this.load() },
   beforeUnmount() {
     if (this.animationFrame != null) cancelAnimationFrame(this.animationFrame);
   },

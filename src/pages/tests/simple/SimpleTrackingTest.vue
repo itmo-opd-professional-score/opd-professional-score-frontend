@@ -89,7 +89,7 @@ import { usePopupStore } from '../../../store/popup.store.ts';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
 import type { AccelerationMode } from '../types';
-import type { CreateTrackingInputDto } from '../../../api/resolvers/test/dto/input/create-tracking-input.dto.ts';
+import type { CreateSimpleTrackingInputDto } from '../../../api/resolvers/test/dto/input/create-simple-tracking-input.dto.ts';
 import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
 import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 import router from '../../../router/router.ts';
@@ -134,11 +134,9 @@ export default defineComponent({
   },
 
   computed: {
-    testResultsDto(): CreateTrackingInputDto {
+    testResultsDto(): CreateSimpleTrackingInputDto {
       return {
-        userId: UserState.id
-          ? String(UserState.id)
-          : null,
+        userId: UserState.id ? UserState.id : null,
         allSignals: this.successTimes.length,
         successCount: this.successCount,
         avgTime: this.avgTime,
@@ -162,7 +160,7 @@ export default defineComponent({
   methods: {
     saveResults(): void {
       const popUpStore = usePopupStore()
-      new TestResolver().createTracking(this.testResultsDto).catch((err) => {
+      new TestResolver().createSimpleTracking(this.testResultsDto).catch((err) => {
         popUpStore.activateErrorPopup(err.message)
       })
       if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {

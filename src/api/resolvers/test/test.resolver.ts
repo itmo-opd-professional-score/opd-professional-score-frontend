@@ -9,9 +9,9 @@ import type { CreateSimpleInputDto } from './dto/input/create-simple-input.dto.t
 import type { CreateRdoInputDto } from './dto/input/create-rdo-input.dto.ts';
 import type { TestType } from '../../../pages/tests/types';
 import type { CreateHardLightInputDto } from './dto/input/create-hard-light-input.dto.ts';
-import type { CreateTrackingInputDto } from './dto/input/create-tracking-input.dto.ts';
-import type { CreateCognitiveInputDto } from './dto/input/create-cognitive.dto.ts';
+import type { CreateSimpleTrackingInputDto } from './dto/input/create-simple-tracking-input.dto.ts';
 import type { CreateCognitiveInputDto } from './dto/input/create-cognitive-input.dto.ts';
+import type { CreateHardTrackingInputDto } from './dto/input/create-hard-tracking-input.dto.ts';
 
 
 export class TestResolver {
@@ -130,12 +130,26 @@ export class TestResolver {
     })
   }
 
-  public async createTracking(data: CreateTrackingInputDto) {
+  public async createSimpleTracking(data: CreateSimpleTrackingInputDto) {
     return await this.apiResolver.request<
-      CreateTrackingInputDto,
+      CreateSimpleTrackingInputDto,
       CreateOutputDto
     >(
-      'tracking/create',
+      'tracking/simple/create',
+      'POST',
+      data,
+      this.token ? this.token : undefined,
+    ).catch((error) => {
+      this.usePopUp.activateErrorPopup(error.message);
+    });
+  }
+
+  public async createHardTracking(data: CreateHardTrackingInputDto) {
+    return await this.apiResolver.request<
+      CreateHardTrackingInputDto,
+      CreateOutputDto
+    >(
+      'tracking/simple/create',
       'POST',
       data,
       this.token ? this.token : undefined,
