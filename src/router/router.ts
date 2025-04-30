@@ -140,6 +140,7 @@ const routes = [
     path: '/test/simple/tracking',
     name: 'SimpleTrackingTest',
     component: SimpleTrackingTest,
+    meta: {ruName: 'Тест на аналоговое слежение', requiresAuth: true },
   }
 ];
 

@@ -1,7 +1,7 @@
 <template>
   <div class="test-wrapper">
     <div v-if="introVisible" class="intro-screen">
-      <h2>Тест на координацию</h2>
+      <h2>Тест на аналоговое слежение</h2>
       <div class="instructions">
         <p>Ваша задача - поймать движущийся шарик и перетащить его в центр.</p>
         <p>Тест продлится {{ duration }} секунд.</p>

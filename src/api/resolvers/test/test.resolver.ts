@@ -124,13 +124,12 @@ export class TestResolver {
       CreateTrackingInputDto,
       CreateOutputDto
     >(
-      'tracking/create',
+      'create',
       'POST',
       data,
       this.token ? this.token : undefined,
     ).catch((error) => {
       this.usePopUp.activateErrorPopup(error.message);
-      throw error;
     });
   }
 }
