@@ -95,7 +95,7 @@ export class TestResolver {
       'cognitive/create',
       'POST',
       data,
-      this.token ? this.token : undefined
+      this.token ? this.token : undefined,
     )
   }
 
