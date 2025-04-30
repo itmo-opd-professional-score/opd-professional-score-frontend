@@ -9,6 +9,8 @@ export type TestType =
   | 'SIMPLE_TRACKING'
   | 'HARD_TRACKING'
   | 'NUMERICAL'
+  | 'STROOP'
+  | 'VERBAL'
 export interface TestJwt {
   testId: number | null;
   testType: TestType;
