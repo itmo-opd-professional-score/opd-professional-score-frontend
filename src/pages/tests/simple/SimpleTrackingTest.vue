@@ -13,7 +13,7 @@
         </ul>
       </div>
       <CommonButton
-        class="start-button primary_button"
+        class="start-button submit_button"
         @click="startTest"
         :width="'12.5rem'"
         :height="'3.125rem'"
@@ -68,13 +68,15 @@
       </div>
 
       <CommonButton
-        class="restart-button primary_button"
+        class="restart-button submit_button"
         @click="restartTest"
         :width="'12.5rem'"
         :height="'3.125rem'"
         :color="'success'"
       >
-        <template v-slot:placeholder>Повторить тест</template>
+        <template v-slot:placeholder>
+          {{ testBlockId ? 'Вернуться к блоку' : 'Пройти заново'}}
+        </template>
       </CommonButton>
     </div>
   </div>
