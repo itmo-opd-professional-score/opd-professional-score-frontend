@@ -137,14 +137,9 @@ const routes = [
     props: true,
   },
   {
-    path: '/simple-tracking-test',
+    path: '/test/simple/tracking',
     name: 'SimpleTrackingTest',
     component: SimpleTrackingTest,
-    props: {
-      time: 10,
-      showTimer: true,
-      showProgressBar: true
-    }
   }
 ];
 

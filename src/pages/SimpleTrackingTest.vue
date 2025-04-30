@@ -1,6 +1,5 @@
 <template>
   <div class="test-wrapper">
-    <!-- Стартовый экран -->
     <div v-if="introVisible" class="intro-screen">
       <h2>Тест на координацию</h2>
       <div class="instructions">
@@ -14,7 +13,7 @@
         </ul>
       </div>
       <CommonButton
-        class="start-button"
+        class="start-button primary_button"
         @click="startTest"
         :width="'12.5rem'"
         :height="'3.125rem'"
@@ -69,7 +68,7 @@
       </div>
 
       <CommonButton
-        class="restart-button"
+        class="restart-button primary_button"
         @click="restartTest"
         :width="'12.5rem'"
         :height="'3.125rem'"
@@ -84,6 +83,28 @@
 <script lang="ts">
 import CommonButton from '../components/UI/CommonButton.vue';
 import { defineComponent } from 'vue';
+import { usePopupStore } from '../store/popup.store.ts';
+import { TestResolver } from '../api/resolvers/test/test.resolver.ts';
+import { UserState } from '../utils/userState/UserState.ts';
+import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resolver.ts';
+
+interface TestSettings {
+  direction: number;
+  ballPosition: number;
+  ballSpeed: number;
+  duration: number;
+  showTimer: boolean;
+  showProgressBar: boolean;
+  accelerationMode?: 'DISCRETE' | 'CONTINUOUS';
+  minSpeed?: number;
+  maxSpeed?: number;
+}
+
+interface TrackingResponse {
+  body?: {
+    token?: string;
+  };
+}
 
 export default defineComponent({
   name: 'SimpleTrackingTest',
@@ -91,63 +112,68 @@ export default defineComponent({
     CommonButton
   },
   props: {
-    duration: {
+    presetId: {
       type: Number,
-      default: 30,
-      validator: (value: number) => value > 0
-    },
-    minSpeed: {
-      type: Number,
-      default: 0.2,
-      validator: (value: number) => value > 0
-    },
-    maxSpeed: {
-      type: Number,
-      default: 0.5,
-      validator: (value: number) => value > 0
+      default: null
     }
   },
 
   data() {
     return {
-
+      duration: 30,
+      animationFrame: null as number | null,
+      presetId: null as number | null,
+      minSpeed: 0.2,
+      maxSpeed: 0.5,
+      direction: 1,
+      isInCenter: false,
       ballPosition: 50,
       ballSpeed: 0.3,
-      direction: 1,
       isMoving: false,
       isCaught: false,
-      isInCenter: false,
-
-
-      isDragging: false,
-
-
-      startTime: 0,
-      remainingTime: 0,
-      testEnded: false,
-
-
       successCount: 0,
       successTimes: [] as number[],
-      lastSuccessTime: 0,
-      currentDragTime: 0,
-
-
+      testEnded: false,
       introVisible: true,
-      animationFrame: null as number | null,
+      showTimer: true,
+      showProgressBar: true,
+      accelerationMode: 'DISCRETE' as 'DISCRETE' | 'CONTINUOUS',
+      remainingTime: 0,
+      startTime: 0 as number,
+      isDragging: false,
+      currentDragTime: 0,
+      lastSuccessTime: 0,
     };
   },
 
   computed: {
+    testResultsDto(): {
+      userId: string | null;
+      allSignals: number;
+      successCount: number;
+      avgTime: number;
+      timeDeviation: number;
+      testType: string
+    } {
+      return {
+        userId: UserState.id !== null && UserState.id !== undefined
+          ? String(UserState.id)
+          : null,
+        allSignals: this.successTimes.length,
+        successCount: this.successCount,
+        avgTime: this.avgTime,
+        timeDeviation: this.timeDeviation,
+        testType: 'TRACKING'
+      };
+    },
+
     avgTime(): number {
       if (!this.successTimes.length) return 0;
       return this.successTimes.reduce((a, b) => a + b, 0) / this.successTimes.length;
     },
-
     timeDeviation(): number {
       const n = this.successTimes.length;
       if (n < 2) return 0;
-
       const mean = this.avgTime;
       const variance = this.successTimes.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1);
       return Math.sqrt(variance);
@@ -155,6 +181,66 @@ export default defineComponent({
   },
 
   methods: {
+    async loadSettings() {
+      if (!this.presetId) return;
+
+      const resolver = new TestSetupsResolver();
+      try {
+        const response = await resolver.getById(this.presetId);
+        if (response && typeof response === 'object' && 'body' in response) {
+          const settings = response.body as TestSettings;
+          this.duration = settings.duration ?? this.duration;
+          this.minSpeed = settings.minSpeed ?? this.minSpeed;
+          this.maxSpeed = settings.maxSpeed ?? this.maxSpeed;
+          this.showTimer = settings.showTimer ?? this.showTimer;
+          this.showProgressBar = settings.showProgressBar ?? this.showProgressBar;
+
+          if (settings.accelerationMode) {
+            this.accelerationMode = settings.accelerationMode;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+        const popUpStore = usePopupStore();
+        popUpStore.activateErrorPopup('Failed to load test settings');
+      }
+    },
+
+    async saveResults() {
+      const popUpStore = usePopupStore();
+      const testResolver = new TestResolver();
+
+      try {
+        const result = await testResolver.createTracking(this.testResultsDto) as TrackingResponse;
+
+        if (!UserState.id) {
+          const savedTests = JSON.parse(localStorage.getItem('trackingTests') ?? '[]');
+          const newResult = {
+            ...this.testResultsDto,
+            token: result.body?.token ?? null
+          };
+
+          localStorage.setItem('trackingTests', JSON.stringify([...savedTests, newResult]));
+        }
+
+        popUpStore.activateInfoPopup('Результаты успешно сохранены');
+      } catch (error: unknown) {
+        const errorMessage = this.getErrorMessage(error);
+        popUpStore.activateErrorPopup(`Ошибка: ${errorMessage}`);
+        console.error('Ошибка сохранения:', error);
+      }
+    },
+
+    getErrorMessage(error: unknown): string {
+      if (typeof error !== 'object' || error === null) {
+        return 'Неизвестная ошибка';
+      }
+
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      return axiosError?.response?.data?.message ??
+        (error instanceof Error ? error.message : 'Неизвестная ошибка');
+    },
+
     startTest() {
       this.introVisible = false;
       this.testEnded = false;
@@ -198,7 +284,12 @@ export default defineComponent({
       this.animationFrame = requestAnimationFrame(this.animate);
     },
 
-    startDrag(event: MouseEvent) {
+    stopTest() {
+      this.testEnded = true;
+      this.saveResults();
+    },
+
+    startDrag(_event: MouseEvent) {
       if (this.testEnded || this.isCaught) return;
 
       this.isCaught = true;
@@ -236,9 +327,14 @@ export default defineComponent({
     }
   },
 
-  beforeUnmount() {
-    if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
+  mounted() {
+    this.loadSettings();
   },
+  beforeUnmount() {
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+    }
+  }
 });
 </script>
 
@@ -246,7 +342,7 @@ export default defineComponent({
 
 .test-wrapper {
   max-width: 90%;
-  width: 50rem;
+  width: 90%;
   margin: 0 auto;
   color: #333;
   padding: 1.25rem;
@@ -277,13 +373,13 @@ export default defineComponent({
 
 .test-container {
   position: relative;
-  width: 100%;
-  height: 15.625rem;
+  width: 96%;
+  height: 30vh;
   margin: 0 auto;
   user-select: none;
   background: #f8f9fa;
-  border-radius: 0.625rem;
-  padding: 1.25rem;
+  border-radius: 0.6vw;
+  padding: 1.5%;
   box-sizing: border-box;
   cursor: grab;
 }
@@ -374,11 +470,13 @@ export default defineComponent({
 
 .stat-card {
   background: white;
-  border-radius: 0.5rem;
-  padding: 0.9375rem 1.5625rem;
-  min-width: 12.5rem;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+  border-radius: 0.5em;
+  padding: 1.5% 2%;
+  min-width: 20vw;
+  max-width: 90%;
+  box-shadow: 0 0.2vh 0.4vh rgba(0, 0, 0, 0.1);
   flex: 1;
+  margin: 0.5vh 0.5vw;
 }
 
 .stat-value {
@@ -401,14 +499,14 @@ export default defineComponent({
   align-items: center;
 }
 
-@media (max-width: 48rem) {
+@media (max-width: 768px) {
   .test-wrapper {
     width: 90%;
     padding: 0.625rem;
   }
 
   .test-container {
-    height: 12.5rem;
+    height: 200px;
   }
 
   .stats-container {
