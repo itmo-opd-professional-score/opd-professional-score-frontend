@@ -11,12 +11,14 @@ import { TestResolver } from '../../../../api/resolvers/test/test.resolver.ts';
 import { usePopupStore } from '../../../../store/popup.store.ts';
 import { UserState } from '../../../../utils/userState/UserState.ts';
 import type { CreateAdditionInputDto } from '../../../../api/resolvers/test/dto/input/create-addition-input.dto.ts';
-import { jwtDecode } from 'jwt-decode';
-import type { TestJwt } from '../../types';
+import type { TestSetupOutputDTO } from '../../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
+import { TestSetupsResolver } from '../../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import { TestBlockResolver } from '../../../../api/resolvers/testBlocks/test-block.resolver.ts';
 
-const questionsCount = 25;
+const questionsCount = 5;
 const step = ref<number>(0);
 const score = ref<number>(0);
+const showTotalResults = ref<boolean>(true);
 const questionStartTime = ref<number>(0);
 const testStartTime = ref<number>(0);
 const questionNumber = ref<number>(-1);
@@ -26,10 +28,10 @@ const questions: SoundHardTestQuestionDto[] = [];
 const answers: SoundHardTestAnswerDto[] = [];
 const utterance = new SpeechSynthesisUtterance();
 let voices = speechSynthesis.getVoices();
-let completedTestsLinks = [];
-let completedTestsResults = [];
+
 const props = defineProps<{
-  token?: string;
+  testBlockId?: string,
+  setupId?: string
 }>();
 
 speechSynthesis.onvoiceschanged = () => {
@@ -113,6 +115,11 @@ const calculateDispersion = (data: number[]) => {
   return Math.sqrt(variance / (data.length - 1));
 };
 
+const resetTest = async () => {
+  if (props.testBlockId) await router.push(`/testblock/${props.testBlockId}`);
+  else router.go(0)
+}
+
 const saveResults = () => {
   const testResolver = new TestResolver();
   const popUpStore = usePopupStore();
@@ -129,47 +136,28 @@ const saveResults = () => {
   };
   testResolver
     .createAddition(data, 'Sound')
-    .then((result) => {
-      if (!UserState.id) {
-        completedTestsLinks.push(props.token);
-        completedTestsResults.push(result.body.testToken);
-        localStorage.setItem(
-          'completedTestsLinks',
-          JSON.stringify(completedTestsLinks),
-        );
-        localStorage.setItem(
-          'completedTestsResults',
-          JSON.stringify(completedTestsResults),
-        );
-      }
-      popUpStore.activateInfoPopup('Results were saved successfully!');
-    })
     .catch((error) => {
       popUpStore.activateErrorPopup(
         `Error code: ${error.status}. ${error.response.data.message}`,
       );
     });
+  if (props.testBlockId && !isNaN(parseInt(props.testBlockId))) {
+    let setupId = props.setupId ? parseInt(props.setupId) : undefined;
+    if (setupId && isNaN(setupId)) setupId = undefined
+    new TestBlockResolver().updateTestBlock({
+      testBlockId: parseInt(props.testBlockId),
+      updatedTest: {
+        name: "ADDITION_SOUND",
+        setupId: setupId,
+        available: false
+      }
+    })
+  }
 };
 onMounted(async () => {
-  if (UserState.id) {
-    await router.push('/test/addition/sound');
-  } else {
-    const linksData = localStorage.getItem('completedTestsLinks');
-    const resultsData = localStorage.getItem('completedTestsResults');
-    if (linksData) {
-      completedTestsLinks.push(...JSON.parse(linksData));
-    }
-    if (resultsData) {
-      completedTestsResults.push(...JSON.parse(resultsData));
-    }
-    if (props.token && completedTestsLinks.length != 0) {
-      completedTestsLinks.forEach((link) => {
-        const data = jwtDecode(link) as TestJwt;
-        if (data.testType == 'ADDITION_SOUND') {
-          step.value = -1;
-        }
-      });
-    }
+  if (props.setupId && !isNaN(parseInt(props.setupId))) {
+    const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(props.setupId))
+    if (settings) showTotalResults.value = settings.showTotalResults
   }
 });
 </script>
@@ -188,7 +176,7 @@ onMounted(async () => {
         </p>
         <ul>
           <li>Кол-во вопросов: {{ questionsCount }}</li>
-          <li>Время выполнения: ~{{ 1.5 }} минуты</li>
+          <li>Время выполнения: ~{{ (15 * questionsCount / 60).toFixed(1) }} минут</li>
           <li>Варианты ответа: ЧЕТ / НЕЧЕТ</li>
           <li>Диапазон чисел: от 100 до 1000</li>
         </ul>
@@ -232,30 +220,29 @@ onMounted(async () => {
       <div class="description">
         <p>
           Поздравляем Вас с прохождением теста на проверку скорости реакции на
-          сложный звуковой сигнал! Ваши результаты:
+          сложный звуковой сигнал!
         </p>
-        <ul>
-          <li>Кол-во вопросов: {{ questionsCount }}</li>
-          <li>Правильные ответы: {{ score }} / {{ questionsCount }}</li>
-          <li>Среднее время ответа: {{ averageResponse }} сек</li>
-          <li>
-            Среднее стандартное отклонение:
-            {{
-              calculateDispersion(
-                answers.map((answer) => answer.elapsedTime),
-              ).toFixed(2)
-            }}
-            сек
-          </li>
-        </ul>
-        <a href="#">Посмотреть рейтинг и оценку результатов</a>
+        <div class="full" v-if="showTotalResults">
+          <p>Ваши результаты:</p>
+          <ul>
+            <li>Кол-во вопросов: {{ questionsCount }}</li>
+            <li>Правильные ответы: {{ score }} / {{ questionsCount }}</li>
+            <li>Среднее время ответа: {{ averageResponse }} сек</li>
+            <li>
+              Среднее стандартное отклонение:
+              {{
+                calculateDispersion(
+                  answers.map((answer) => answer.elapsedTime),
+                ).toFixed(2)
+              }}
+              сек
+            </li>
+          </ul>
+        </div>
       </div>
       <div class="controls">
-        <CommonButton v-if="UserState.id" class="button" @click="router.go">
+        <CommonButton v-if="UserState.id" class="button" @click="resetTest">
           <template v-slot:placeholder>Пройти заново</template>
-        </CommonButton>
-        <CommonButton v-else class="button" @click="router.push('/auth/login')">
-          <template v-slot:placeholder>Сохранить результаты</template>
         </CommonButton>
       </div>
     </div>

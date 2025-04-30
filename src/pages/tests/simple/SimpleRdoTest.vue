@@ -5,10 +5,11 @@ import { usePopupStore } from '../../../store/popup.store.ts';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
 import router from '../../../router/router.ts';
-import { jwtDecode } from 'jwt-decode';
-import type { AccelerationMode, TestJwt } from '../types';
+import type { AccelerationMode } from '../types';
 import type { CreateRdoInputDto } from '../../../api/resolvers/test/dto/input/create-rdo-input.dto.ts';
 import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
+import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
@@ -17,8 +18,8 @@ export default defineComponent({
   components: { CommonButton },
   emits: ['test completed'],
   props: {
-    token: String,
-    presetId: Number,
+    testBlockId: String,
+    setupId: String,
     isModule: Boolean,
     startAcceleration: Number,
     timeAsModule: Number
@@ -39,7 +40,7 @@ export default defineComponent({
       deviationHistory: [] as Array<number>,
       testState: 'ready' as TestState,
       remainingSeconds: 0,
-      time: 10,
+      duration: 10,
 
       completedTestsLinks: [] as Array<string>,
       completedTestsResults: [] as Array<string>,
@@ -79,7 +80,7 @@ export default defineComponent({
     },
     progressBarWidth() {
       if (this.remainingSeconds === 0) return '0%';
-      return `${this.remainingSeconds / this.time * 100}%`;
+      return `${this.remainingSeconds / this.duration * 100}%`;
     },
     averageCallbackTime(): number {
       if (this.deviationHistory.length == 0) return 0;
@@ -97,20 +98,29 @@ export default defineComponent({
     }
   },
   methods: {
-    handleClick() {
+    async handleClick() {
       if (this.testState === 'ready') {
         this.testState = 'reacting';
         this.animationFrameId = requestAnimationFrame(this.animate)
-        this.remainingSeconds = this.time
+        this.remainingSeconds = this.duration
         this.startTimer()
       } else if (this.testState === 'reacting') {
         if (!this.checkLooped) {
-          if (this.circleX < 150) this.deviationHistory.push(-this.circleY * this.speed * 10)
-          else this.deviationHistory.push(this.circleY * this.speed * 10)
+          const score = this.circleY * this.speed * 10 - 0.5
+          if (this.circleX < 150) {
+            this.deviationHistory.push(-score)
+            this.currentDeviation = -score
+          }
+          else {
+            this.deviationHistory.push(score)
+            this.currentDeviation =score
+          }
+
           this.checkLooped = true;
         }
       } else {
-        router.go(0)
+        if (this.testBlockId) await router.push(`/testblock/${this.testBlockId}`);
+        else router.go(0)
       }
     },
     startTimer() {
@@ -145,72 +155,41 @@ export default defineComponent({
     },
     saveResults(): void {
       const popUpStore = usePopupStore()
-      const testResolver =
-        new TestResolver()
-      testResolver
-        .createRdo(this.testResultsDto).then((result) => {
-        if (!UserState.id) {
-          this.completedTestsLinks.push(this.token!);
-          this.completedTestsResults.push(result.body.testToken);
-          localStorage.setItem(
-            'completedTestsLinks',
-            JSON.stringify(this.completedTestsLinks),
-          );
-          localStorage.setItem(
-            'completedTestsResults',
-            JSON.stringify(this.completedTestsResults),
-          );
-        }
-        popUpStore.activateInfoPopup('Results were saved successfully!');
-      }).catch((error) => {
-        popUpStore.activateErrorPopup(
-          `Error code: ${error.status}. ${error.response.data.message}`,
-        );
-      });
+      new TestResolver().createRdo(this.testResultsDto).catch((err) => {
+        popUpStore.activateErrorPopup(err.message)
+      })
+      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
+        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
+        if (setupId && isNaN(setupId)) setupId = undefined
+        new TestBlockResolver().updateTestBlock({
+          testBlockId: parseInt(this.testBlockId),
+          updatedTest: {
+            name: "SIMPLE_RDO",
+            setupId: setupId,
+            available: false
+          }
+        })
+      }
     },
     async load () {
-      if (UserState.id) {
-        await router.push('/test/simple/rdo');
-      } else {
-        const linksData = localStorage.getItem('completedTestsLinks');
-        const resultsData = localStorage.getItem('completedTestsResults');
-        if (linksData) {
-          this.completedTestsLinks.push(...JSON.parse(linksData));
+      if (this.setupId && !isNaN(parseInt(this.setupId))) {
+        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
+        if (settings) {
+          this.duration = settings.duration
+          if (!this.isModule) {
+            this.showProgressBar = settings.showProgress
+            this.showTimer = settings.showTimer
+            this.accelerationMode = settings.accelerationMode
+          }
+          this.showTotalResults = settings.showTotalResults
         }
-        if (resultsData) {
-          this.completedTestsResults.push(...JSON.parse(resultsData));
-        }
-        if (this.token && this.completedTestsLinks.length != 0) {
-          this.completedTestsLinks.forEach((link) => {
-            const data = jwtDecode(link) as TestJwt;
-            if (data.testType == 'SIMPLE_RDO') {
-              router.back()
-            }
-          });
-        }
-      }
-      if (this.presetId != null) {
-        await this.loadSettings()
       }
     },
-    async loadSettings() {
-      const testSetupResolver = new TestSetupsResolver()
-      const settings = await testSetupResolver.getById(this.presetId!)
-      if (settings) {
-        this.time = settings.duration
-        if (!this.isModule) {
-          this.showProgressBar = settings.showProgress
-          this.showTimer = settings.showTimer
-          this.accelerationMode = settings.accelerationMode
-        }
-        this.showTotalResults = settings.showTotalResults
-      }
-    }
   },
   mounted() {
     if (!this.isModule) this.load()
     else {
-      if (this.timeAsModule) this.time = this.timeAsModule
+      if (this.timeAsModule) this.duration = this.timeAsModule
       this.showProgressBar = false
       this.showTimer = false
     }
@@ -274,7 +253,7 @@ export default defineComponent({
         </CommonButton>
         <div class="current-deviation">
           Текущее отклонение:
-          {{ currentDeviation !== null ? currentDeviation.toFixed(2) : '0' }} мс
+          {{currentDeviation.toFixed(2) }}с
         </div>
         <div class="standard-deviation">
           Стандартное отклонение:
@@ -298,7 +277,6 @@ export default defineComponent({
       <CommonButton
         class="reaction-button"
         :class="{ active: testState == 'reacting' }"
-        :disabled="testState == 'completed'"
         @click="handleClick"
       >
         <template v-slot:placeholder>{{ buttonText }}</template>

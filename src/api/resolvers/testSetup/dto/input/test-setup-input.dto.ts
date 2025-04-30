@@ -1,7 +1,7 @@
-import type { AccelerationMode } from '../../pages/tests/types';
+import type { AccelerationMode } from '../../../../../pages/tests/types';
 
-export interface TestSettingsDto {
-  testType: string;
+export interface TestSetupInputDto {
+  testTypeId: number;
   duration: number;
   showTimer: boolean;
   showTotalResults: boolean;
