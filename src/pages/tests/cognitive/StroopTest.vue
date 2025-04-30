@@ -256,7 +256,9 @@ export default defineComponent({
         class="reaction-button"
         @click="resetTest"
       >
-        <template v-slot:placeholder>Начать заново</template>
+        <template v-slot:placeholder>
+          {{ testBlockId ? 'Назад к блоку' : 'Начать заново'}}
+        </template>
       </CommonButton>
     </div>
   </div>
