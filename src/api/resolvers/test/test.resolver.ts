@@ -9,6 +9,7 @@ import type { CreateSimpleInputDto } from './dto/input/create-simple-input.dto.t
 import type { CreateRdoInputDto } from './dto/input/create-rdo-input.dto.ts';
 import type { TestType } from '../../../pages/tests/types';
 import type { CreateHardLightInputDto } from './dto/input/create-hard-light-input.dto.ts';
+import type { CreateCognitiveInputDto } from './dto/input/create-cognitive-input.dto.ts';
 
 
 export class TestResolver {
@@ -85,6 +86,15 @@ export class TestResolver {
       'POST',
       data,
       this.token ? this.token : undefined,
+    )
+  }
+
+  public async createCognitive(data: CreateCognitiveInputDto) {
+    return await this.apiResolver.request<CreateCognitiveInputDto, CreateOutputDto>(
+      'cognitive/create',
+      'POST',
+      data,
+      this.token ? this.token : undefined
     )
   }
 
