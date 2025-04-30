@@ -9,6 +9,7 @@ import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import type { CreateCognitiveInputDto } from '../../../api/resolvers/test/dto/input/create-cognitive-input.dto.ts';
+import router from '../../../router/router.ts';
 
 type TestState= 'ready' | 'reacting' | 'completed';
 
@@ -119,12 +120,9 @@ export default defineComponent({
         this.startTest();
       }
     },
-    resetTest() {
-      this.testState = 'ready';
-      this.score = 0;
-      this.result = 0;
-      this.mistakes = 0;
-      this.startTimer(this.duration);
+    async resetTest() {
+      if (this.testBlockId) await router.push(`/testBlock/${this.testBlockId}`);
+      else router.go(0)
     },
     startTest() {
       this.totalTime = this.duration;
@@ -329,7 +327,9 @@ export default defineComponent({
           class="reaction-button"
           @click="resetTest"
         >
-          <template v-slot:placeholder>Начать заново</template>
+          <template v-slot:placeholder>
+            {{ testBlockId ? 'Назад к блоку' : 'Начать заново'}}
+          </template>
         </CommonButton>
       </div>
     </div>
