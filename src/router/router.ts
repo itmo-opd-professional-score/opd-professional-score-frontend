@@ -24,7 +24,7 @@ import HardRdoTest from '../pages/tests/hard/HardRdoTest.vue';
 import TestBlockPage from '../pages/tests/TestBlockPage.vue';
 import NotFound from '../pages/NotFound.vue';
 import TestsCatalogPage from '../pages/TestsCatalogPage.vue';
-import SimpleTrackingTest from '../pages/SimpleTrackingTest.vue';
+import SimpleTrackingTest from '../pages/tests/simple/SimpleTrackingTest.vue';
 
 const routes = [
   {

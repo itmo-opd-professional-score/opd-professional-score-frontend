@@ -124,7 +124,7 @@ export class TestResolver {
       CreateTrackingInputDto,
       CreateOutputDto
     >(
-      'create',
+      'tracking/create',
       'POST',
       data,
       this.token ? this.token : undefined,

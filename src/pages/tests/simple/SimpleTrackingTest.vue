@@ -81,30 +81,16 @@
 </template>
 
 <script lang="ts">
-import CommonButton from '../components/UI/CommonButton.vue';
+import CommonButton from '../../../components/UI/CommonButton.vue';
 import { defineComponent } from 'vue';
-import { usePopupStore } from '../store/popup.store.ts';
-import { TestResolver } from '../api/resolvers/test/test.resolver.ts';
-import { UserState } from '../utils/userState/UserState.ts';
-import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resolver.ts';
-
-interface TestSettings {
-  direction: number;
-  ballPosition: number;
-  ballSpeed: number;
-  duration: number;
-  showTimer: boolean;
-  showProgressBar: boolean;
-  accelerationMode?: 'DISCRETE' | 'CONTINUOUS';
-  minSpeed?: number;
-  maxSpeed?: number;
-}
-
-interface TrackingResponse {
-  body?: {
-    token?: string;
-  };
-}
+import { usePopupStore } from '../../../store/popup.store.ts';
+import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
+import { UserState } from '../../../utils/userState/UserState.ts';
+import type { AccelerationMode } from '../types';
+import type { CreateTrackingInputDto } from '../../../api/resolvers/test/dto/input/create-tracking-input.dto.ts';
+import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
+import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import router from '../../../router/router.ts';
 
 export default defineComponent({
   name: 'SimpleTrackingTest',
@@ -112,17 +98,13 @@ export default defineComponent({
     CommonButton
   },
   props: {
-    presetId: {
-      type: Number,
-      default: null
-    }
+    testBlockId: String,
+    setupId: String,
   },
 
   data() {
     return {
-      duration: 30,
       animationFrame: null as number | null,
-      presetId: null as number | null,
       minSpeed: 0.2,
       maxSpeed: 0.5,
       direction: 1,
@@ -135,35 +117,30 @@ export default defineComponent({
       successTimes: [] as number[],
       testEnded: false,
       introVisible: true,
-      showTimer: true,
-      showProgressBar: true,
-      accelerationMode: 'DISCRETE' as 'DISCRETE' | 'CONTINUOUS',
       remainingTime: 0,
       startTime: 0 as number,
       isDragging: false,
       currentDragTime: 0,
       lastSuccessTime: 0,
+
+      duration: 30,
+      accelerationMode: 'DISCRETE' as AccelerationMode,
+      showProgressBar: true,
+      showTimer: false,
+      showTotalResults: false,
     };
   },
 
   computed: {
-    testResultsDto(): {
-      userId: string | null;
-      allSignals: number;
-      successCount: number;
-      avgTime: number;
-      timeDeviation: number;
-      testType: string
-    } {
+    testResultsDto(): CreateTrackingInputDto {
       return {
-        userId: UserState.id !== null && UserState.id !== undefined
+        userId: UserState.id
           ? String(UserState.id)
           : null,
         allSignals: this.successTimes.length,
         successCount: this.successCount,
         avgTime: this.avgTime,
         timeDeviation: this.timeDeviation,
-        testType: 'TRACKING'
       };
     },
 
@@ -181,53 +158,22 @@ export default defineComponent({
   },
 
   methods: {
-    async loadSettings() {
-      if (!this.presetId) return;
-
-      const resolver = new TestSetupsResolver();
-      try {
-        const response = await resolver.getById(this.presetId);
-        if (response && typeof response === 'object' && 'body' in response) {
-          const settings = response.body as TestSettings;
-          this.duration = settings.duration ?? this.duration;
-          this.minSpeed = settings.minSpeed ?? this.minSpeed;
-          this.maxSpeed = settings.maxSpeed ?? this.maxSpeed;
-          this.showTimer = settings.showTimer ?? this.showTimer;
-          this.showProgressBar = settings.showProgressBar ?? this.showProgressBar;
-
-          if (settings.accelerationMode) {
-            this.accelerationMode = settings.accelerationMode;
+    saveResults(): void {
+      const popUpStore = usePopupStore()
+      new TestResolver().createTracking(this.testResultsDto).catch((err) => {
+        popUpStore.activateErrorPopup(err.message)
+      })
+      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
+        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
+        if (setupId && isNaN(setupId)) setupId = undefined
+        new TestBlockResolver().updateTestBlock({
+          testBlockId: parseInt(this.testBlockId),
+          updatedTest: {
+            name: "SIMPLE_TRACKING",
+            setupId: setupId,
+            available: false
           }
-        }
-      } catch (error) {
-        console.error('Error loading settings:', error);
-        const popUpStore = usePopupStore();
-        popUpStore.activateErrorPopup('Failed to load test settings');
-      }
-    },
-
-    async saveResults() {
-      const popUpStore = usePopupStore();
-      const testResolver = new TestResolver();
-
-      try {
-        const result = await testResolver.createTracking(this.testResultsDto) as TrackingResponse;
-
-        if (!UserState.id) {
-          const savedTests = JSON.parse(localStorage.getItem('trackingTests') ?? '[]');
-          const newResult = {
-            ...this.testResultsDto,
-            token: result.body?.token ?? null
-          };
-
-          localStorage.setItem('trackingTests', JSON.stringify([...savedTests, newResult]));
-        }
-
-        popUpStore.activateInfoPopup('Результаты успешно сохранены');
-      } catch (error: unknown) {
-        const errorMessage = this.getErrorMessage(error);
-        popUpStore.activateErrorPopup(`Ошибка: ${errorMessage}`);
-        console.error('Ошибка сохранения:', error);
+        })
       }
     },
 
@@ -321,15 +267,24 @@ export default defineComponent({
       this.resetBall();
     },
 
-    restartTest() {
-      this.testEnded = false;
-      this.startTest();
+    async restartTest() {
+      if (this.testBlockId) await router.push(`/testBlock/${this.testBlockId}`);
+      else router.go(0)
+    },
+    async load() {
+      if (this.setupId && !isNaN(parseInt(this.setupId))) {
+        const settings = await new TestSetupsResolver().getById(parseInt(this.setupId))
+        if (settings) {
+          this.duration = settings.duration
+          this.showProgressBar = settings.showProgress
+          this.showTimer = settings.showTimer
+          this.showTotalResults = settings.showTotalResults
+          this.accelerationMode = settings.accelerationMode
+        }
+      }
     }
   },
-
-  mounted() {
-    this.loadSettings();
-  },
+  mounted() { this.load() },
   beforeUnmount() {
     if (this.animationFrame) {
       cancelAnimationFrame(this.animationFrame);
