@@ -21,7 +21,6 @@ defineProps<{ disabled?: boolean }>();
   background: var(--button-primary);
   transition-duration: 0.2s;
   user-select: none;
-  outline: none;
 }
 
 .wrapper:hover {
@@ -63,5 +62,10 @@ defineProps<{ disabled?: boolean }>();
   background-color: transparent;
   border-color: transparent;
   color: black
+}
+
+.wrapper:focus-visible {
+  outline: 2px solid black;
+  outline-offset: 2px;
 }
 </style>
