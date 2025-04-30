@@ -24,6 +24,7 @@ import HardRdoTest from '../pages/tests/hard/HardRdoTest.vue';
 import TestBlockPage from '../pages/tests/TestBlockPage.vue';
 import NotFound from '../pages/NotFound.vue';
 import TestsCatalogPage from '../pages/TestsCatalogPage.vue';
+import StroopTest from '../pages/tests/cognitive/StroopTest.vue';
 import VerbalTest from '../pages/tests/cognitive/VerbalTest.vue';
 
 const routes = [
@@ -120,9 +121,9 @@ const routes = [
   },
   {
     path: '/test/results/:testTypeId/:testId',
-    props: true,
     component: TestResultsPage,
     meta: { ruName: 'Результаты прохождения теста', requiresAuth: true },
+    props: true,
   },
   {
     path: `/testBlock/:testBlockId/test/:testTypeId`,
@@ -166,6 +167,11 @@ const routes = [
     component: SelectSettingsPage,
     meta: { ruName: 'Настройки теста', requiresAuth: true },
     props: true,
+  },
+  {
+    path: '/test/cognitive/stroop',
+    component: StroopTest,
+    meta: { ruName: 'Тест Струпа', requiresAuth: true },
   },
   {
     path: '/:catchAll(.*)*',

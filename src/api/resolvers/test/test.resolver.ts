@@ -9,6 +9,7 @@ import type { CreateSimpleInputDto } from './dto/input/create-simple-input.dto.t
 import type { CreateRdoInputDto } from './dto/input/create-rdo-input.dto.ts';
 import type { TestType } from '../../../pages/tests/types';
 import type { CreateHardLightInputDto } from './dto/input/create-hard-light-input.dto.ts';
+import type { CreateCognitiveInputDto } from './dto/input/create-cognitive.dto.ts';
 import type { CreateCognitiveInputDto } from './dto/input/create-cognitive-input.dto.ts';
 
 
