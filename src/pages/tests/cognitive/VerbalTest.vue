@@ -1,14 +1,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import CommonButton from "../components/UI/CommonButton.vue";
-import type { CreateCognitiveInputDto } from '../api/resolvers/test/dto/input/create-cognitive-input.dto.ts';
-import { UserState } from '../utils/userState/UserState.ts';
-import router from '../router/router.ts';
-import { usePopupStore } from '../store/popup.store.ts';
-import { TestResolver } from '../api/resolvers/test/test.resolver.ts';
-import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
-import type { TestSetupOutputDTO } from '../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
-import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resolver.ts';
+import CommonButton from "../../../components/UI/CommonButton.vue";
+import type { CreateCognitiveInputDto } from '../../../api/resolvers/test/dto/input/create-cognitive-input.dto.ts';
+import { UserState } from '../../../utils/userState/UserState.ts';
+import router from '../../../router/router.ts';
+import { usePopupStore } from '../../../store/popup.store.ts';
+import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
+import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
+import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
+import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 type DifficultyLevel = 0 | 1 | 2;
