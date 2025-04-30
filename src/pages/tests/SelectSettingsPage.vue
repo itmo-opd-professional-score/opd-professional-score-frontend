@@ -2,17 +2,24 @@
 import { defineComponent } from 'vue';
 import CustomInput from '../../components/UI/inputs/CustomInput.vue';
 import CommonButton from '../../components/UI/CommonButton.vue';
-import type { AccelerationMode } from './types';
-import type { TestSettingsDto } from '../../api/dto/test-settings.dto.ts';
+import type { AccelerationMode, TestType } from './types';
+import type { TestTypeDataOutputDto } from '../../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
+import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver.ts';
+import { TestSetupsResolver } from '../../api/resolvers/testSetup/test-setups.resolver.ts';
+import type { TestSetupInputDto } from '../../api/resolvers/testSetup/dto/input/test-setup-input.dto.ts';
+import { UserState } from '../../utils/userState/UserState.ts';
+import { UserRole } from '../../utils/userState/UserState.types.ts';
+import router from '../../router/router.ts';
+import { max, min } from '@floating-ui/utils';
 
 
 export default defineComponent({
   name: 'SelectSettingsPage',
   components: { CustomInput, CommonButton },
   props: {
-    testType: {
+    testTypeId: {
       type: String,
-      default: 'No test name',
+      required: true,
     },
   },
   data() {
@@ -23,15 +30,13 @@ export default defineComponent({
       showProgress: false,
       difficultyMode: true,
       accelerationMode: 'DISCRETE' as AccelerationMode,
-      testTypeLabels: {
-        lab4_3: 'Оценка простой реакции человека на движущийся объект',
-        lab4_4: 'Оценка сложной реакции человека на движущийся объект',
-        lab5_3: 'Оценка аналогового слежения',
-        lab5_4: 'Оценка слежения с преследованием',
-        lab6_3: 'Оценка внимания',
-        lab6_4: 'Оценка памяти',
-        lab6_5: 'Оценка мышления',
-      },
+      currentTestType: null as TestTypeDataOutputDto | null,
+      specialTypes: [
+        "SIMPLE_RDO",
+        "HARD_RDO",
+        "SIMPLE_TRACKING",
+        "HARD_TRACKING"
+      ] as Array<TestType>
     };
   },
   computed: {
@@ -40,16 +45,31 @@ export default defineComponent({
       const seconds = (this.duration % 60).toString().padStart(2, '0');
       return `${minutes} мин ${seconds} сек`;
     },
-    testTitle(): string {
-      return this.testType in this.testTypeLabels
-        ? this.testTypeLabels[this.testType as keyof typeof this.testTypeLabels]
-        : this.testType;
+    minTimeValue() {
+      if (this.currentTestType === null) return 120
+      switch (this.currentTestType.name) {
+        case "HARD_LIGHT":
+          return 0.5
+        default:
+          return 120
+      }
     },
+    maxTimeValue() {
+      if (this.currentTestType === null) return 2700
+      switch (this.currentTestType.name) {
+        case "HARD_LIGHT":
+          return 3
+        default:
+          return 2700
+      }
+    }
   },
   methods: {
-    saveSettings() {
-      const settings: TestSettingsDto = {
-        testType: this.testType,
+    min,
+    max,
+    async saveSettings() {
+      const settings: TestSetupInputDto = {
+        testTypeId: parseInt(this.testTypeId),
         duration: this.duration,
         showTimer: this.showTimer,
         showTotalResults: this.showTotalResults,
@@ -57,20 +77,24 @@ export default defineComponent({
         accelerationMode: this.accelerationMode,
         difficultyMode: this.difficultyMode,
       };
-      this.$emit('newSettings', settings);
+      await new TestSetupsResolver().create(settings)
+      await router.push('/testBlock/create')
     },
   },
-  emits: ['newSettings'],
+  async mounted() {
+    if ( ![UserRole.EXPERT, UserRole.ADMIN].includes(UserState.role!) ) await router.push('/profile')
+    this.currentTestType = await new TestTypeResolver().getById(parseInt(this.testTypeId))
+  }
 });
 </script>
 
 <template>
-  <div id="choose-settings">
+  <div class="choose-settings">
     <div class="choose-settings-form">
       <div class="section header-section">
-        <h2>Выберите настройки теста: <br />{{ testTitle }}</h2>
+        <h2>Выберите настройки теста: <br />{{ currentTestType ? currentTestType.description : "Load error" }}</h2>
       </div>
-      <div class="settings-group">
+      <div v-if="currentTestType" class="settings-group">
         <div class="time-interval-selector">
           <label
             >Время прохождения теста:
@@ -79,14 +103,14 @@ export default defineComponent({
           <CustomInput
             type="range"
             v-model.number="duration"
-            :minNumber="120"
-            :maxNumber="2700"
+            :minNumber="minTimeValue"
+            :maxNumber="maxTimeValue"
             selector="range"
             class="custom-slider"
           />
           <div class="slider-labels">
-            <span>2 мин</span>
-            <span>45 мин</span>
+            <span>{{ minTimeValue > 60 ? (minTimeValue / 60).toFixed(1) + ' мин' : minTimeValue + ' сек'}}</span>
+            <span>{{ maxTimeValue > 60 ? (minTimeValue / 60).toFixed(1) + ' мин' : maxTimeValue + ' сек'}}</span>
           </div>
           <div class="setting-item">
             <CustomInput
@@ -116,7 +140,7 @@ export default defineComponent({
           </div>
           <div
             class="special-settings"
-            v-if="['lab4_3', 'lab4_4', 'lab5_3', 'lab5_4'].includes(testType)"
+            v-if="specialTypes.includes(currentTestType.name)"
           >
             <h3>Ускорения:</h3>
             <div class="radio-group">
@@ -138,7 +162,7 @@ export default defineComponent({
           </div>
           <div
             class="special-settings"
-            v-if="['lab6_5', 'lab6_3', 'lab6_4'].includes(testType)"
+            v-if="specialTypes.includes(currentTestType.name)"
           >
             <h3>Выберите уровень сложности:</h3>
             <div class="radio-group">
@@ -172,26 +196,22 @@ export default defineComponent({
 </template>
 
 <style scoped>
-#choose-settings {
-  position: relative;
+.choose-settings {
   width: 100%;
   height: 100%;
-  z-index: 2;
-  transition: all 0.3s ease-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .choose-settings-form {
-  width: 100%;
-  max-width: 700px;
+  width: 50%;
   margin: auto;
-  background: rgba(255, 255, 255, 1);
-  border-radius: 1.4rem;
-  color: black;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-clip-margin: 0.02rem;
-  overflow: clip;
+  background-color: white;
+  border-radius: 10px;
 }
 
 .choose-settings-form h2 {
@@ -201,7 +221,7 @@ export default defineComponent({
   padding: 0 2rem;
 }
 
-#choose-settings button {
+.choose-settings button {
   margin: 0.3vh auto;
 }
 
@@ -209,6 +229,7 @@ export default defineComponent({
   width: 100%;
   background: rgb(16, 73, 231);
   padding: 0.5rem;
+  border-radius: 10px;
 }
 
 .time-interval-selector {
@@ -264,7 +285,6 @@ export default defineComponent({
 }
 
 .header-section {
-  position: relative;
   padding: 0.5rem 2rem 0.5rem 0.5rem;
 }
 

@@ -5,11 +5,10 @@ import { usePopupStore } from '../../../store/popup.store.ts';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
 import router from '../../../router/router.ts';
-import { jwtDecode } from 'jwt-decode';
-import type { TestJwt } from '../types';
 import type { CreateRdoInputDto } from '../../../api/resolvers/test/dto/input/create-rdo-input.dto.ts';
 import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 import SimpleRdoTest from '../simple/SimpleRdoTest.vue';
+import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
@@ -28,15 +27,15 @@ export default defineComponent({
   name: "HardRdoTest",
   components: { SimpleRdoTest, CommonButton },
   props: {
-    token: String,
-    presetId: Number
+    testBlockId: String,
+    setupId: String
   },
   data() {
     return {
       balls: [null, null, null] as Array<SimpleRdoTest | null>,
       completedTestsLinks: [] as Array<string>,
       completedTestsResults: [] as Array<string>,
-      time: 10,
+      duration: 10,
       showTimer: true,
       showTotalResults: true,
       showProgressBar: true,
@@ -106,7 +105,7 @@ export default defineComponent({
     },
     progressBarWidth() {
       if (this.remainingSeconds === 0) return '0%';
-      return `${this.remainingSeconds / this.time * 100}%`;
+      return `${this.remainingSeconds / this.duration * 100}%`;
     },
   },
   methods: {
@@ -120,7 +119,7 @@ export default defineComponent({
             this.remainingSeconds--
           }, 1000)
         }
-        this.remainingSeconds = this.time
+        this.remainingSeconds = this.duration
         this.balls.forEach((ball) => {
           if (ball != null) {
             ball.testState = 'ready'
@@ -139,59 +138,30 @@ export default defineComponent({
     },
     saveResults(): void {
       const popUpStore = usePopupStore()
-      const testResolver =
-        new TestResolver()
-      testResolver
-        .createRdo(this.testResultsDto).then((result) => {
-        if (!UserState.id) {
-          this.completedTestsLinks.push(this.token!);
-          this.completedTestsResults.push(result.body.testToken);
-          localStorage.setItem(
-            'completedTestsLinks',
-            JSON.stringify(this.completedTestsLinks),
-          );
-          localStorage.setItem(
-            'completedTestsResults',
-            JSON.stringify(this.completedTestsResults),
-          );
-        }
-        popUpStore.activateInfoPopup('Results were saved successfully!');
-      }).catch((error) => {
-        popUpStore.activateErrorPopup(
-          `Error code: ${error.status}. ${error.response.data.message}`,
-        );
-      });
-    },
-    async loadSettings() {
-      const testSetupResolver = new TestSetupsResolver()
-      const settings = await testSetupResolver.getById(this.presetId!)
-      if (settings) {
-        this.time = settings.duration
-        this.showProgressBar = settings.showProgress
-        this.showTimer = settings.showTimer
-        this.showTotalResults = settings.showTotalResults
+      new TestResolver().createRdo(this.testResultsDto).catch((err) => {
+        popUpStore.activateErrorPopup(err.message)
+      })
+      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
+        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
+        if (setupId && isNaN(setupId)) setupId = undefined
+        new TestBlockResolver().updateTestBlock({
+          testBlockId: parseInt(this.testBlockId),
+          updatedTest: {
+            name: "HARD_RDO",
+            setupId: setupId,
+            available: false
+          }
+        })
       }
     },
     async load () {
-      if (UserState.id) {
-        await router.push('/test/hard/rdo');
-
-      } else {
-        const linksData = localStorage.getItem('completedTestsLinks');
-        const resultsData = localStorage.getItem('completedTestsResults');
-        if (linksData) {
-          this.completedTestsLinks.push(...JSON.parse(linksData));
-        }
-        if (resultsData) {
-          this.completedTestsResults.push(...JSON.parse(resultsData));
-        }
-        if (this.token && this.completedTestsLinks.length != 0) {
-          this.completedTestsLinks.forEach((link) => {
-            const data = jwtDecode(link) as TestJwt;
-            if (data.testType == 'HARD_RDO') {
-              router.back()
-            }
-          });
+      if (this.setupId && !isNaN(parseInt(this.setupId))) {
+        const settings = await new TestSetupsResolver().getById(parseInt(this.setupId))
+        if (settings) {
+          this.duration = settings.duration
+          this.showProgressBar = settings.showProgress
+          this.showTimer = settings.showTimer
+          this.showTotalResults = settings.showTotalResults
         }
       }
     },
@@ -247,7 +217,7 @@ export default defineComponent({
             ref="simpleRdoTest"
             :is-module="true"
             :start-acceleration="Math.random() * 0.009"
-            :preset-id="presetId"
+            :preset-id="setupId"
           />
           <div v-if="ball?.currentDeviation" class="current-deviation">
             Текущее отклонение: {{ ball?.currentDeviation.toFixed(2) }} мс

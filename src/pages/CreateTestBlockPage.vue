@@ -10,6 +10,7 @@ import { usePopupStore } from '../store/popup.store.ts';
 import { useTestTypesStore } from '../store/test-types.store.ts';
 import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 import router from '../router/router.ts';
+import type { TestBlockTest } from './tests/types';
 
 export default {
   name: 'CreateTestBlockPage',
@@ -22,7 +23,7 @@ export default {
 
     return {
       approvedUsers: [] as number[],
-      approvedTests: [] as string[],
+      approvedTests: [] as TestBlockTest[],
       tests: [] as TestTypeDataOutputDto[],
       users,
       testBlockResolver,
@@ -34,9 +35,7 @@ export default {
     const usersFromApi = await this.userResolver.getAll();
     const testTypesStore = useTestTypesStore();
     await testTypesStore.loadTestTypes();
-
     this.tests = testTypesStore.getTestTypes;
-
     if (usersFromApi?.body) {
       this.users = usersFromApi?.body.sort((a, b) => a.id - b.id);
     }
@@ -45,9 +44,7 @@ export default {
     async save() {
       if (this.approvedTests.length > 0 && this.approvedUsers.length > 0) {
         const data: CreateTestBlockInputDto = {
-          tests: {
-            tests: this.approvedTests,
-          },
+          tests: this.approvedTests,
           userIDs: this.approvedUsers,
         };
 
@@ -71,16 +68,17 @@ export default {
   <div class="container">
     <h1 class="container-header">Создание блока тестов</h1>
 
-    <h2 class="block-header">Выберите тесты для блока тестов</h2>
+    <h2 class="block-header">Выберите тесты:</h2>
     <div class="tests-container">
       <TestRowElement
         v-for="(test, index) in tests"
         :key="index"
+        :test-type-id="test.id"
         :test-name="test.description"
         :test-meta="test.name"
-        @apply-test="(meta: string) => approvedTests.push(meta)"
+        @apply-test="(meta: TestBlockTest) => approvedTests.push(meta)"
         @remove-test="
-          (meta: string) => {
+          (meta) => {
             const i = approvedTests.indexOf(meta);
             approvedTests = [
               ...approvedTests.slice(0, i),
@@ -90,8 +88,7 @@ export default {
         "
       />
     </div>
-
-    <h2 class="block-header">Выберите пользователей для блока тестов</h2>
+    <h2 class="block-header">Выберите пользователей:</h2>
     <div class="user-container">
       <UserRowElement
         v-for="(user, index) in users"
@@ -112,7 +109,7 @@ export default {
       />
     </div>
 
-    <CommonButton class="approve-button" @click="save">
+    <CommonButton class="submit_button save" @click="save">
       <template v-slot:placeholder> Сохранить </template>
     </CommonButton>
   </div>
@@ -120,50 +117,58 @@ export default {
 
 <style scoped>
 .container {
-  width: 50vw;
+  width: 80vw;
   border-radius: 10px;
-  padding: 2rem 1rem;
+  padding: 3vw 2vw;
   background-color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  column-gap: 2vw;
+  grid-template-rows: repeat(3, auto);
 }
 
 .container-header {
   margin-bottom: 1rem;
+  grid-column: 1 / 3;
 }
 
 .tests-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  width: 95%;
   align-items: center;
-  justify-content: center;
-  margin: 1rem;
+  height: 100%;
 }
 
 .user-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  width: 95%;
   align-items: center;
-  justify-content: center;
-  margin: 1rem;
 }
 
-.approve-button,
-.approve-button:hover {
-  margin-top: 1rem;
-  width: 40%;
-  height: 3rem;
-  background-color: #4127e4;
-  color: white;
+.tests-container, .user-container {
+  overflow-y: scroll;
+  height: 43vh;
+  width: 100%;
+  gap: 1vh;
+  grid-row: 3 / 4;
 }
 
 .block-header {
-  margin-top: 1rem;
+  margin: 2vw 0;
+}
+
+.save {
+  grid-column: 1 / 3;
+  margin-left: auto;
+  margin-bottom: -2vw;
+  margin-right: -1vw;
+  width: 20%;
+}
+
+@media only screen and (max-width: 900px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+  }
 }
 </style>

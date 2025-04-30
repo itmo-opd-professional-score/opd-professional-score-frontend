@@ -25,16 +25,16 @@ export default {
   data() {
     return {
       added: false,
-      buttonClass: 'add-test',
+      buttonClass: 'submit_button',
     };
   },
   computed: {
     buttonText() {
       if (this.added) {
-        this.buttonClass = 'remove-user';
+        this.buttonClass = 'logout_button';
         return 'Удалить';
       } else {
-        this.buttonClass = 'add-user';
+        this.buttonClass = 'submit_button';
         return 'Добавить';
       }
     },
@@ -56,9 +56,7 @@ export default {
     <p class="wrapper-block user-name">{{ userName }}</p>
     <p class="wrapper-block user-email">{{ userEmail }}</p>
     <CommonButton class="user-button" :class="buttonClass" @click="applyTest">
-      <template v-slot:placeholder class="user-button">
-        {{ buttonText }} </template
-      >x
+      <template v-slot:placeholder>{{ buttonText }}</template>
     </CommonButton>
   </div>
 </template>
@@ -71,33 +69,13 @@ export default {
   border: 1px solid var(--input-border);
   background: white;
   display: grid;
-  grid-template-columns: 1fr 3fr 4fr 2fr;
+  grid-template-columns: 4% 16% 44% 26%;
   align-items: center;
   justify-items: center;
-  gap: 0.5rem;
-}
+  gap: 4%;
 
-.wrapper-block {
-  text-align: left;
-  overflow-x: unset;
-  width: 100%;
-}
-
-.user-button,
-.user-button:hover {
-  padding: 0.5rem 0;
-  width: 100%;
-}
-
-.add-user,
-.add-user:hover {
-  background-color: #4127e4;
-  color: white;
-}
-
-.remove-user,
-.remove-user:hover {
-  background-color: #e13a3a;
-  color: white;
+  .wrapper-block, .user-button {
+    width: 100%;
+  }
 }
 </style>

@@ -2,16 +2,18 @@
 import CommonButton from '../../../../components/UI/CommonButton.vue';
 import { TestResolver } from '../../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../../utils/userState/UserState.ts';
-import router from '../../../../router/router.ts';
-import { jwtDecode } from 'jwt-decode';
-import type { TestJwt } from '../../types';
 import { usePopupStore } from '../../../../store/popup.store.ts';
+import type { TestSetupOutputDTO } from '../../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
+import { TestSetupsResolver } from '../../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import router from '../../../../router/router.ts';
+import { TestBlockResolver } from '../../../../api/resolvers/testBlocks/test-block.resolver.ts';
 
 export default {
   name: 'AdditionVisualTest',
   components: { CommonButton },
   props: {
-    token: String
+    testBlockId: String,
+    setupId: String
   },
   data() {
     return {
@@ -28,7 +30,8 @@ export default {
       responseTimes: [] as Array<number>,
       standardDeviation: 0,
       completedTestsLinks: [] as Array<string>,
-      completedTestsResults: [] as Array<string>
+      completedTestsResults: [] as Array<string>,
+      showTotalResults: true,
     };
   },
   methods: {
@@ -53,7 +56,7 @@ export default {
         this.generateRandomNumbers();
       } else {
         this.testCompleted = true;
-        this.status = `Тест завершен! Правильные ответы: ${this.score} из ${this.totalAttempts}`;
+        this.status = `Правильные ответы: ${this.score} из ${this.totalAttempts}`;
         this.calculateStandardDeviation();
         this.saveResults()
       }
@@ -75,63 +78,42 @@ export default {
     },
     saveResults() {
       const popUpStore = usePopupStore()
-      const testResolver =
-        new TestResolver()
-      testResolver
-        .createAddition({
-          userId: UserState.id != undefined ? UserState.id : null,
-          dispersion: this.standardDeviation,
-          averageCallbackTime: this.responseTimes.reduce(
-            (sum, time) => sum + time, 0
-          ) / this.responseTimes.length,
-          allSignals: this.totalAttempts,
-          mistakes: this.totalAttempts - this.score,
-        }, "Visual").then((result) => {
-        if (!UserState.id) {
-          this.completedTestsLinks.push(this.token!);
-          this.completedTestsResults.push(result.body.testToken);
-          localStorage.setItem(
-            'completedTestsLinks',
-            JSON.stringify(this.completedTestsLinks),
-          );
-          localStorage.setItem(
-            'completedTestsResults',
-            JSON.stringify(this.completedTestsResults),
-          );
-        }
-        popUpStore.activateInfoPopup('Results were saved successfully!');
-      }).catch((error) => {
-        popUpStore.activateErrorPopup(
-          `Error code: ${error.status}. ${error.response.data.message}`,
-        );
-      });
+      new TestResolver().createAddition({
+        userId: UserState.id ? UserState.id : null,
+        dispersion: this.standardDeviation,
+        averageCallbackTime: this.responseTimes.reduce(
+          (sum, time) => sum + time, 0
+        ) / this.responseTimes.length,
+        allSignals: this.totalAttempts,
+        mistakes: this.totalAttempts - this.score,
+      }, "Visual").catch((err) => {
+        popUpStore.activateErrorPopup(err.message)
+      })
+      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
+        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
+        if (setupId && isNaN(setupId)) setupId = undefined
+        new TestBlockResolver().updateTestBlock({
+          testBlockId: parseInt(this.testBlockId),
+          updatedTest: {
+            name: "ADDITION_VISUAL",
+            setupId: setupId,
+            available: false
+          }
+        })
+      }
+    },
+    async resetTest() {
+      if (this.testBlockId) await router.push(`/testblock/${this.testBlockId}`);
+      else router.go(0)
     },
     async load () {
-      if (UserState.id) {
-        await router.push('/test/addition/visual');
-      } else {
-        const linksData = localStorage.getItem('completedTestsLinks');
-        const resultsData = localStorage.getItem('completedTestsResults');
-        if (linksData) {
-          this.completedTestsLinks.push(...JSON.parse(linksData));
-        }
-        if (resultsData) {
-          this.completedTestsResults.push(...JSON.parse(resultsData));
-        }
-        if (this.token && this.completedTestsLinks.length != 0) {
-          this.completedTestsLinks.forEach((link) => {
-            const data = jwtDecode(link) as TestJwt;
-            if (data.testType == 'ADDITION_VISUAL') {
-              router.back()
-            }
-          });
-        }
+      if (this.setupId && !isNaN(parseInt(this.setupId))) {
+        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
+        if (settings) this.showTotalResults = settings.showTotalResults
       }
     },
   },
-  mounted() {
-      this.load()
-  },
+  mounted() { this.load() }
 };
 </script>
 
@@ -160,12 +142,17 @@ export default {
         <div>Правильные ответы: {{ score }}</div>
         <div>Попытки: {{ attempts }}</div>
       </div>
-      <div class="results" v-else>
-        <p>{{ status }}</p>
-        <p>
-          Стандартное отклонение времени ответов:
-          {{ standardDeviation.toFixed(2) }} секунд
-        </p>
+      <div class="results" v-if="testCompleted">
+        <div class="short">
+          <h2>Поздравляем с выполнением теста!</h2>
+        </div>
+        <div class="full" v-if="showTotalResults">
+          <p>{{ status }}</p>
+          <p>
+            Стандартное отклонение времени ответов:
+            {{ standardDeviation.toFixed(2) }} секунд
+          </p>
+        </div>
       </div>
       <div class="numbers" v-if="!testCompleted">
         <span>{{ number1 }}</span>
@@ -179,7 +166,7 @@ export default {
         <CommonButton v-if="!testCompleted" class="button submit_button" @click="checkEvenOdd(false)">
           <template v-slot:placeholder>Нечетное</template>
         </CommonButton>
-        <CommonButton v-else class="button submit_button" @click="$router.go(0)">
+        <CommonButton v-else class="button submit_button" @click="resetTest">
           <template v-slot:placeholder>Пройти еще раз</template>
         </CommonButton>
       </div>
