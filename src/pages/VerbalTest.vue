@@ -1,6 +1,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import CommonButton from "../components/UI/CommonButton.vue";
+import type { CreateCognitiveInputDto } from '../api/resolvers/test/dto/input/create-cognitive-input.dto.ts';
+import { UserState } from '../utils/userState/UserState.ts';
+import router from '../router/router.ts';
+import { usePopupStore } from '../store/popup.store.ts';
+import { TestResolver } from '../api/resolvers/test/test.resolver.ts';
+import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
+import type { TestSetupOutputDTO } from '../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
+import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resolver.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 type DifficultyLevel = 0 | 1 | 2;
@@ -35,6 +43,7 @@ export default defineComponent({
       duration: 10,
       showTimer: false,
       showProgressBar: true,
+      showTotalResults: false,
     }
   },
 
@@ -50,7 +59,6 @@ export default defineComponent({
       const seconds = Math.floor((this.remainingTimeValue % 60000) / 1000);
       return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     },
-
     difficultyProbability(): number {
       const probabilities = [0.7, 0.4, 0.2];
       return probabilities[this.currentLevel];
@@ -59,6 +67,14 @@ export default defineComponent({
       if (this.remainingTimeValue === 0) return '0%';
       return `${(1 - this.remainingTimeValue / (this.duration * 1000)) * 100}%`;
     },
+    testResults(): CreateCognitiveInputDto {
+      return {
+        userId: UserState.id,
+        allSignals: this.score + this.mistakes,
+        mistakes: this.mistakes,
+        score: this.score
+      }
+    }
   },
 
   created() {
@@ -174,19 +190,41 @@ export default defineComponent({
         this.result = 0;
       }
     },
-
-    resetTest() {
-      this.finishTest();
-      this.testState = 'ready';
-      this.currentLevel = 0;
-      this.currentWords = [];
-      this.shownWords.clear();
-      this.score = 0;
-      this.mistakes = 0;
-      this.correctInRow = 0;
-      this.currentWord = '';
+    saveResults(): void {
+      const popUpStore = usePopupStore()
+      new TestResolver().createCognitive(this.testResults).catch((err) => {
+        popUpStore.activateErrorPopup(err.message)
+      })
+      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
+        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
+        if (setupId && isNaN(setupId)) setupId = undefined
+        new TestBlockResolver().updateTestBlock({
+          testBlockId: parseInt(this.testBlockId),
+          updatedTest: {
+            name: "VERBAL",
+            setupId: setupId,
+            available: false
+          }
+        })
+      }
     },
-  }
+    async resetTest() {
+      if (this.testBlockId) await router.push(`/testBlock/${this.testBlockId}`);
+      else router.go(0)
+    },
+    async load () {
+      if (this.setupId && !isNaN(parseInt(this.setupId))) {
+        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
+        if (settings) {
+          this.duration = settings.duration
+          this.showTotalResults = settings.showTotalResults
+          this.showTimer = settings.showTimer
+          this.showProgressBar = settings.showProgress
+        }
+      }
+    },
+  },
+  mounted() { this.load() },
 });
 </script>
 
@@ -239,11 +277,15 @@ export default defineComponent({
     <!-- Результаты -->
     <div v-else-if="testState === 'completed'" class="test-container">
       <h2 class="title">Тест завершен!</h2>
-      <p class="result">Правильных ответов: {{ score }}</p>
-      <p class="result">Ошибок: {{ mistakes }}</p>
-      <p class="result">Результат: {{ result }}%</p>
+      <div class="full" v-if="showTotalResults">
+        <p class="result">Правильных ответов: {{ score }}</p>
+        <p class="result">Ошибок: {{ mistakes }}</p>
+        <p class="result">Результат: {{ result }}%</p>
+      </div>
       <CommonButton class="restart-button" @click="resetTest">
-        <template v-slot:placeholder>Начать заново</template>
+        <template v-slot:placeholder>
+          {{ testBlockId ? 'Назад к блоку' : 'Начать заново'}}
+        </template>
       </CommonButton>
     </div>
   </div>
