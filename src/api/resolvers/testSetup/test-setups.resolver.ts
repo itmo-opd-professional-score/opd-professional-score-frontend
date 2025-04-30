@@ -29,11 +29,7 @@ export class TestSetupsResolver {
       'GET',
       null,
       this.token ? this.token : undefined,
-    ).catch((err) => {
-      const error = err as DefaultErrorDto;
-      error.message = ""
-      return []
-    })
+    )
   }
 
   public async create(data: TestSetupInputDto): Promise<DefaultOutputDto<TestSetupOutputDTO> | null> {
