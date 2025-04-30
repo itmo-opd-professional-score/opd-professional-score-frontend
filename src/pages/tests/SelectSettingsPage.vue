@@ -77,6 +77,7 @@ export default defineComponent({
         accelerationMode: this.accelerationMode,
         difficultyMode: this.difficultyMode,
       };
+      console.log(settings)
       await new TestSetupsResolver().create(settings)
       await router.push('/testBlock/create')
     },

@@ -15,14 +15,13 @@ import { TestBlockResolver } from '../../api/resolvers/testBlocks/test-block.res
 import router from '../../router/router.ts';
 
 const usePopUp = usePopupStore()
-const testType = ref<TestType | null>(null)
 const testSetupId = ref<number | undefined>(undefined)
 const props = defineProps<{
   testBlockId: string;
   testTypeName: string;
 }>();
 const testComponent = computed(() => {
-  switch (testType.value) {
+  switch (props.testTypeName) {
     case 'ADDITION_SOUND':
       return AdditionSoundTest;
     case 'ADDITION_VISUAL':

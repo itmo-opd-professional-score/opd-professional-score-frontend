@@ -16,25 +16,25 @@ export class TestBlockResolver {
       'GET',
       null,
       this.token ? this.token : undefined,
-    );
+    ).catch((error) => { return error.message })
   }
 
   public async getById(id: number) {
     return await this.apiResolver.request<null, GetTestBlockOutputDto>(
-      `getById/${id}`,
+      `getTestBlockById/${id}`,
       'GET',
       null,
       this.token ? this.token : undefined,
-    );
+    ).catch((error) => { return error.message })
   }
 
-  public async getByUserId(id: number) {
+  public async getAllByUserId(id: number) {
     return await this.apiResolver.request<null, GetTestBlockOutputDto[]>(
-      `getByUserId/${id}`,
+      `getAllAssignedTestBlockByUserId/${id}`,
       'GET',
       null,
       this.token ? this.token : undefined,
-    );
+    ).catch((error) => { return error.message })
   }
 
   public async createTestBlock(data: CreateTestBlockInputDto) {
@@ -57,6 +57,6 @@ export class TestBlockResolver {
         ...data
       },
       this.token ? this.token : undefined,
-    )
+    ).catch((error) => { return error.message })
   }
 }

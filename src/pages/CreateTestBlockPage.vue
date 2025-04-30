@@ -7,10 +7,10 @@ import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-da
 import UserRowElement from '../components/UserRowElement.vue';
 import type { CreateTestBlockInputDto } from '../api/resolvers/testBlocks/dto/input/create-test-block-input.dto.ts';
 import { usePopupStore } from '../store/popup.store.ts';
-import { useTestTypesStore } from '../store/test-types.store.ts';
 import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 import router from '../router/router.ts';
 import type { TestBlockTest } from './tests/types';
+import { TestTypeResolver } from '../api/resolvers/testType/testType.resolver.ts';
 
 export default {
   name: 'CreateTestBlockPage',
@@ -32,13 +32,12 @@ export default {
     };
   },
   async mounted() {
-    const usersFromApi = await this.userResolver.getAll();
-    const testTypesStore = useTestTypesStore();
-    await testTypesStore.loadTestTypes();
-    this.tests = testTypesStore.getTestTypes;
-    if (usersFromApi?.body) {
-      this.users = usersFromApi?.body.sort((a, b) => a.id - b.id);
-    }
+    try {
+      const usersFromApi = await this.userResolver.getAll();
+      const types = await new TestTypeResolver().getAll();
+      if (usersFromApi !== null) this.users = usersFromApi.body.sort((a, b) => a.id - b.id);
+      if (types !== null) this.tests = types;
+    } catch (e) {}
   },
   methods: {
     async save() {
@@ -69,14 +68,14 @@ export default {
     <h1 class="container-header">Создание блока тестов</h1>
 
     <h2 class="block-header">Выберите тесты:</h2>
-    <div class="tests-container">
+    <div class="tests-container" v-if="tests.length > 0">
       <TestRowElement
         v-for="(test, index) in tests"
         :key="index"
         :test-type-id="test.id"
         :test-name="test.description"
         :test-meta="test.name"
-        @apply-test="(meta: TestBlockTest) => approvedTests.push(meta)"
+        @apply-test="(meta) => approvedTests.push(meta)"
         @remove-test="
           (meta) => {
             const i = approvedTests.indexOf(meta);
@@ -89,7 +88,7 @@ export default {
       />
     </div>
     <h2 class="block-header">Выберите пользователей:</h2>
-    <div class="user-container">
+    <div class="user-container" v-if="users.length > 0">
       <UserRowElement
         v-for="(user, index) in users"
         :key="index"

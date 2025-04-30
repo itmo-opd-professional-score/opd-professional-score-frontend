@@ -128,7 +128,7 @@ const routes = [
     props: true,
   },
   {
-    path: `/testBlock/:testBlockId/test/:testTypeId`,
+    path: `/testBlock/:testBlockId/test/:testTypeName`,
     props: true,
     component: TestMapper,
   },

@@ -1,7 +1,6 @@
 import ApiResolverUtil from '../../../utils/ApiResolver.ts';
 import type { UpdateUserIdsInputDto } from './dto/input/update-user-ids-input.dto.ts';
 import type { DefaultOutputDto } from '../../dto/common/default-output.dto.ts';
-import { usePopupStore } from '../../../store/popup.store.ts';
 import type { TestDataOutputDto } from './dto/output/test-data-output.dto.ts';
 import type { CreateAdditionInputDto } from './dto/input/create-addition-input.dto.ts';
 import type { CreateOutputDto } from './dto/output/create-output.dto.ts';
@@ -17,7 +16,6 @@ import type { CreateHardTrackingInputDto } from './dto/input/create-hard-trackin
 export class TestResolver {
   private apiResolver = new ApiResolverUtil('test');
   private token = localStorage.getItem('token');
-  private usePopUp = usePopupStore();
 
   public async getAllByType(typeEndpoint: string) {
     return await this.apiResolver.request<null, TestDataOutputDto[]>(
@@ -25,7 +23,7 @@ export class TestResolver {
       'GET',
       null,
       this.token ? this.token : undefined,
-    );
+    )
   }
 
   public async getByTypeById(typeEndpoint: string, id: number) {
@@ -43,7 +41,7 @@ export class TestResolver {
       'GET',
       null,
       this.token ? this.token : undefined,
-    );
+    )
   }
 
   public async createAddition(data: CreateAdditionInputDto, endpoint: string) {
@@ -55,7 +53,7 @@ export class TestResolver {
       'POST',
       data,
       this.token ? this.token : undefined,
-    );
+    )
   }
 
   public async createSimple(data: CreateSimpleInputDto, endpoint: string) {
@@ -108,14 +106,10 @@ export class TestResolver {
         data,
         this.token ? this.token : undefined,
       )
-      .then((res) => {
+      .then(() => {
         localStorage.removeItem('completedTestsLinks');
         localStorage.removeItem('completedTestsResults');
-        this.usePopUp.activateInfoPopup(res.body);
       })
-      .catch((error) => {
-        this.usePopUp.activateErrorPopup(error.message);
-      });
   }
 
   public async generateTestLink(testType: {testType: TestType}) {
@@ -124,10 +118,7 @@ export class TestResolver {
       'POST',
       testType,
       this.token ? this.token : undefined,
-    ).catch((err) => {
-      this.usePopUp.activateErrorPopup(err.message);
-      return null
-    })
+    )
   }
 
   public async createSimpleTracking(data: CreateSimpleTrackingInputDto) {
@@ -139,9 +130,7 @@ export class TestResolver {
       'POST',
       data,
       this.token ? this.token : undefined,
-    ).catch((error) => {
-      this.usePopUp.activateErrorPopup(error.message);
-    });
+    )
   }
 
   public async createHardTracking(data: CreateHardTrackingInputDto) {
@@ -153,8 +142,6 @@ export class TestResolver {
       'POST',
       data,
       this.token ? this.token : undefined,
-    ).catch((error) => {
-      this.usePopUp.activateErrorPopup(error.message);
-    });
+    )
   }
 }

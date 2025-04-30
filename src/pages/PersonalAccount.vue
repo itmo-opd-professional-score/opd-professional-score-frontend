@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Button from '../components/UI/CommonButton.vue';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import TestsManagerList from '../components/TestsManagerList.vue';
 import UserManagerList from '../components/UserManagerList.vue';
 import ProfessionsManagerList from '../components/ProfessionsManagerList.vue';
@@ -20,6 +20,7 @@ import { useTestTypesStore } from '../store/test-types.store.ts';
 import type { GetTestBlockOutputDto } from '../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
 import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
 import TestBlocksManagerList from '../components/TestBlocksManagerList.vue';
+import * as test from 'node:test';
 import CommonButton from '../components/UI/CommonButton.vue';
 
 const authResolver = new AuthResolver();
@@ -67,10 +68,9 @@ const professionsPublished = ref<GetProfessionOutputDto[]>([]);
 const testBlocks = ref<GetTestBlockOutputDto[]>([]);
 
 const reloadTestBlocks = async () => {
-  const res = await testBlockResolver.getByUserId(
-    UserState.id ? UserState.id : 0,
-  );
-  if (res != null) testBlocks.value = res;
+  try {
+    testBlocks.value = await testBlockResolver.getAllByUserId(UserState.id!);
+  } catch (e) {}
 };
 
 const reloadUsers = async () => {
@@ -99,7 +99,7 @@ const reloadProfessions = async () => {
       popupStore.activateErrorPopup('Error occurred. No one profession found.');
     }
   } catch (e) {
-    popupStore.activateErrorPopup((e as DefaultErrorDto).message);
+    console.log((e as DefaultErrorDto).message)
   }
 };
 
@@ -179,29 +179,23 @@ const reloadTests = async () => {
       tests.value.hardLight.push(
         ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'hlt')),
       );
-    } catch (error) {
-      popupStore.activateErrorPopup((error as DefaultErrorDto).message);
-    }
+    } catch (error) {}
   }
 };
 
-const connectLocalTestsResults = () => {
-  const resultsData = localStorage.getItem('completedTestsResults');
-  if (resultsData && UserState.id) {
-    const completedTestsResults: string[] = JSON.parse(resultsData);
-    testResolver.updateUserIDs({
-      userId: UserState.id,
-      tokens: completedTestsResults,
-    });
-  }
-};
+const emptyProfile = computed(() => {
+  return allTests.value.length == 0 &&
+    Object.values(tests.value).reduce((acc, category) => acc + category.length, 0) == 0 &&
+    users.value.length == 0
+})
 
 onMounted(() => {
   if (UserState.role == UserRole.ADMIN) {
     reloadUsers();
   }
-  connectLocalTestsResults();
-  reloadProfessions();
+  if (UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN) {
+    reloadProfessions();
+  }
   reloadTests();
   reloadTestBlocks();
 });
@@ -408,7 +402,18 @@ onMounted(() => {
             :max-elements-count="5"
           />
         </div>
-
+      </div>
+      <div
+        v-if="emptyProfile"
+        class="empty-profile tests-info"
+      >
+        <h2>Похоже, тут еще ничего нет</h2>
+        <CommonButton
+          class="submit_button"
+          @click="router.push('/tests')"
+        >
+          <template #placeholder>Перейти в каталог тестов</template>
+        </CommonButton>
       </div>
     </div>
   </div>
@@ -497,5 +502,15 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+.empty-profile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .submit_button {
+    width: 50%;
+  }
 }
 </style>

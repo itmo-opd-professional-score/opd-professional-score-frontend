@@ -228,7 +228,7 @@ const saveResults = () => {
   new TestResolver().createHardLight({
     allSignals: ALL_SIGNALS,
     averageCallbackTime: avgTime.value,
-    dispersion: calculateDispersion(reactionTimes.value),
+    dispersion: parseFloat(calculateDispersion(reactionTimes.value).toFixed(2)),
     misclicks: missedAnswers.value,
     mistakes: wrongAnswers.value,
     userId: UserState.id ? UserState.id : null,
