@@ -17,6 +17,7 @@ import SelectSettingsPage from '../pages/tests/SelectSettingsPage.vue';
 import HardLightTest from '../pages/tests/hard/HardLightTest.vue';
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
+import HardTrackingTest from '../pages/tests/HardTrackingTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
 import SimpleRdoTest from '../pages/tests/simple/SimpleRdoTest.vue';
 import HardRdoTest from '../pages/tests/hard/HardRdoTest.vue';
@@ -129,12 +130,17 @@ const routes = [
     component: CreateTestBlockPage,
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
   },
-   {
-     path: '/test/settings/:testType',
-     component: SelectSettingsPage,
-     meta: { ruName: 'Настройки теста', requiresAuth: true },
-     props: true,
-   },
+  {
+    path: '/test/hard/tracking',
+    component: HardTrackingTest,
+    meta: { ruName: "Тест на координацию", requiresAuth: true },
+  },
+  {
+    path: '/test/settings/:testType',
+    component: SelectSettingsPage,     
+    meta: { ruName: 'Настройки теста', requiresAuth: true },
+    props: true,
+  },
 ];
 
 const router = createRouter({
