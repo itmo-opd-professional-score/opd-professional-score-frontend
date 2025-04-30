@@ -25,6 +25,9 @@ import TestBlockPage from '../pages/tests/TestBlockPage.vue';
 import NotFound from '../pages/NotFound.vue';
 import TestsCatalogPage from '../pages/TestsCatalogPage.vue';
 import SimpleTrackingTest from '../pages/tests/simple/SimpleTrackingTest.vue';
+import NumericalSeriesTest from '../pages/tests/cognitive/NumericalSeriesTest.vue';
+import StroopTest from '../pages/tests/cognitive/StroopTest.vue';
+import VerbalTest from '../pages/tests/cognitive/VerbalTest.vue';
 
 const routes = [
   {
@@ -120,9 +123,9 @@ const routes = [
   },
   {
     path: '/test/results/:testTypeId/:testId',
-    props: true,
     component: TestResultsPage,
     meta: { ruName: 'Результаты прохождения теста', requiresAuth: true },
+    props: true,
   },
   {
     path: `/testBlock/:testBlockId/test/:testTypeId`,
@@ -162,10 +165,26 @@ const routes = [
     meta: { ruName: 'Сложный тест на координацию', requiresAuth: true },
   },
   {
+    path: '/test/cognitive/verbal',
+    component: VerbalTest,
+    meta: { ruName: 'Тест на вербальное восприятие', requiresAuth: true },
+  },
+  {
     path: '/test/settings/:testType',
     component: SelectSettingsPage,
     meta: { ruName: 'Настройки теста', requiresAuth: true },
     props: true,
+  },
+  {
+    path: '/test/cognitive/numerical',
+    name: 'NumericalSeriesTest',
+    component: NumericalSeriesTest,
+    meta: { ruName: 'Тест Числовые последовательности' },
+  },
+  {
+    path: '/test/cognitive/stroop',
+    component: StroopTest,
+    meta: { ruName: 'Тест Струпа', requiresAuth: true },
   },
   {
     path: '/:catchAll(.*)*',
