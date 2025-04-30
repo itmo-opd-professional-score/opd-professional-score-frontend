@@ -1,6 +1,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import CommonButton from '../components/UI/CommonButton.vue';
+import CommonButton from '../../../components/UI/CommonButton.vue';
+import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
+import { usePopupStore } from '../../../store/popup.store.ts';
+import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
+import type { CreateCognitiveInputDto } from '../../../api/resolvers/test/dto/input/create-cognitive.dto.ts';
+import { UserState } from '../../../utils/userState/UserState.ts';
+import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
+import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import router from '../../../router/router.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
@@ -15,21 +23,32 @@ export default defineComponent({
       levelOfDifficulty: 0,
       score: 0,
       mistakes: 0,
-      totalTime: 0,
       remainingTimeValue: 0,
       timerIntervalId: null as ReturnType<typeof setInterval> | null,
       roundTimeoutId: null as ReturnType<typeof setTimeout> | null,
       testState: 'ready' as TestState,
       result: 0,
+      randomChangeOfDifficulty: false,
+
+      duration: 10,
+      showTimer: false,
+      showTotalResults: false,
+      showProgressBar: true
     };
   },
   props: {
-    randomChangeOfDifficulty: { type: Boolean, default: false },
-    time: { type: Number, required: true },
-    showTimer: { type: Boolean, default: false },
-    showFinalResults: { type: Boolean, default: false },
-    showPerMinuteResults: { type: Boolean, default: false },
-    showProgressBar: { type: Boolean, default: false },
+    testBlockId: String,
+    setupId: String
+  },
+  computed: {
+    testResults(): CreateCognitiveInputDto {
+      return {
+        userId: UserState.id,
+        allSignals: this.score + this.mistakes,
+        mistakes: this.mistakes,
+        score: this.score
+      }
+    }
   },
   methods: {
     giveColorName() {
@@ -66,8 +85,8 @@ export default defineComponent({
     },
     nextRound() {
       if (!this.randomChangeOfDifficulty) {
-        const timePassed = (this.totalTime * 1000 - this.remainingTimeValue) / 1000;
-        const thirdTime = this.totalTime / 3;
+        const timePassed = (this.duration * 1000 - this.remainingTimeValue) / 1000;
+        const thirdTime = this.duration / 3;
         if (timePassed >= thirdTime * 2 && this.levelOfDifficulty < 2) {
           this.levelOfDifficulty = 2;
         } else if (timePassed >= thirdTime && this.levelOfDifficulty < 1) {
@@ -86,11 +105,10 @@ export default defineComponent({
       }, 3000);
     },
     startTest() {
-      this.totalTime = this.time;
-      this.remainingTimeValue = this.time * 1000;
+      this.remainingTimeValue = this.duration * 1000;
       this.testState = 'reacting';
       this.nextRound();
-      this.startTimer(this.time);
+      this.startTimer(this.duration);
     },
     startTimer(totalSeconds: number) {
       this.remainingTimeValue = totalSeconds * 1000;
@@ -113,13 +131,27 @@ export default defineComponent({
         this.result = Math.round((this.score / (this.score + this.mistakes)) * 100);
       }
     },
-    resetTest() {
-      this.cancelTimer();
-      this.clearRoundTimeout();
-      this.testState = 'ready';
-      this.score = 0;
-      this.mistakes = 0;
-      this.currentWord = '';
+    saveResults(): void {
+      const popUpStore = usePopupStore()
+      new TestResolver().createCognitive(this.testResults).catch((err) => {
+        popUpStore.activateErrorPopup(err.message)
+      })
+      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
+        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
+        if (setupId && isNaN(setupId)) setupId = undefined
+        new TestBlockResolver().updateTestBlock({
+          testBlockId: parseInt(this.testBlockId),
+          updatedTest: {
+            name: "STROOP",
+            setupId: setupId,
+            available: false
+          }
+        })
+      }
+    },
+    async resetTest() {
+      if (this.testBlockId) await router.push(`/testBlock/${this.testBlockId}`);
+      else router.go(0)
     },
     cancelTimer() {
       if (this.timerIntervalId) {
@@ -140,14 +172,26 @@ export default defineComponent({
     },
     progressBarWidth() {
       if (this.remainingTimeValue === 0) return '0%';
-      return `${(1 - this.remainingTimeValue / (this.time * 1000)) * 100}%`;
+      return `${(1 - this.remainingTimeValue / (this.duration * 1000)) * 100}%`;
     },
     clickButton() {
       if (this.testState === 'ready') {
         this.startTest();
       }
     },
+    async load () {
+      if (this.setupId && !isNaN(parseInt(this.setupId))) {
+        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
+        if (settings) {
+          this.duration = settings.duration
+          this.showTotalResults = settings.showTotalResults
+          this.showTimer = settings.showTimer
+          this.showProgressBar = settings.showProgress
+        }
+      }
+    },
   },
+  mounted() { this.load() },
 });
 </script>
 
@@ -203,9 +247,11 @@ export default defineComponent({
     </div>
     <div v-if="testState == 'completed'" class="test-container">
       <h2 class="title">Тест завершен!</h2>
-      <p class="result">Правильных ответов: {{ score }}</p>
-      <p class="result">Ошибок: {{ mistakes }}</p>
-      <p class="result">Результат: {{ result }}%</p>
+      <div class="full" v-if="showTotalResults">
+        <p class="result">Правильных ответов: {{ score }}</p>
+        <p class="result">Ошибок: {{ mistakes }}</p>
+        <p class="result">Результат: {{ result }}%</p>
+      </div>
       <CommonButton
         class="reaction-button"
         @click="resetTest"
@@ -263,7 +309,7 @@ export default defineComponent({
 }
 
 .progress-bar-container {
-  width: 80%;
+  width: 50vw;
   height: 10px;
   background-color: #ddd;
   border-radius: 5px;
@@ -289,6 +335,11 @@ export default defineComponent({
   max-width: 35vw;
   padding: 2rem;
   text-align: center;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 
 .progress-bar {
