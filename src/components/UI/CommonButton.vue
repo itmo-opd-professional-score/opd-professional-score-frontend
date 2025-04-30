@@ -46,6 +46,12 @@ defineProps<{ disabled?: boolean }>();
   color: white;
 }
 
+.wrapper.submit_button:disabled {
+  background-color: #6da3f5;
+  color: rgba(255, 255, 255, 0.54);
+  border-color: transparent;
+}
+
 .wrapper.logout_button {
   background-color: var(--danger-button-secondary);
   border-color: var(--danger-button-primary);

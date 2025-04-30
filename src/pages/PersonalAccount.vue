@@ -7,7 +7,6 @@ import ProfessionsManagerList from '../components/ProfessionsManagerList.vue';
 import { calculateAge, UserState } from '../utils/userState/UserState.ts';
 import { ProfessionResolver } from '../api/resolvers/profession/profession.resolver.ts';
 import type { GetProfessionOutputDto } from '../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
-import { usePopupStore } from '../store/popup.store.ts';
 import type { DefaultErrorDto } from '../api/dto/common/default-error.dto.ts';
 import { AuthResolver } from '../api/resolvers/auth/auth.resolver.ts';
 import router from '../router/router.ts';
@@ -20,7 +19,6 @@ import { useTestTypesStore } from '../store/test-types.store.ts';
 import type { GetTestBlockOutputDto } from '../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
 import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
 import TestBlocksManagerList from '../components/TestBlocksManagerList.vue';
-import * as test from 'node:test';
 import CommonButton from '../components/UI/CommonButton.vue';
 
 const authResolver = new AuthResolver();
@@ -29,7 +27,6 @@ const testResolver = new TestResolver();
 const testBlockResolver = new TestBlockResolver();
 const professionResolver = new ProfessionResolver();
 
-const popupStore = usePopupStore();
 const testTypesStore = useTestTypesStore();
 testTypesStore.loadTestTypes();
 
@@ -95,8 +92,6 @@ const reloadProfessions = async () => {
       });
       professionsArchive.value.sort((a, b) => a.id - b.id);
       professionsPublished.value.sort((a, b) => a.id - b.id);
-    } else {
-      popupStore.activateErrorPopup('Error occurred. No one profession found.');
     }
   } catch (e) {
     console.log((e as DefaultErrorDto).message)
@@ -252,7 +247,8 @@ onMounted(() => {
       <div
         class="tests-info"
         v-if="
-          UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN
+          (UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN)
+          && allTests.length > 0
         "
       >
         <p class="block_header">Все тесты</p>

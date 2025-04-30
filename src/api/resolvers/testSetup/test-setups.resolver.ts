@@ -1,7 +1,6 @@
 import ApiResolverUtil from '../../../utils/ApiResolver.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import type { TestSetupOutputDTO } from './dto/output/test-setup-output.dto.ts';
-import type { DefaultErrorDto } from '../../dto/common/default-error.dto.ts';
 import type { TestSetupInputDto } from './dto/input/test-setup-input.dto.ts';
 import type { DefaultOutputDto } from '../../dto/common/default-output.dto.ts';
 
@@ -16,11 +15,7 @@ export class TestSetupsResolver {
       'GET',
       null,
       this.token ? this.token : undefined,
-    ).catch((err) => {
-      const error = err as DefaultErrorDto;
-      this.usePopUp.activateErrorPopup(error.message);
-      return null
-    })
+    )
   }
 
   public async getAllByTestTypeId(testTypeId: number): Promise<TestSetupOutputDTO[]> {
@@ -41,10 +36,6 @@ export class TestSetupsResolver {
     ).then((res) => {
       this.usePopUp.activateInfoPopup("Setup was created successfully!")
       return res
-    }).catch((err) => {
-      const error = err as DefaultErrorDto;
-      this.usePopUp.activateErrorPopup(error.message)
-      return null
     })
   }
 }

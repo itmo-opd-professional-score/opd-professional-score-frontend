@@ -20,47 +20,47 @@ const testsData = [
     link: "/test/hard/light"
   },
   {
-    name: "Сложение в уме на слух",
+    name: "Сложение в уме - на слух",
     category: "Сложный",
     link: "/test/addition/sound"
   },
   {
-    name: "Сложение в уме визуально",
+    name: "Сложение в уме - визуально",
     category: "Сложный",
     link: "/test/addition/visual"
   },
   {
-    name: "Простая реакция на движущийся объект",
+    name: "Простая реакция на движение",
     category: "Простой",
     link: "/test/simple/rdo"
   },
   {
-    name: "Сложная реакция на движущийся объект",
+    name: "Сложная реакция на движение",
     category: "Сложный",
     link: "/test/hard/rdo"
   },
   {
-    name: "Простая реакция на преследование объекта",
+    name: "Простая реакция на преследование",
     category: "Простой",
     link: "/test/simple/tracking"
   },
   {
-    name: "Сложная реакция на преследование объекта",
+    name: "Сложная реакция на преследование",
     category: "Сложный",
     link: "/test/simple/tracking"
   },
   {
-    name: "Тест Струппа",
+    name: "Тест Струпа",
     category: "Средний",
     link: "/test/cognitive/stroop"
   },
   {
-    name: "Тест на нахождение последовательностей",
+    name: "Числовые закономерности",
     category: "Средний",
     link: "/test/cognitive/numerical"
   },
   {
-    name: "Тест на вербальное восприятие",
+    name: "Вербальное восприятие",
     category: "Средний",
     link: "/test/cognitive/verbal"
   }

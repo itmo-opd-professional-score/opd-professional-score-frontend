@@ -4,6 +4,7 @@ import CustomSelect from './UI/inputs/CustomSelect.vue';
 import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resolver.ts';
 import router from '../router/router.ts';
 import type { TestBlockTest } from '../pages/tests/types';
+import type { DefaultErrorDto } from '../api/dto/common/default-error.dto.ts';
 
 export default {
   name: 'TestRowElement',
@@ -61,13 +62,15 @@ export default {
   },
   async mounted() {
     if (this.testTypeId) {
-      const presets = await new TestSetupsResolver().getAllByTestTypeId(this.testTypeId)
-      presets.forEach((preset) => {
-        this.setups.push({
-          value: preset.id.toString(),
-          text: `Конфиг №${preset.id}`,
-        });
-      })
+      try {
+        const setups = await new TestSetupsResolver().getAllByTestTypeId(this.testTypeId)
+        setups.forEach((setup) => {
+          this.setups.push({
+            value: setup.id.toString(),
+            text: `Конфиг №${setup.id}`,
+          });
+        })
+      } catch (e) { return (e as DefaultErrorDto).message }
     }
   },
 };

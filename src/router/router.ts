@@ -28,45 +28,7 @@ import SimpleTrackingTest from '../pages/tests/simple/SimpleTrackingTest.vue';
 import NumericalSeriesTest from '../pages/tests/cognitive/NumericalSeriesTest.vue';
 import StroopTest from '../pages/tests/cognitive/StroopTest.vue';
 import VerbalTest from '../pages/tests/cognitive/VerbalTest.vue';
-
-const routes = [
-  {
-    path: '/',
-    component: ProfessionsList,
-    meta: { ruName: 'Главная' },
-  },
-  {
-    path: '/professions',
-    component: ProfessionsList,
-    meta: { ruName: 'Профессии' },
-  },
-  {
-    path: `/profession/new`,
-    component: ProfessionForm,
-    meta: { requiresAuth: true, ruName: 'Новая профессия' },
-  },
-  {
-    path: `/profession/setup/:professionId`,
-    component: PvkSetupPage,
-    meta: { requiresAuth: true, ruName: 'Установка ПВК' },
-    props: true,
-  },
-  {
-    path: `/profession/:id`,
-    component: ProfessionPage,
-    props: true,
-    meta: { ruName: 'Профессия ' },
-  },
-  {
-    path: '/profile',
-    component: PersonalAccount,
-    meta: { requiresAuth: true, ruName: 'Профиль' },
-  },
-  {
-    path: `/profile/change`,
-    component: PersonalAccountChanging,
-    meta: { requiresAuth: true, ruName: 'Изменение профиля' },
-  },
+const authRoutes = [
   {
     path: '/auth/login',
     component: LogInPage,
@@ -82,66 +44,36 @@ const routes = [
     component: PasswordChanging,
     meta: { ruName: 'Изменение пароля' },
   },
+]
+const professionRoutes = [
   {
-    path: '/test/addition/visual',
-    component: AdditionVisualTest,
-    meta: { requiresAuth: true, ruName: 'Тест на определение четности' },
+    path: '/professions',
+    component: ProfessionsList,
+    meta: { ruName: 'Список профессий' },
   },
   {
-    path: `/test/addition/sound`,
-    component: AdditionSoundTest,
-    meta: {
-      requiresAuth: true,
-      ruName:
-        'Оценка скорости реакции на сложный звуковой сигнал - сложение в уме',
-    },
+    path: `/profession/new`,
+    component: ProfessionForm,
+    meta: { ruName: 'Новая профессия', requiresAuth: true, },
   },
   {
-    path: '/test/simple/sound',
-    component: SimpleSoundTest,
-    meta: { ruName: 'Простой звуковой тест', requiresAuth: true },
-  },
-  {
-    path: '/test/simple/light',
-    component: SimpleLightTest,
-    meta: { ruName: 'Оценка скорости простых реакции на свет', requiresAuth: true },
-  },
-  {
-    path: '/test/simple/rdo',
-    component: SimpleRdoTest,
-    meta: { ruName: 'Оценка скорости простой реакции на движущийся объект', requiresAuth: true },
-  },
-  {
-    path: '/test/hard/rdo',
-    component: HardRdoTest,
-    meta: { ruName: 'Оценки скорости сложной реакции на движущийся объект', requiresAuth: true },
-  },
-  {
-    path: '/test/hard/light',
-    component: HardLightTest,
-    meta: { ruName: 'Оценка скорости реакции на сложный световой сигнал', requiresAuth: true },
-  },
-  {
-    path: '/test/results/:testTypeId/:testId',
-    component: TestResultsPage,
-    meta: { ruName: 'Результаты прохождения теста', requiresAuth: true },
+    path: `/profession/setup/:professionId`,
+    component: PvkSetupPage,
+    meta: { ruName: 'Установка ПВК', requiresAuth: true },
     props: true,
   },
   {
-    path: `/testBlock/:testBlockId/test/:testTypeName`,
+    path: `/profession/:id`,
+    component: ProfessionPage,
+    meta: { ruName: 'Страница профессии'},
     props: true,
-    component: TestMapper,
   },
+]
+const testBlockRoutes = [
   {
     path: '/testBlock/create',
     component: CreateTestBlockPage,
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
-  },
-  {
-    path: '/test/settings/:testTypeId',
-    component: SelectSettingsPage,
-    meta: { ruName: 'Настройки теста', requiresAuth: true },
-    props: true,
   },
   {
     path: '/testBlock/:testBlockId/:testBlockToken',
@@ -150,25 +82,67 @@ const routes = [
     props: true,
   },
   {
-    path: '/tests',
-    component: TestsCatalogPage,
-    meta: { ruName: 'Доступные тесты', requiresAuth: true },
+    path: `/testBlock/:testBlockId/test/:testTypeName`,
+    component: TestMapper,
+    props: true,
+  },
+  {
+    path: '/test/settings/:testType',
+    component: SelectSettingsPage,
+    meta: { ruName: 'Настройки теста', requiresAuth: true },
+    props: true,
+  },
+]
+const testRoutes = [
+  {
+    path: '/test/simple/light',
+    component: SimpleLightTest,
+    meta: { ruName: 'Простая реакция на свет', requiresAuth: true },
+  },
+  {
+    path: '/test/simple/sound',
+    component: SimpleSoundTest,
+    meta: { ruName: 'Простая реакция на звук', requiresAuth: true },
+  },
+  {
+    path: '/test/hard/light',
+    component: HardLightTest,
+    meta: { ruName: 'Сложная реакция на свет', requiresAuth: true },
+  },
+  {
+    path: '/test/addition/visual',
+    component: AdditionVisualTest,
+    meta: { ruName: 'Сложение в уме - визуально', requiresAuth: true },
+  },
+  {
+    path: `/test/addition/sound`,
+    component: AdditionSoundTest,
+    meta: { ruName: 'Сложение в уме - на слух', requiresAuth: true,  },
+  },
+  {
+    path: '/test/simple/rdo',
+    component: SimpleRdoTest,
+    meta: { ruName: 'Простая реакция на движение', requiresAuth: true },
+  },
+  {
+    path: '/test/hard/rdo',
+    component: HardRdoTest,
+    meta: { ruName: 'Сложная реакция а движение', requiresAuth: true },
   },
   {
     path: '/test/simple/tracking',
     component: SimpleTrackingTest,
-    meta: { ruName: 'Простой тест на координацию', requiresAuth: true },
+    meta: { ruName: 'Простая реакция на преследование', requiresAuth: true },
   },
   {
     path: '/test/hard/tracking',
     component: HardTrackingTest,
-    meta: { ruName: 'Сложный тест на координацию', requiresAuth: true },
+    meta: { ruName: 'Сложная реакция на преследование', requiresAuth: true },
   },
   {
     path: '/test/cognitive/numerical',
-    name: 'NumericalSeriesTest',
     component: NumericalSeriesTest,
-    meta: { ruName: 'Тест Числовые последовательности' },
+    meta: { ruName: 'Числовые закономерности', requiresAuth: true },
   },
   {
     path: '/test/cognitive/stroop',
@@ -178,13 +152,47 @@ const routes = [
   {
     path: '/test/cognitive/verbal',
     component: VerbalTest,
-    meta: { ruName: 'Тест на вербальное восприятие', requiresAuth: true },
+    meta: { ruName: 'Вербальное восприятие', requiresAuth: true },
   },
+
   {
-    path: '/test/settings/:testType',
+    path: '/test/settings/:testTypeId',
     component: SelectSettingsPage,
     meta: { ruName: 'Настройки теста', requiresAuth: true },
     props: true,
+  },
+  {
+    path: '/test/results/:testTypeId/:testId',
+    component: TestResultsPage,
+    meta: { ruName: 'Результаты прохождения теста', requiresAuth: true },
+    props: true,
+  },
+]
+
+const routes = [
+  ...authRoutes,
+  ...professionRoutes,
+  ...testBlockRoutes,
+  ...testRoutes,
+  {
+    path: '/',
+    component: ProfessionsList,
+    meta: { ruName: 'Главная' },
+  },
+  {
+    path: '/profile',
+    component: PersonalAccount,
+    meta: { requiresAuth: true, ruName: 'Профиль' },
+  },
+  {
+    path: `/profile/change`,
+    component: PersonalAccountChanging,
+    meta: { requiresAuth: true, ruName: 'Изменение профиля' },
+  },
+  {
+    path: '/tests',
+    component: TestsCatalogPage,
+    meta: { ruName: 'Доступные тесты', requiresAuth: true },
   },
   {
     path: '/:catchAll(.*)*',

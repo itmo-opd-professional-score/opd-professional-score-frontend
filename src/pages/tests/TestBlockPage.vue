@@ -70,6 +70,8 @@ onMounted(async () => {
 
     .test-block {
       width: 50%;
+      height: 79%;
+      overflow-y: scroll;
       background-color: var(--background-primary);
       padding: 2vw;
       border-radius: 15px;

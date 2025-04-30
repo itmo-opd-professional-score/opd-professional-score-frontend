@@ -50,7 +50,7 @@ export default {
         await this.testBlockResolver.createTestBlock(data).then((res) => {
           if (res.status == 200) {
             this.popupStore.activateInfoPopup('Блок тестов создан успешно!');
-            router.push('/');
+            router.push('/profile');
           }
         });
       } else {
