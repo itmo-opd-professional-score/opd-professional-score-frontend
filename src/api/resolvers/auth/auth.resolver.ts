@@ -1,6 +1,6 @@
 import ApiResolver from '../../../utils/ApiResolver.ts';
 import type { LoginUserInputDto } from './dto/input/login-user-input.dto.ts';
-import type { DefaultInputDto } from '../../dto/common/default-input.dto.ts';
+import type { DefaultOutputDto } from '../../dto/common/default-output.dto.ts';
 import type { RegUserFirstStepInputDto } from './dto/input/reg-user-first-step-input.dto.ts';
 import type { AuthUserOutputDto } from './dto/output/auth-user-output.dto.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
@@ -16,7 +16,7 @@ export class AuthResolver {
 
   public async login(data: LoginUserInputDto) {
     return await this.apiResolver
-      .request<LoginUserInputDto, DefaultInputDto<AuthUserOutputDto>>(
+      .request<LoginUserInputDto, DefaultOutputDto<AuthUserOutputDto>>(
         'login',
         'POST',
         data,
@@ -44,7 +44,7 @@ export class AuthResolver {
 
   public async registrationFirstStep(data: RegUserFirstStepInputDto) {
     return await this.apiResolver
-      .request<RegUserFirstStepInputDto, DefaultInputDto<string>>(
+      .request<RegUserFirstStepInputDto, DefaultOutputDto<string>>(
         'registrationFirstStep',
         'POST',
         data,
@@ -64,7 +64,7 @@ export class AuthResolver {
 
   public async registrationSecondStep(data: RegUserSecondStepInputDto) {
     return await this.apiResolver
-      .request<RegUserSecondStepInputDto, DefaultInputDto<AuthUserOutputDto>>(
+      .request<RegUserSecondStepInputDto, DefaultOutputDto<AuthUserOutputDto>>(
         'register',
         'POST',
         data,

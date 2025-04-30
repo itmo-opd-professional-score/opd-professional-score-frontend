@@ -1,6 +1,6 @@
+import type { TestBlockTest } from '../../../../../pages/tests/types';
+
 export interface CreateTestBlockInputDto {
-  tests: {
-    tests: string[];
-  };
+  tests: TestBlockTest[];
   userIDs: number[];
 }

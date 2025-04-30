@@ -1,6 +1,6 @@
 import ApiResolverUtil from '../../../utils/ApiResolver.ts';
 import type { UpdateUserIdsInputDto } from './dto/input/update-user-ids-input.dto.ts';
-import type { DefaultInputDto } from '../../dto/common/default-input.dto';
+import type { DefaultOutputDto } from '../../dto/common/default-output.dto.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import type { TestDataOutputDto } from './dto/output/test-data-output.dto.ts';
 import type { CreateAdditionInputDto } from './dto/input/create-addition-input.dto.ts';
@@ -8,6 +8,7 @@ import type { CreateOutputDto } from './dto/output/create-output.dto.ts';
 import type { CreateSimpleInputDto } from './dto/input/create-simple-input.dto.ts';
 import type { CreateRdoInputDto } from './dto/input/create-rdo-input.dto.ts';
 import type { TestType } from '../../../pages/tests/types';
+import type { CreateHardLightInputDto } from './dto/input/create-hard-light-input.dto.ts';
 
 
 export class TestResolver {
@@ -66,6 +67,18 @@ export class TestResolver {
     )
   }
 
+  public async createHardLight(data: CreateHardLightInputDto) {
+    return await this.apiResolver.request<
+      CreateSimpleInputDto,
+      CreateOutputDto
+    >(
+      'hlt/create',
+      'POST',
+      data,
+      this.token ? this.token : undefined,
+    )
+  }
+
   public async createRdo(data: CreateRdoInputDto) {
     return await this.apiResolver.request<CreateRdoInputDto, CreateOutputDto>(
       'rdo/createRDOTest',
@@ -77,7 +90,7 @@ export class TestResolver {
 
   public async updateUserIDs(data: UpdateUserIdsInputDto) {
     return await this.apiResolver
-      .request<UpdateUserIdsInputDto, DefaultInputDto<string>>(
+      .request<UpdateUserIdsInputDto, DefaultOutputDto<string>>(
         'updateUserIDs',
         'PATCH',
         data,
