@@ -42,6 +42,11 @@ const tests = ref<{
   hardLight: TestDataOutputDto[];
   simpleRdo: TestDataOutputDto[];
   hardRdo: TestDataOutputDto[];
+  simpleTracking: TestDataOutputDto[];
+  hardTracking: TestDataOutputDto[];
+  numerical: TestDataOutputDto[];
+  stroop: TestDataOutputDto[];
+  verbal: TestDataOutputDto[];
 }>({
   additionSound: [],
   additionVisual: [],
@@ -50,6 +55,11 @@ const tests = ref<{
   hardLight: [],
   simpleRdo: [],
   hardRdo: [],
+  simpleTracking: [],
+  hardTracking: [],
+  numerical: [],
+  stroop: [],
+  verbal: [],
 });
 const allTests = ref<TestDataOutputDto[]>([]);
 const professionsArchive = ref<GetProfessionOutputDto[]>([]);
@@ -95,49 +105,83 @@ const reloadProfessions = async () => {
 
 const reloadTests = async () => {
   if (UserState.role) {
-    let additionTests: TestDataOutputDto[];
-    let rdoTests: TestDataOutputDto[];
-    if (UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT) {
-      allTests.value.push(...(await testResolver.getAllByType('at')));
-      allTests.value.push(...(await testResolver.getAllByType('sst')));
-      allTests.value.push(...(await testResolver.getAllByType('slt')));
-      allTests.value.push(...(await testResolver.getAllByType('hlt')));
-      allTests.value.push(...(await testResolver.getAllByType('rdo')));
+    try {
+      let additionTests: TestDataOutputDto[];
+      let rdoTests: TestDataOutputDto[];
+      let trackingTests: TestDataOutputDto[];
+      let cognitiveTests: TestDataOutputDto[];
+      if (UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT) {
+        allTests.value.push(...(await testResolver.getAllByType('at')));
+        allTests.value.push(...(await testResolver.getAllByType('sst')));
+        allTests.value.push(...(await testResolver.getAllByType('slt')));
+        allTests.value.push(...(await testResolver.getAllByType('hlt')));
+        allTests.value.push(...(await testResolver.getAllByType('rdo')));
+        allTests.value.push(...(await testResolver.getAllByType('tracking')));
+        allTests.value.push(...(await testResolver.getAllByType('cognitive')));
+      }
+      additionTests = await testResolver.getTestsByTypeByUserId(
+        UserState.id!,
+        'at',
+      );
+      rdoTests = await testResolver.getTestsByTypeByUserId(
+        UserState.id!,
+        'rdo'
+      );
+      trackingTests = await testResolver.getTestsByTypeByUserId(
+        UserState.id!,
+        'tracking'
+      );
+      cognitiveTests = await testResolver.getTestsByTypeByUserId(
+        UserState.id!,
+        'cognitive'
+      );
+      if (additionTests) {
+        tests.value.additionSound = additionTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'ADDITION_SOUND' ? test : null,
+        );
+        tests.value.additionVisual = additionTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'ADDITION_VISUAL' ? test : null,
+        );
+      }
+      if (rdoTests) {
+        tests.value.simpleRdo = rdoTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'SIMPLE_RDO' ? test : null,
+        );
+        tests.value.hardRdo = rdoTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'HARD_RDO' ? test : null,
+        );
+      }
+      if (trackingTests) {
+        tests.value.simpleTracking = trackingTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'SIMPLE_TRACKING' ? test : null,
+        );
+        tests.value.hardTracking = trackingTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'HARD_TRACKING' ? test : null,
+        );
+      }
+      if (cognitiveTests) {
+        tests.value.numerical = cognitiveTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'NUMERICAL' ? test : null,
+        );
+        tests.value.stroop = cognitiveTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'STROOP' ? test : null,
+        );
+        tests.value.verbal = cognitiveTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'VERBAL' ? test : null,
+        );
+      }
+      tests.value.simpleSound.push(
+        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst')),
+      );
+      tests.value.simpleLight.push(
+        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'slt')),
+      );
+      tests.value.hardLight.push(
+        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'hlt')),
+      );
+    } catch (error) {
+      popupStore.activateErrorPopup((error as DefaultErrorDto).message);
     }
-    additionTests = await testResolver.getTestsByTypeByUserId(
-      UserState.id!,
-      'at',
-    );
-    rdoTests = await testResolver.getTestsByTypeByUserId(
-      UserState.id!,
-      'rdo'
-    )
-    if (additionTests) {
-      tests.value.additionSound = additionTests.filter((test) =>
-        testTypesStore.checkTestType(test).name == 'ADDITION_SOUND' ? test : null,
-      );
-      tests.value.additionVisual = additionTests.filter((test) =>
-        testTypesStore.checkTestType(test).name == 'ADDITION_VISUAL' ? test : null,
-      );
-    }
-    if (rdoTests) {
-      tests.value.simpleRdo = rdoTests.filter((test) =>
-        testTypesStore.checkTestType(test).name == 'SIMPLE_RDO' ? test : null,
-      );
-      tests.value.hardRdo = rdoTests.filter((test) =>
-        testTypesStore.checkTestType(test).name == 'HARD_RDO' ? test : null,
-      );
-    }
-
-    tests.value.simpleSound.push(
-      ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst')),
-    );
-    tests.value.simpleLight.push(
-      ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'slt')),
-    );
-    tests.value.hardLight.push(
-      ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'hlt')),
-    );
   }
 };
 
@@ -188,44 +232,6 @@ onMounted(() => {
         <div class="info-block" v-if="UserState.gender">
           <p class="field_label">Gender</p>
           <p class="field">{{ UserState.gender }}</p>
-        </div>
-        <div class="test buttons" v-if="UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT">
-          <CommonButton
-            @click="router.push('/test/simple/sound')"
-            class="submit_button"
-          >
-            <template #placeholder>Simple sound test</template>
-          </CommonButton>
-          <CommonButton
-            @click="router.push('/test/simple/light')"
-            class="submit_button"
-          >
-            <template #placeholder>Simple light test</template>
-          </CommonButton>
-          <CommonButton
-            @click="router.push('/test/addition/sound')"
-            class="submit_button"
-          >
-            <template #placeholder>Addition sound test</template>
-          </CommonButton>
-          <CommonButton
-            @click="router.push('/test/addition/visual')"
-            class="submit_button"
-          >
-            <template #placeholder>Addition visual test</template>
-          </CommonButton>
-          <CommonButton
-            @click="router.push('/test/simple/rdo')"
-            class="submit_button"
-          >
-            <template #placeholder>Simple rdo test</template>
-          </CommonButton>
-          <CommonButton
-            @click="router.push('/test/hard/rdo')"
-            class="submit_button"
-          >
-            <template #placeholder>Hard rdo test</template>
-          </CommonButton>
         </div>
       </div>
       <div class="buttons_container">
@@ -323,7 +329,6 @@ onMounted(() => {
           />
         </div>
 
-
         <div class="test-info" v-if="tests.additionSound.length > 0">
           <p class="block_header">Реакция на сложение по звуку</p>
           <TestsManagerList
@@ -360,6 +365,46 @@ onMounted(() => {
           <p class="block_header">Сложная реакция на движущийся объект</p>
           <TestsManagerList
             :tests="tests.hardRdo"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.simpleTracking.length > 0">
+          <p class="block_header">Простая реакция на аналаговое преследование</p>
+          <TestsManagerList
+            :tests="tests.simpleTracking"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.hardTracking.length > 0">
+          <p class="block_header">Сложная реакция на аналаговое преследование</p>
+          <TestsManagerList
+            :tests="tests.hardTracking"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.numerical.length > 0">
+          <p class="block_header">Числовые последовательности</p>
+          <TestsManagerList
+            :tests="tests.numerical"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.stroop.length > 0">
+          <p class="block_header">Тест Струпа</p>
+          <TestsManagerList
+            :tests="tests.stroop"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.verbal.length > 0">
+          <p class="block_header">Тест на вербальное восприятие</p>
+          <TestsManagerList
+            :tests="tests.verbal"
             :max-elements-count="5"
           />
         </div>

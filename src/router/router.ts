@@ -17,7 +17,7 @@ import SelectSettingsPage from '../pages/tests/SelectSettingsPage.vue';
 import HardLightTest from '../pages/tests/hard/HardLightTest.vue';
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
-import HardTrackingTest from '../pages/tests/HardTrackingTest.vue';
+import HardTrackingTest from '../pages/tests/hard/HardTrackingTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
 import SimpleRdoTest from '../pages/tests/simple/SimpleRdoTest.vue';
 import HardRdoTest from '../pages/tests/hard/HardRdoTest.vue';

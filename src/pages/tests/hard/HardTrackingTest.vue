@@ -76,12 +76,12 @@
 </template>
 
 <script lang="ts">
-import CommonButton from '../../components/UI/CommonButton.vue';
+import CommonButton from '../../../components/UI/CommonButton.vue';
 import { defineComponent } from 'vue';
 import type {
   CreateHardTrackingTestInputDto
-} from '../../api/resolvers/test/dto/input/create-hard-tracking-test-input.dto.ts';
-import { UserState } from '../../utils/userState/UserState.ts';
+} from '../../../api/resolvers/test/dto/input/create-hard-tracking-test-input.dto.ts';
+import { UserState } from '../../../utils/userState/UserState.ts';
 
 
 export default defineComponent({

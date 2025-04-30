@@ -294,7 +294,6 @@ export default defineComponent({
 <style scoped>
 /* Основной контейнер */
 .container {
-  max-width: 35vw;
   padding: 2rem;
   text-align: center;
 }
