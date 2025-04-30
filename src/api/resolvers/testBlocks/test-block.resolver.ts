@@ -41,7 +41,7 @@ export class TestBlockResolver {
     return await this.apiResolver.request<
       CreateTestBlockInputDto,
       DefaultOutputDto<GetTestBlockOutputDto>
-    >('create', 'POST', data, this.token ? this.token : undefined);
+    >('createTestBlock', 'POST', data, this.token ? this.token : undefined);
   }
 
   public async updateTestBlock(data: UpdateTestBlockInputDto) {
@@ -50,7 +50,7 @@ export class TestBlockResolver {
       testBlockId: number;
       updatedTest: TestBlockTest
     }, DefaultOutputDto<string>>(
-      'update',
+      'updateTestBlock',
       'PATCH',
       {
         userId: UserState.id ? UserState.id : 999999,
