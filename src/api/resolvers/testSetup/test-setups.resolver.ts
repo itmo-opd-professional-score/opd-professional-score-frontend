@@ -23,7 +23,7 @@ export class TestSetupsResolver {
     })
   }
 
-  public async getAllByTestTypeId(testTypeId: number): Promise<Promise<TestSetupOutputDTO[]>> {
+  public async getAllByTestTypeId(testTypeId: number): Promise<TestSetupOutputDTO[]> {
     return await this.apiResolver.request<null, TestSetupOutputDTO[]>(
       `getAllSetupsByTestType/${testTypeId}`,
       'GET',
