@@ -4,7 +4,7 @@ import { onMounted, ref } from 'vue';
 import TestsManagerList from '../components/TestsManagerList.vue';
 import UserManagerList from '../components/UserManagerList.vue';
 import ProfessionsManagerList from '../components/ProfessionsManagerList.vue';
-import { calculateAge, updateUserState, UserState } from '../utils/userState/UserState.ts';
+import { calculateAge, UserState } from '../utils/userState/UserState.ts';
 import { ProfessionResolver } from '../api/resolvers/profession/profession.resolver.ts';
 import type { GetProfessionOutputDto } from '../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
 import { usePopupStore } from '../store/popup.store.ts';
@@ -20,6 +20,7 @@ import { useTestTypesStore } from '../store/test-types.store.ts';
 import type { GetTestBlockOutputDto } from '../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
 import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
 import TestBlocksManagerList from '../components/TestBlocksManagerList.vue';
+import CommonButton from '../components/UI/CommonButton.vue';
 
 const authResolver = new AuthResolver();
 const userResolver = new UserResolver();
@@ -39,12 +40,16 @@ const tests = ref<{
   simpleSound: TestDataOutputDto[];
   simpleLight: TestDataOutputDto[];
   hardLight: TestDataOutputDto[];
+  simpleRdo: TestDataOutputDto[];
+  hardRdo: TestDataOutputDto[];
 }>({
   additionSound: [],
   additionVisual: [],
   simpleSound: [],
   simpleLight: [],
   hardLight: [],
+  simpleRdo: [],
+  hardRdo: [],
 });
 const allTests = ref<TestDataOutputDto[]>([]);
 const professionsArchive = ref<GetProfessionOutputDto[]>([]);
@@ -91,24 +96,39 @@ const reloadProfessions = async () => {
 const reloadTests = async () => {
   if (UserState.role) {
     let additionTests: TestDataOutputDto[];
+    let rdoTests: TestDataOutputDto[];
     if (UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT) {
       allTests.value.push(...(await testResolver.getAllByType('at')));
       allTests.value.push(...(await testResolver.getAllByType('sst')));
       allTests.value.push(...(await testResolver.getAllByType('slt')));
       allTests.value.push(...(await testResolver.getAllByType('hlt')));
+      allTests.value.push(...(await testResolver.getAllByType('rdo')));
     }
     additionTests = await testResolver.getTestsByTypeByUserId(
       UserState.id!,
       'at',
     );
+    rdoTests = await testResolver.getTestsByTypeByUserId(
+      UserState.id!,
+      'rdo'
+    )
     if (additionTests) {
       tests.value.additionSound = additionTests.filter((test) =>
-        testTypesStore.checkTestType(test).name == 'SOUND_ADDITION' ? test : null,
+        testTypesStore.checkTestType(test).name == 'ADDITION_SOUND' ? test : null,
       );
       tests.value.additionVisual = additionTests.filter((test) =>
-        testTypesStore.checkTestType(test).name == 'VISUAL_ADDITION' ? test : null,
+        testTypesStore.checkTestType(test).name == 'ADDITION_VISUAL' ? test : null,
       );
     }
+    if (rdoTests) {
+      tests.value.simpleRdo = rdoTests.filter((test) =>
+        testTypesStore.checkTestType(test).name == 'SIMPLE_RDO' ? test : null,
+      );
+      tests.value.hardRdo = rdoTests.filter((test) =>
+        testTypesStore.checkTestType(test).name == 'HARD_RDO' ? test : null,
+      );
+    }
+
     tests.value.simpleSound.push(
       ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst')),
     );
@@ -168,6 +188,44 @@ onMounted(() => {
         <div class="info-block" v-if="UserState.gender">
           <p class="field_label">Gender</p>
           <p class="field">{{ UserState.gender }}</p>
+        </div>
+        <div class="test buttons" v-if="UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT">
+          <CommonButton
+            @click="router.push('/test/simple/sound')"
+            class="submit_button"
+          >
+            <template #placeholder>Simple sound test</template>
+          </CommonButton>
+          <CommonButton
+            @click="router.push('/test/simple/light')"
+            class="submit_button"
+          >
+            <template #placeholder>Simple light test</template>
+          </CommonButton>
+          <CommonButton
+            @click="router.push('/test/addition/sound')"
+            class="submit_button"
+          >
+            <template #placeholder>Addition sound test</template>
+          </CommonButton>
+          <CommonButton
+            @click="router.push('/test/addition/visual')"
+            class="submit_button"
+          >
+            <template #placeholder>Addition visual test</template>
+          </CommonButton>
+          <CommonButton
+            @click="router.push('/test/simple/rdo')"
+            class="submit_button"
+          >
+            <template #placeholder>Simple rdo test</template>
+          </CommonButton>
+          <CommonButton
+            @click="router.push('/test/hard/rdo')"
+            class="submit_button"
+          >
+            <template #placeholder>Hard rdo test</template>
+          </CommonButton>
         </div>
       </div>
       <div class="buttons_container">
@@ -282,6 +340,30 @@ onMounted(() => {
           />
         </div>
 
+        <div class="test-info" v-if="tests.hardLight.length > 0">
+          <p class="block_header">Реакция на сложный световой сигнал</p>
+          <TestsManagerList
+            :tests="tests.hardLight"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.simpleRdo.length > 0">
+          <p class="block_header">Простая реакция на движущийся объект</p>
+          <TestsManagerList
+            :tests="tests.simpleRdo"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.hardRdo.length > 0">
+          <p class="block_header">Сложная реакция на движущийся объект</p>
+          <TestsManagerList
+            :tests="tests.hardRdo"
+            :max-elements-count="5"
+          />
+        </div>
+
       </div>
     </div>
   </div>
@@ -310,6 +392,12 @@ onMounted(() => {
   .buttons_container {
     margin-top: auto;
   }
+}
+
+.test.buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1vw;
 }
 
 .users-info, .tests-info, .test-info {

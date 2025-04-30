@@ -2,18 +2,20 @@
 import { defineComponent } from 'vue'
 import { UserState } from '../../../utils/userState/UserState.ts';
 import router from '../../../router/router.ts';
-import { jwtDecode } from 'jwt-decode';
-import type { TestJwt } from '../types';
 import CommonButton from '../../../components/UI/CommonButton.vue';
 import type { CreateSimpleInputDto } from '../../../api/resolvers/test/dto/input/create-simple-input.dto.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
+import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
+import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
 
 export default defineComponent({
   name: "LightSimpleTest",
   components: { CommonButton },
   props: {
-    token: String,
+    testBlockId: String,
+    setupId: String
   },
   data() {
     return {
@@ -27,7 +29,8 @@ export default defineComponent({
       completedTestsResults: [] as Array<string>,
       TRIAL_COUNT: 3,
       currentTrial: 0,
-      timer: 0
+      timer: 0,
+      showTotalResults: false,
     }
   },
   computed: {
@@ -47,12 +50,13 @@ export default defineComponent({
         times.reduce((acc, val) => acc + Math.pow(val - average, 2), 0) /
         times.length;
       const deviation = Math.round(Math.sqrt(variance));
+      console.log(this.reactionTimes)
       return {
         average,
         deviation,
         best: Math.min(...times),
         worst: Math.max(...times),
-        missedCount: this.reactionTimes.filter(reaction => reaction > 1).length
+        missedCount: this.reactionTimes.filter(reaction => reaction > 600).length
       };
     },
     testResultDto(): CreateSimpleInputDto {
@@ -89,11 +93,11 @@ export default defineComponent({
       this.buttonText = 'Ждите...';
       this.timer = setTimeout(this.changeButtonColor, Math.random() * 3000 + 1000);
     },
-    resetTest(): void {
-      if (UserState) {
-        router.go(0);
+    async resetTest() {
+      if (this.testBlockId) {
+        await router.push(`/testblock/${this.testBlockId}`);
       } else {
-        router.push('/auth/login');
+        router.go(0)
       }
     },
     saveResults(): void {
@@ -103,55 +107,32 @@ export default defineComponent({
       this.showResults = true;
 
       const popUpStore = usePopupStore()
-      const testResolver =
-        new TestResolver()
-      testResolver
-        .createSimple(this.testResultDto, "slt").then((result) => {
-        if (!UserState.id) {
-          this.completedTestsLinks.push(this.token!);
-          this.completedTestsResults.push(result.body.testToken);
-          localStorage.setItem(
-            'completedTestsLinks',
-            JSON.stringify(this.completedTestsLinks),
-          );
-          localStorage.setItem(
-            'completedTestsResults',
-            JSON.stringify(this.completedTestsResults),
-          );
-        }
-        popUpStore.activateInfoPopup('Results were saved successfully!');
-      }).catch((error) => {
+      new TestResolver().createSimple(this.testResultDto, "slt").catch((error) => {
         popUpStore.activateErrorPopup(
           `Error code: ${error.status}. ${error.response.data.message}`,
         );
       });
-    },
-    async load () {
-      if (UserState.id) {
-        await router.push('/test/simple/light');
-      } else {
-        const linksData = localStorage.getItem('completedTestsLinks');
-        const resultsData = localStorage.getItem('completedTestsResults');
-        if (linksData) {
-          this.completedTestsLinks.push(...JSON.parse(linksData));
-        }
-        if (resultsData) {
-          this.completedTestsResults.push(...JSON.parse(resultsData));
-        }
-        if (this.token && this.completedTestsLinks.length != 0) {
-          this.completedTestsLinks.forEach((link) => {
-            const data = jwtDecode(link) as TestJwt;
-            if (data.testType != 'SIMPLE_LIGHT') {
-              router.back()
-            }
-          });
-        }
+      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
+        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
+        if (setupId && isNaN(setupId)) setupId = undefined
+        new TestBlockResolver().updateTestBlock({
+          testBlockId: parseInt(this.testBlockId),
+          updatedTest: {
+            name: "SIMPLE_LIGHT",
+            setupId: setupId,
+            available: false
+          }
+        })
       }
     },
+    async load() {
+      if (this.setupId && !isNaN(parseInt(this.setupId))) {
+        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
+        if (settings) this.showTotalResults = settings.showTotalResults
+      }
+    }
   },
-  mounted(): void {
-    this.load()
-  }
+  mounted(): void {this.load()}
 })
 
 </script>
@@ -193,27 +174,32 @@ export default defineComponent({
     </div>
 
     <div v-else class="results">
-      <h2 class="title">Результаты:</h2>
-      <p>
-        Среднее время: <strong>{{ results.average }} мс</strong>
-      </p>
-      <p>
-        Стандартное отклонение: <strong>{{ results.deviation }} мс</strong>
-      </p>
-      <p>
-        Лучшее время: <strong>{{ results.best }} мс</strong>
-      </p>
-      <p>
-        Худшее время: <strong>{{ results.worst }} мс</strong>
-      </p>
-      <p>
-        Количество пропусков: <strong>{{ results.missedCount }}</strong>
-      </p>
+      <div class="congrats">
+        <h2>Поздравляем с прохождением теста!</h2>
+      </div>
+      <div class="final-results">
+        <h2 class="title">Результаты:</h2>
+        <p>
+          Среднее время: <strong>{{ results.average }} мс</strong>
+        </p>
+        <p>
+          Стандартное отклонение: <strong>{{ results.deviation }} мс</strong>
+        </p>
+        <p>
+          Лучшее время: <strong>{{ results.best }} мс</strong>
+        </p>
+        <p>
+          Худшее время: <strong>{{ results.worst }} мс</strong>
+        </p>
+        <p>
+          Количество пропусков: <strong>{{ results.missedCount }}</strong>
+        </p>
+      </div>
       <CommonButton
         class="retry-button"
         @click="resetTest"
       >
-        <template v-slot:placeholder>Пройти заново</template>
+        <template v-slot:placeholder>{{ testBlockId ? 'Вернуться к блоку тестов' : 'Пройти заново'}}</template>
       </CommonButton>
     </div>
   </div>

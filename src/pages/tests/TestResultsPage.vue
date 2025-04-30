@@ -47,10 +47,10 @@ export default defineComponent({
     async load() {
       this.testType = await new TestTypeResolver().getById(parseInt(this.testTypeId))
       switch (this.testType?.name) {
-        case 'SOUND_ADDITION':
+        case 'ADDITION_SOUND':
           this.endpoint = 'at';
           break
-        case 'VISUAL_ADDITION':
+        case 'ADDITION_VISUAL':
           this.endpoint = 'at';
           break
         case 'SIMPLE_SOUND':
@@ -62,9 +62,16 @@ export default defineComponent({
         case 'HARD_LIGHT':
           this.endpoint = 'hlt';
           break
+        case 'SIMPLE_RDO':
+          this.endpoint = 'rdo';
+          break
+        case 'HARD_RDO':
+          this.endpoint = 'rdo';
+          break
       }
       this.currentTest = await this.testResolver.getByTypeById(this.endpoint, parseInt(this.testId));
-      this.testsData = await this.testResolver.getAllByType(this.endpoint)
+      const tests = await this.testResolver.getAllByType(this.endpoint)
+      this.testsData = tests.filter(test => test.testTypeId == parseInt(this.testTypeId))
       this.userTestsData = this.testsData.filter((test) => test.userId === UserState.id)
     }
   },
@@ -85,9 +92,9 @@ export default defineComponent({
         :test-type="testType ? testType : undefined"
         :user-name="UserState.username"
         :score="
-          currentTest.misclicks ?
+          currentTest.misclicks != null ?
           currentTest.allSignals - currentTest.misclicks :
-          currentTest.allSignals - currentTest.mistakes  !
+          currentTest.allSignals - currentTest.mistakes
         "
         :valid="currentTest.valid"
       />

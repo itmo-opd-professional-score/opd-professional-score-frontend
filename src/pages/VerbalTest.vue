@@ -31,13 +31,16 @@ export default defineComponent({
       penaltyOnWrong: 2,
       requiredCorrect: 5,
       result: 0,
+
+      duration: 10,
+      showTimer: false,
+      showProgressBar: true,
     }
   },
 
   props: {
-    time: { type: Number, required: true },
-    showTimer: { type: Boolean, default: false },
-    showProgressBar: { type: Boolean, default: false },
+    testBlockId: String,
+    setupId: String
   },
 
   computed: {
@@ -54,12 +57,12 @@ export default defineComponent({
     },
     progressBarWidth() {
       if (this.remainingTimeValue === 0) return '0%';
-      return `${(1 - this.remainingTimeValue / (this.time * 1000)) * 100}%`;
+      return `${(1 - this.remainingTimeValue / (this.duration * 1000)) * 100}%`;
     },
   },
 
   created() {
-    this.wordsPerLevel = Math.ceil((this.time / 60) * 20 / 3);
+    this.wordsPerLevel = Math.ceil((this.duration / 60) * 20 / 3);
   },
 
   methods: {
@@ -67,7 +70,7 @@ export default defineComponent({
       this.resetTest();
       this.testState = 'reacting';
       this.generateWordsForLevel(0);
-      this.startTimer(this.time);
+      this.startTimer(this.duration);
       this.nextWord();
     },
 
@@ -129,7 +132,7 @@ export default defineComponent({
     checkResponse(response: boolean) {
       const isRepeated = this.shownWords.has(this.currentWord);
 
-      const isCorrect = (isRepeated && response === true) || (!isRepeated && response === false);
+      const isCorrect = (isRepeated && response) || (!isRepeated && !response);
 
       if (isCorrect) {
         this.score++;

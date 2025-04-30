@@ -13,12 +13,18 @@ import TestMapper from '../pages/tests/TestMapper.vue';
 import CreateTestBlockPage from '../pages/CreateTestBlockPage.vue';
 import AdditionVisualTest from '../pages/tests/addition/visual/AdditionVisualTest.vue';
 import AdditionSoundTest from '../pages/tests/addition/sound/AdditionSoundTest.vue';
-import SelectSettingsPage from '../pages/SelectSettingsPage.vue';
-import SimpleReactionTest from "../pages/SimpleReactionTest.vue";
+import SelectSettingsPage from '../pages/tests/SelectSettingsPage.vue';
+import HardLightTest from '../pages/tests/hard/HardLightTest.vue';
 import SimpleSoundTest from '../pages/tests/simple/SimpleSoundTest.vue';
 import SimpleLightTest from '../pages/tests/simple/SimpleLightTest.vue';
+import HardTrackingTest from '../pages/tests/HardTrackingTest.vue';
 import TestResultsPage from '../pages/tests/TestResultsPage.vue';
-import VerbalTest from "../pages/VerbalTest.vue";
+import SimpleRdoTest from '../pages/tests/simple/SimpleRdoTest.vue';
+import HardRdoTest from '../pages/tests/hard/HardRdoTest.vue';
+import TestBlockPage from '../pages/tests/TestBlockPage.vue';
+import NotFound from '../pages/NotFound.vue';
+import TestsCatalogPage from '../pages/TestsCatalogPage.vue';
+import VerbalTest from '../pages/VerbalTest.vue';
 
 const routes = [
   {
@@ -95,16 +101,31 @@ const routes = [
   {
     path: '/test/simple/light',
     component: SimpleLightTest,
-    meta: {ruName: "Оценка скорости простых реакции на свет", requiresAuth: true}
+    meta: { ruName: 'Оценка скорости простых реакции на свет', requiresAuth: true },
+  },
+  {
+    path: '/test/simple/rdo',
+    component: SimpleRdoTest,
+    meta: { ruName: 'Оценка скорости простой реакции на движущийся объект', requiresAuth: true },
+  },
+  {
+    path: '/test/hard/rdo',
+    component: HardRdoTest,
+    meta: { ruName: 'Оценки скорости сложной реакции на движущийся объект', requiresAuth: true },
+  },
+  {
+    path: '/test/hard/light',
+    component: HardLightTest,
+    meta: { ruName: 'Оценка скорости реакции на сложный световой сигнал', requiresAuth: true },
   },
   {
     path: '/test/results/:testTypeId/:testId',
     props: true,
     component: TestResultsPage,
-    meta: {ruName: "Результаты прохождения теста", requiresAuth: true},
+    meta: { ruName: 'Результаты прохождения теста', requiresAuth: true },
   },
   {
-    path: `/invitation/test/:token`,
+    path: `/testBlock/:testBlockId/test/:testTypeId`,
     props: true,
     component: TestMapper,
   },
@@ -113,31 +134,45 @@ const routes = [
     component: CreateTestBlockPage,
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
   },
-   {path: '/test/settings/:testName',
-      component: SelectSettingsPage,
-      meta: { ruName: 'Настройки теста', requiresAuth: true },
-     props: true,
-    },
   {
-    path: '/simple-reaction-test',
-    name: 'SimpleReactionTest',
-    component: SimpleReactionTest,
-    props: {
-      time: 10,
-      showTimer: true,
-      showProgressBar: true
-    },
+    path: '/test/settings/:testTypeId',
+    component: SelectSettingsPage,
+    meta: { ruName: 'Настройки теста', requiresAuth: true },
+    props: true,
   },
   {
-    path: '/test/verbal',
+    path: '/testBlock/:testBlockId/:testBlockToken',
+    component: TestBlockPage,
+    meta: { ruName: 'Блок тестов' },
+    props: true,
+  },
+  {
+    path: '/tests',
+    component: TestsCatalogPage,
+    meta: { ruName: 'Доступные тесты', requiresAuth: true },
+  },
+  {
+    path: '/test/hard/tracking',
+    component: HardTrackingTest,
+    meta: { ruName: 'Тест на координацию', requiresAuth: true },
+  },
+  {
+    path: '/test/cognitive/verbal',
     component: VerbalTest,
-    meta: { requiresAuth: false, ruName: "Вербальный тест"},
-    props: {
-      time: 10,
-      showTimer: true,
-      showProgressBar: true
-    }
-  }
+    meta: { ruName: 'Тест на вербальное восприятие', requiresAuth: true },
+  },
+  {
+    path: '/test/settings/:testType',
+    component: SelectSettingsPage,
+    meta: { ruName: 'Настройки теста', requiresAuth: true },
+    props: true,
+  },
+  {
+    path: '/:catchAll(.*)*',
+    component: NotFound,
+    name: 'NotFound',
+    meta: { ruName: 'Страница не найдена' },
+  },
 ];
 
 const router = createRouter({

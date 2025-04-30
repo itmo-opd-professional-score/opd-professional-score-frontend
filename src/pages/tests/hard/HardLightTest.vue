@@ -5,16 +5,18 @@
       <div class="instructions">
         <p>Когда появится цветной экран, быстро нажмите кнопку соответствующего цвета.</p>
         <p>На каждый ответ у вас есть 2 секунды.</p>
-        <p>Всего будет 15 попыток.</p>
+        <p>Всего будет {{ ALL_SIGNALS }} попыток.</p>
       </div>
-      <CommonButton class="start-btn" @click="startTest">Начать тест</CommonButton>
+      <CommonButton class="start-btn submit_button" @click="startTest">
+        <template #placeholder>Начать тест</template>
+      </CommonButton>
     </div>
 
     <div v-else-if="!testCompleted" class="test-screen">
-      <div class="timer-container">
+      <div class="timer-container" v-if="showProgress">
         <div class="timer-bar" :style="timerStyle"></div>
       </div>
-      <div class="attempt-counter">Попытка: {{ currentAttempt }}/15</div>
+      <div class="attempt-counter">Попытка: {{ currentAttempt }} / {{ ALL_SIGNALS }}</div>
 
       <div class="color-display" :style="{ backgroundColor: currentColor }"></div>
 
@@ -22,31 +24,50 @@
         <CommonButton
           v-for="color in colors"
           :key="color"
-          class="color-btn"
+          class="color-btn submit_button"
           :style="{ backgroundColor: colorMap[color] }"
           @click="handleColorClick(color)"
-        ></CommonButton>
+        />
       </div>
 
       <div class="stats">
         <p>Среднее время: {{ avgTime > 0 ? avgTime + ' мс' : '-' }}</p>
-        <p>Правильно: {{ correctAnswers }}, Ошибок: {{ wrongAnswers }}</p>
+        <p>Правильно: {{ correctAnswers }}, Ошибки: {{ wrongAnswers }}, Пропуски: {{ missedAnswers }}</p>
       </div>
     </div>
 
     <div v-else class="results">
-      <h2>Результаты теста</h2>
-      <p>Среднее время реакции: <strong>{{ avgTime }} мс</strong></p>
-      <p>Правильных ответов: <strong>{{ correctAnswers }}</strong></p>
-      <p>Лучшее время: <strong>{{ bestTime }} мс</strong></p>
-      <CommonButton class="restart-btn" @click="restartTest">Пройти снова</CommonButton>
+      <div class="short">
+        <h2>Поздравляем с прохождением теста!</h2>
+      </div>
+      <div class="full" v-if="showTotalResults">
+        <h2>Результаты теста</h2>
+        <p>Среднее время реакции: <strong>{{ avgTime }} мс</strong></p>
+        <p>Правильных ответов: <strong>{{ correctAnswers }}</strong></p>
+        <p>Лучшее время: <strong>{{ bestTime }} мс</strong></p>
+      </div>
+      <CommonButton class="restart-btn submit_button" @click="restartTest">
+        <template #placeholder>Пройти снова</template>
+      </CommonButton>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onUnmounted } from 'vue'
-import CommonButton from './UI/CommonButton.vue'
+import { ref, computed, onUnmounted, onMounted } from 'vue';
+import CommonButton from '../../../components/UI/CommonButton.vue'
+import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
+import { usePopupStore } from '../../../store/popup.store.ts';
+import { UserState } from '../../../utils/userState/UserState.ts';
+import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
+import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
+import router from '../../../router/router.ts';
+
+const props = defineProps<{
+  testBlockId?: string,
+  setupId?: string
+}>()
 
 type Color = 'red' | 'blue' | 'green' | 'yellow'
 const colors: Color[] = ['red', 'blue', 'green', 'yellow']
@@ -56,18 +77,23 @@ const colorMap = {
   green: '#44ff44',
   yellow: '#ffff44'
 }
-const TIME_LIMIT = 2000
+const duration = ref<number>(2000)
+const showTotalResults = ref<boolean>(true)
+const showProgress = ref<boolean>(true)
+const ALL_SIGNALS = 15
 
 const testStarted = ref(false)
 const testCompleted = ref(false)
 const currentColor = ref<Color | 'white'>('white')
 const currentAttempt = ref(0)
 const correctAnswers = ref(0)
+const missedAnswers = ref(0)
 const wrongAnswers = ref(0)
 const reactionTimes = ref<number[]>([])
 const startTime = ref<number | null>(null)
-const timeLeft = ref(TIME_LIMIT)
+const timeLeft = ref(duration.value)
 const flashTimeouts = ref<number[]>([])
+
 let timeoutId: number | undefined
 let timerInterval: number | undefined
 
@@ -84,12 +110,21 @@ const bestTime = computed(() => {
 })
 
 const timerStyle = computed(() => {
-  const percentage = (timeLeft.value / TIME_LIMIT) * 100
+  const percentage = (timeLeft.value / duration.value) * 100
   return {
     width: percentage + '%',
     backgroundColor: percentage <= 30 ? '#ff4444' : '#4CAF50'
   }
 })
+
+const calculateDispersion = (data: number[]) => {
+  const mean = data.reduce((sum, value) => sum + value, 0) / data.length;
+  const variance = data.reduce(
+    (sum, value) => sum + Math.pow(value - mean, 2),
+    0,
+  );
+  return Math.sqrt(variance / (data.length - 1));
+};
 
 function startTest() {
   testStarted.value = true
@@ -97,7 +132,7 @@ function startTest() {
 }
 
 function showNextColor() {
-  if (currentAttempt.value >= 15) {
+  if (currentAttempt.value >= ALL_SIGNALS) {
     endTest()
     return
   }
@@ -114,7 +149,7 @@ function showNextColor() {
 }
 
 function startTimer() {
-  timeLeft.value = TIME_LIMIT
+  timeLeft.value = duration.value
   clearInterval(timerInterval)
 
   timerInterval = setInterval(() => {
@@ -127,7 +162,7 @@ function startTimer() {
 }
 
 function handleTimeOut() {
-  wrongAnswers.value++
+  missedAnswers.value++
   flashScreen()
 }
 
@@ -173,21 +208,13 @@ function handleColorClick(selectedColor: 'red' | 'blue' | 'green' | 'yellow') {
 
 function endTest() {
   testCompleted.value = true
+  saveResults()
   clearFlashTimeouts() // Добавлена очистка таймаутов
 }
 
-function restartTest() {
-  testStarted.value = false
-  testCompleted.value = false
-  currentColor.value = 'white'
-  currentAttempt.value = 0
-  correctAnswers.value = 0
-  wrongAnswers.value = 0
-  reactionTimes.value = []
-  startTime.value = null
-  clearTimeout(timeoutId)
-  clearInterval(timerInterval)
-  clearFlashTimeouts() // Добавлена очистка таймаутов
+async function restartTest() {
+  if (props.testBlockId) await router.push(`/testblock/${props.testBlockId}`);
+  else router.go(0)
 }
 
 onUnmounted(() => {
@@ -195,6 +222,42 @@ onUnmounted(() => {
   clearInterval(timerInterval)
   clearFlashTimeouts() // Добавлена очистка таймаутов
 })
+
+const saveResults = () => {
+  const usePopUp = usePopupStore()
+  new TestResolver().createHardLight({
+    allSignals: ALL_SIGNALS,
+    averageCallbackTime: avgTime.value,
+    dispersion: calculateDispersion(reactionTimes.value),
+    misclicks: missedAnswers.value,
+    mistakes: wrongAnswers.value,
+    userId: UserState.id ? UserState.id : null,
+  }).catch((error) => {
+    usePopUp.activateErrorPopup(error.message)
+  })
+  if (props.testBlockId && !isNaN(parseInt(props.testBlockId))) {
+    let setupId = props.setupId ? parseInt(props.setupId) : undefined;
+    if (setupId && isNaN(setupId)) setupId = undefined
+    new TestBlockResolver().updateTestBlock({
+      testBlockId: parseInt(props.testBlockId),
+      updatedTest: {
+        name: "HARD_LIGHT",
+        setupId: setupId,
+        available: false
+      }
+    })
+  }
+}
+onMounted(async () => {
+  if (props.setupId && !isNaN(parseInt(props.setupId))) {
+    const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(props.setupId))
+    if (settings) {
+      showTotalResults.value = settings.showTotalResults
+      duration.value = settings.duration
+      showProgress.value = settings.showProgress
+    }
+  }
+});
 </script>
 
 <style scoped>

@@ -1,14 +1,11 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import CommonButton from './CommonButton.vue';
+import router from '../../router/router.ts';
 
-export default defineComponent({
-  name: 'TestBlockElement',
-  components: { CommonButton },
-  methods: {
-    open() {},
-  },
-});
+defineProps<{
+  blockId: number
+  token: string
+}>()
 </script>
 
 <template>
@@ -17,8 +14,8 @@ export default defineComponent({
     <div class="field" id="name">
       <slot name="name">Название</slot>
     </div>
-    <CommonButton class="open-button" id="btn" @click="open">
-      <template v-slot:placeholder>Открыть</template>
+    <CommonButton class="open-button" id="btn" @click="router.push(`/testBlock/${blockId}/${token}`)">
+      <template v-slot:placeholder>Перейти</template>
     </CommonButton>
   </div>
 </template>
@@ -35,6 +32,22 @@ export default defineComponent({
   display: grid;
   grid-template-columns: 1fr 5fr 1fr;
   gap: 2rem;
+  position: relative;
+
+  .block-links {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: var(--background-primary);
+    backdrop-filter: blur(15px);
+    height: min-content;
+    border-radius: 10px;
+    margin-top: 1vw;
+
+    .link {
+      padding: 1vw;
+    }
+  }
 }
 
 .test-block-element-wrapper:hover {
