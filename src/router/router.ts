@@ -100,28 +100,28 @@ const routes = [
   {
     path: '/test/simple/light',
     component: SimpleLightTest,
-    meta: {ruName: "Оценка скорости простых реакции на свет", requiresAuth: true}
+    meta: { ruName: 'Оценка скорости простых реакции на свет', requiresAuth: true },
   },
   {
     path: '/test/simple/rdo',
     component: SimpleRdoTest,
-    meta: {ruName: "Оценка скорости простой реакции на движущийся объект", requiresAuth: true},
+    meta: { ruName: 'Оценка скорости простой реакции на движущийся объект', requiresAuth: true },
   },
   {
     path: '/test/hard/rdo',
     component: HardRdoTest,
-    meta: { ruName: "Оценки скорости сложной реакции на движущийся объект", requiresAuth: true },
+    meta: { ruName: 'Оценки скорости сложной реакции на движущийся объект', requiresAuth: true },
   },
   {
     path: '/test/hard/light',
     component: HardLightTest,
-    meta: { ruName: "Оценка скорости реакции на сложный световой сигнал", requiresAuth: true },
+    meta: { ruName: 'Оценка скорости реакции на сложный световой сигнал', requiresAuth: true },
   },
   {
     path: '/test/results/:testTypeId/:testId',
     props: true,
     component: TestResultsPage,
-    meta: {ruName: "Результаты прохождения теста", requiresAuth: true},
+    meta: { ruName: 'Результаты прохождения теста', requiresAuth: true },
   },
   {
     path: `/testBlock/:testBlockId/test/:testTypeId`,
@@ -133,16 +133,16 @@ const routes = [
     component: CreateTestBlockPage,
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
   },
-   {
-     path: '/test/settings/:testTypeId',
-     component: SelectSettingsPage,
-     meta: { ruName: 'Настройки теста', requiresAuth: true },
-     props: true,
-   },
+  {
+    path: '/test/settings/:testTypeId',
+    component: SelectSettingsPage,
+    meta: { ruName: 'Настройки теста', requiresAuth: true },
+    props: true,
+  },
   {
     path: '/testBlock/:testBlockId/:testBlockToken',
     component: TestBlockPage,
-    meta: { ruName: 'Блок тестов'},
+    meta: { ruName: 'Блок тестов' },
     props: true,
   },
   {
@@ -154,16 +154,16 @@ const routes = [
     path: '/:catchAll(.*)*',
     component: NotFound,
     name: 'NotFound',
-    meta: { ruName: 'Страница не найдена'}
+    meta: { ruName: 'Страница не найдена' },
   },
   {
     path: '/test/hard/tracking',
     component: HardTrackingTest,
-    meta: { ruName: "Тест на координацию", requiresAuth: true },
+    meta: { ruName: 'Тест на координацию', requiresAuth: true },
   },
   {
     path: '/test/settings/:testType',
-    component: SelectSettingsPage,     
+    component: SelectSettingsPage,
     meta: { ruName: 'Настройки теста', requiresAuth: true },
     props: true,
   },
