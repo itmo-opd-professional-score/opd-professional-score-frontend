@@ -76,7 +76,7 @@ export default defineComponent({
     },
     checkAnswer(selectedColor: string) {
       this.clearRoundTimeout();
-      if (this.currentColor == selectedColor) {
+      if (this.currentColor === selectedColor) {
         this.score++;
       } else {
         this.mistakes++;
