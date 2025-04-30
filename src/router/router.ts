@@ -165,17 +165,6 @@ const routes = [
     meta: { ruName: 'Сложный тест на координацию', requiresAuth: true },
   },
   {
-    path: '/test/cognitive/verbal',
-    component: VerbalTest,
-    meta: { ruName: 'Тест на вербальное восприятие', requiresAuth: true },
-  },
-  {
-    path: '/test/settings/:testType',
-    component: SelectSettingsPage,
-    meta: { ruName: 'Настройки теста', requiresAuth: true },
-    props: true,
-  },
-  {
     path: '/test/cognitive/numerical',
     name: 'NumericalSeriesTest',
     component: NumericalSeriesTest,
@@ -185,6 +174,17 @@ const routes = [
     path: '/test/cognitive/stroop',
     component: StroopTest,
     meta: { ruName: 'Тест Струпа', requiresAuth: true },
+  },
+  {
+    path: '/test/cognitive/verbal',
+    component: VerbalTest,
+    meta: { ruName: 'Тест на вербальное восприятие', requiresAuth: true },
+  },
+  {
+    path: '/test/settings/:testType',
+    component: SelectSettingsPage,
+    meta: { ruName: 'Настройки теста', requiresAuth: true },
+    props: true,
   },
   {
     path: '/:catchAll(.*)*',

@@ -3,6 +3,8 @@ import type { CreateTestBlockInputDto } from './dto/input/create-test-block-inpu
 import type { GetTestBlockOutputDto } from './dto/output/get-test-block-output.dto.ts';
 import type { DefaultOutputDto } from '../../dto/common/default-output.dto.ts';
 import type { UpdateTestBlockInputDto } from './dto/input/update-test-block-input.dto.ts';
+import { UserState } from '../../../utils/userState/UserState.ts';
+import type { TestBlockTest } from '../../../pages/tests/types';
 
 export class TestBlockResolver {
   private apiResolver = new ApiResolverUtil('testBlock');
@@ -43,10 +45,17 @@ export class TestBlockResolver {
   }
 
   public async updateTestBlock(data: UpdateTestBlockInputDto) {
-    return await this.apiResolver.request<UpdateTestBlockInputDto, DefaultOutputDto<string>>(
+    return await this.apiResolver.request<{
+      userId: number,
+      testBlockId: number;
+      updatedTest: TestBlockTest
+    }, DefaultOutputDto<string>>(
       'update',
       'PATCH',
-      data,
+      {
+        userId: UserState.id ? UserState.id : 999999,
+        ...data
+      },
       this.token ? this.token : undefined,
     )
   }

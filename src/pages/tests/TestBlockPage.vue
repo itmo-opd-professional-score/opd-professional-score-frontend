@@ -7,6 +7,7 @@ import CommonButton from '../../components/UI/CommonButton.vue';
 import router from '../../router/router.ts';
 import type { TestBlockJwt, TestBlockTest } from './types';
 import { usePopupStore } from '../../store/popup.store.ts';
+import { UserState } from '../../utils/userState/UserState.ts';
 
 const props = defineProps<{
   testBlockId: string,
@@ -30,7 +31,11 @@ onMounted(async () => {
   } else token.value = props.token
   if (token.value) {
     if (token.value !== props.token) await router.push('/profile')
-    testTypes.value = (jwtDecode(token.value) as TestBlockJwt).tests
+    const testBlockData = jwtDecode(token.value) as TestBlockJwt
+    if (testBlockData.userId === 999999 && !UserState.id ||
+    testBlockData.userId === UserState.id) {
+      testTypes.value = testBlockData.tests
+    } else await router.push('/profile')
   }
 })
 </script>
