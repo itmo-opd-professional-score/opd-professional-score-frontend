@@ -25,6 +25,7 @@ import TestBlockPage from '../pages/tests/TestBlockPage.vue';
 import NotFound from '../pages/NotFound.vue';
 import TestsCatalogPage from '../pages/TestsCatalogPage.vue';
 import StroopTest from '../pages/tests/cognitive/StroopTest.vue';
+import VerbalTest from '../pages/tests/cognitive/VerbalTest.vue';
 
 const routes = [
   {
@@ -155,6 +156,11 @@ const routes = [
     path: '/test/hard/tracking',
     component: HardTrackingTest,
     meta: { ruName: 'Тест на координацию', requiresAuth: true },
+  },
+  {
+    path: '/test/cognitive/verbal',
+    component: VerbalTest,
+    meta: { ruName: 'Тест на вербальное восприятие', requiresAuth: true },
   },
   {
     path: '/test/settings/:testType',
