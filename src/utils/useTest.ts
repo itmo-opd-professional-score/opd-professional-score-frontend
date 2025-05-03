@@ -11,7 +11,18 @@ export interface UseTestOptions {
 }
 
 export function useTest(options: UseTestOptions) {
-  const settings = ref<TestSetupOutputDTO | undefined>();
+  const settings = ref<TestSetupOutputDTO>({
+    id: 0,
+    testName: '',
+    testTypeId: -1,
+    showTotalResults: true,
+    showProgress: false,
+    showTimer: false,
+    duration: 10,
+    accelerationMode: 'DISCRETE',
+    createdAt: '',
+    updatedAt: '',
+  });
   const testBlockId = options.testBlockId && !isNaN(parseInt(options.testBlockId)) ?
     parseInt(options.testBlockId) : undefined;
   const setupId = options.setupId && !isNaN(parseInt(options.setupId)) ?
@@ -33,19 +44,7 @@ export function useTest(options: UseTestOptions) {
   onMounted(async () => {
     if (setupId) new TestSetupsResolver().getById(setupId).then((result => {
       settings.value = result
-    })).catch(() => {settings.value = undefined})
-    if (!settings.value) settings.value = {
-      id: 0,
-      testName: '',
-      testTypeId: -1,
-      showTotalResults: true,
-      showProgress: false,
-      showTimer: false,
-      duration: 10,
-      accelerationMode: 'DISCRETE',
-      createdAt: '',
-      updatedAt: '',
-    }
+    }))
   })
 
   return {

@@ -69,7 +69,9 @@ export default defineComponent({
       switch (this.testState) {
         case 'ready': return 'Начать тест';
         case 'reacting': return 'Жмите';
-        case 'completed': return 'Тест окончен';
+        case 'completed': return this.testBlockId ?
+          'Вернуться к текущему блоку тестов' :
+          'Пройти снова';
         default: return '';
       }
     },

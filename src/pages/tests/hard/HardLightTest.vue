@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-if="settings">
     <div v-if="!testStarted">
       <h1>Тест на реакцию на цвета</h1>
       <div class="instructions">
@@ -13,7 +13,7 @@
     </div>
 
     <div v-else-if="!testCompleted" class="test-screen">
-      <div class="timer-container" v-if="showProgress">
+      <div class="timer-container" v-if="settings.showProgress">
         <div class="timer-bar" :style="timerStyle"></div>
       </div>
       <div class="attempt-counter">Попытка: {{ currentAttempt }} / {{ ALL_SIGNALS }}</div>
@@ -40,29 +40,28 @@
       <div class="short">
         <h2>Поздравляем с прохождением теста!</h2>
       </div>
-      <div class="full" v-if="showTotalResults">
+      <div class="full" v-if="settings.showTotalResults">
         <h2>Результаты теста</h2>
         <p>Среднее время реакции: <strong>{{ avgTime }} мс</strong></p>
         <p>Правильных ответов: <strong>{{ correctAnswers }}</strong></p>
         <p>Лучшее время: <strong>{{ bestTime }} мс</strong></p>
       </div>
       <CommonButton class="restart-btn submit_button" @click="restartTest">
-        <template #placeholder>Пройти снова</template>
+        <template #placeholder>
+          {{ testBlockId ? 'Вернуться к текущему блоку тестов' : 'Пройти снова' }}
+        </template>
       </CommonButton>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onUnmounted, onMounted } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 import CommonButton from '../../../components/UI/CommonButton.vue'
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
-import { usePopupStore } from '../../../store/popup.store.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
-import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
-import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
-import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
 import router from '../../../router/router.ts';
+import { useTest } from '../../../utils/useTest.ts';
 
 const props = defineProps<{
   testBlockId?: string,
@@ -79,9 +78,11 @@ const colorMap = {
   green: '#44ff44',
   yellow: '#ffff44'
 }
-const duration = ref<number>(2000)
-const showTotalResults = ref<boolean>(true)
-const showProgress = ref<boolean>(true)
+const { settings, updateTestBlockToken } = useTest({
+  testBlockId: props.testBlockId,
+  setupId: props.setupId,
+  testType: "HARD_LIGHT"
+})
 const ALL_SIGNALS = 15
 
 const testStarted = ref(false)
@@ -93,7 +94,7 @@ const missedAnswers = ref(0)
 const wrongAnswers = ref(0)
 const reactionTimes = ref<number[]>([])
 const startTime = ref<number | null>(null)
-const timeLeft = ref(duration.value)
+const timeLeft = ref(settings.value.duration * 1000)
 const flashTimeouts = ref<number[]>([])
 
 let timeoutId: number | undefined
@@ -112,7 +113,7 @@ const bestTime = computed(() => {
 })
 
 const timerStyle = computed(() => {
-  const percentage = (timeLeft.value / duration.value) * 100
+  const percentage = (timeLeft.value / settings.value.duration * 1000) * 100
   return {
     width: percentage + '%',
     backgroundColor: percentage <= 30 ? '#ff4444' : '#4CAF50'
@@ -151,7 +152,7 @@ function showNextColor() {
 }
 
 function startTimer() {
-  timeLeft.value = duration.value
+  timeLeft.value = settings.value.duration * 1000
   clearInterval(timerInterval)
 
   timerInterval = setInterval(() => {
@@ -215,7 +216,7 @@ function endTest() {
 }
 
 async function restartTest() {
-  if (props.testBlockId) await router.push(`/testblock/${props.testBlockId}`);
+  if (props.testBlockId) await router.push(`/testBlock/${props.testBlockId}`);
   else router.go(0)
 }
 
@@ -226,41 +227,16 @@ onUnmounted(() => {
 })
 
 const saveResults = async () => {
-  const usePopUp = usePopupStore()
-  new TestResolver().createHardLight({
+  await new TestResolver().createHardLight({
     allSignals: ALL_SIGNALS,
     averageCallbackTime: avgTime.value,
     dispersion: parseFloat(calculateDispersion(reactionTimes.value).toFixed(2)),
     misclicks: missedAnswers.value,
     mistakes: wrongAnswers.value,
     userId: UserState.id ? UserState.id : null,
-  }).catch((error) => {
-    usePopUp.activateErrorPopup(error.message)
   })
-  if (props.testBlockId && !isNaN(parseInt(props.testBlockId))) {
-    let setupId = props.setupId ? parseInt(props.setupId) : undefined;
-    if (setupId && isNaN(setupId)) setupId = undefined
-    const result = await new TestBlockResolver().updateTestBlock({
-      testBlockId: parseInt(props.testBlockId),
-      updatedTest: {
-        name: "HARD_LIGHT",
-        setupId: setupId,
-        available: false
-      }
-    })
-    emits('test-completed', result.body)
-  }
+  if (props.testBlockId) await updateTestBlockToken()
 }
-onMounted(async () => {
-  if (props.setupId && !isNaN(parseInt(props.setupId))) {
-    const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(props.setupId))
-    if (settings) {
-      showTotalResults.value = settings.showTotalResults
-      duration.value = settings.duration
-      showProgress.value = settings.showProgress
-    }
-  }
-});
 </script>
 
 <style scoped>
