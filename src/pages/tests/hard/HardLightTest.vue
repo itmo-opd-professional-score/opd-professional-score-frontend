@@ -69,6 +69,8 @@ const props = defineProps<{
   setupId?: string
 }>()
 
+const emits = defineEmits(['test-completed']);
+
 type Color = 'red' | 'blue' | 'green' | 'yellow'
 const colors: Color[] = ['red', 'blue', 'green', 'yellow']
 const colorMap = {
@@ -223,7 +225,7 @@ onUnmounted(() => {
   clearFlashTimeouts() // Добавлена очистка таймаутов
 })
 
-const saveResults = () => {
+const saveResults = async () => {
   const usePopUp = usePopupStore()
   new TestResolver().createHardLight({
     allSignals: ALL_SIGNALS,
@@ -238,7 +240,7 @@ const saveResults = () => {
   if (props.testBlockId && !isNaN(parseInt(props.testBlockId))) {
     let setupId = props.setupId ? parseInt(props.setupId) : undefined;
     if (setupId && isNaN(setupId)) setupId = undefined
-    new TestBlockResolver().updateTestBlock({
+    const result = await new TestBlockResolver().updateTestBlock({
       testBlockId: parseInt(props.testBlockId),
       updatedTest: {
         name: "HARD_LIGHT",
@@ -246,6 +248,7 @@ const saveResults = () => {
         available: false
       }
     })
+    emits('test-completed', result.body)
   }
 }
 onMounted(async () => {

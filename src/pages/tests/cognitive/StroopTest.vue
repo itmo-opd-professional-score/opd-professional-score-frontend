@@ -15,6 +15,7 @@ type TestState = 'ready' | 'reacting' | 'completed';
 export default defineComponent({
   name: 'StroopTest',
   components: { CommonButton },
+  emits: ['test-completed'],
   data() {
     return {
       colors: ['red', 'green', 'yellow', 'blue', 'purple'],
@@ -132,7 +133,7 @@ export default defineComponent({
         this.result = Math.round((this.score / (this.score + this.mistakes)) * 100);
       }
     },
-    saveResults(): void {
+    async saveResults() {
       const popUpStore = usePopupStore()
       new TestResolver().createCognitive(this.testResults).catch((err) => {
         popUpStore.activateErrorPopup(err.message)
@@ -140,7 +141,7 @@ export default defineComponent({
       if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
         let setupId = this.setupId ? parseInt(this.setupId) : undefined;
         if (setupId && isNaN(setupId)) setupId = undefined
-        new TestBlockResolver().updateTestBlock({
+        const result = await new TestBlockResolver().updateTestBlock({
           testBlockId: parseInt(this.testBlockId),
           updatedTest: {
             name: "STROOP",
@@ -148,6 +149,7 @@ export default defineComponent({
             available: false
           }
         })
+        this.$emit('test-completed', result.body)
       }
     },
     async resetTest() {

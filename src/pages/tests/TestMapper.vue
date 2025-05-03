@@ -13,6 +13,11 @@ import SimpleRdoTest from './simple/SimpleRdoTest.vue';
 import HardRdoTest from './hard/HardRdoTest.vue';
 import { TestBlockResolver } from '../../api/resolvers/testBlocks/test-block.resolver.ts';
 import router from '../../router/router.ts';
+import SimpleTrackingTest from './simple/SimpleTrackingTest.vue';
+import HardTrackingTest from './hard/HardTrackingTest.vue';
+import NumericalSeriesTest from './cognitive/NumericalSeriesTest.vue';
+import StroopTest from './cognitive/StroopTest.vue';
+import VerbalTest from './cognitive/VerbalTest.vue';
 
 const usePopUp = usePopupStore()
 const testSetupId = ref<number | undefined>(undefined)
@@ -21,7 +26,7 @@ const props = defineProps<{
   testTypeName: string;
 }>();
 const testComponent = computed(() => {
-  switch (props.testTypeName) {
+  switch (props.testTypeName as TestType) {
     case 'ADDITION_SOUND':
       return AdditionSoundTest;
     case 'ADDITION_VISUAL':
@@ -36,6 +41,16 @@ const testComponent = computed(() => {
       return SimpleRdoTest;
     case 'HARD_RDO':
       return HardRdoTest;
+    case 'SIMPLE_TRACKING':
+      return SimpleTrackingTest;
+    case 'HARD_TRACKING':
+      return HardTrackingTest;
+    case 'NUMERICAL':
+      return NumericalSeriesTest;
+    case 'STROOP':
+      return StroopTest;
+    case 'VERBAL':
+      return VerbalTest;
     default:
       return NotFound;
   }

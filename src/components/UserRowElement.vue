@@ -64,7 +64,7 @@ export default {
 <style scoped>
 .user-row-wrapper {
   width: 100%;
-  padding: 0.5rem 1rem;
+  padding: 1vh 1vw;
   border-radius: 10px;
   border: 1px solid var(--input-border);
   background: white;
@@ -72,7 +72,8 @@ export default {
   grid-template-columns: 4% 16% 44% 26%;
   align-items: center;
   justify-items: center;
-  gap: 4%;
+  gap: 2vh;
+  max-height: 8vh;
 
   .wrapper-block, .user-button {
     width: 100%;

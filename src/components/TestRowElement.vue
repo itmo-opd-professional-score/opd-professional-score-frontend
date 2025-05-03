@@ -78,6 +78,7 @@ export default {
 
 <template>
   <div class="wrapper">
+    <p class="wrapper-block test-name">{{ testTypeId }}</p>
     <p class="wrapper-block test-name">{{ testName }}</p>
     <div class="buttons">
       <CustomSelect
@@ -94,12 +95,15 @@ export default {
         <template v-slot:placeholder>Настроить</template>
       </CommonButton>
       <CommonButton
-        class="wrapper-block btn"
+        class="wrapper-block btn add"
         :class="buttonClass"
         @click="applyTest"
       >
         <template v-slot:placeholder>
-          {{ buttonText }}
+          <svg width="30" height="31" viewBox="0 0 30 31" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4.48311 0.738L15.0338 11.2887L25.5298 0.792667C25.7616 0.545894 26.0409 0.348485 26.3509 0.212277C26.6609 0.0760682 26.9952 0.00386587 27.3338 0C28.0587 0 28.7539 0.287975 29.2665 0.800575C29.7791 1.31317 30.0671 2.00841 30.0671 2.73333C30.0735 3.06845 30.0113 3.40132 29.8844 3.71154C29.7575 4.02176 29.5685 4.30277 29.3291 4.53733L18.6964 15.0333L29.3291 25.666C29.7796 26.1067 30.0438 26.7035 30.0671 27.3333C30.0671 28.0583 29.7791 28.7535 29.2665 29.2661C28.7539 29.7787 28.0587 30.0667 27.3338 30.0667C26.9854 30.0811 26.6379 30.023 26.3132 29.8959C25.9885 29.7689 25.6938 29.5757 25.4478 29.3287L15.0338 18.778L4.51045 29.3013C4.27949 29.5399 4.00359 29.7303 3.69865 29.8617C3.39371 29.993 3.06578 30.0627 2.73378 30.0667C2.00885 30.0667 1.31362 29.7787 0.801019 29.2661C0.28842 28.7535 0.000444732 28.0583 0.000444732 27.3333C-0.00592802 26.9982 0.0562469 26.6653 0.183154 26.3551C0.310062 26.0449 0.499024 25.7639 0.738445 25.5293L11.3711 15.0333L0.738445 4.40067C0.28795 3.95994 0.0237864 3.36313 0.000444732 2.73333C0.000444732 2.00841 0.28842 1.31317 0.801019 0.800575C1.31362 0.287975 2.00885 0 2.73378 0C3.38978 0.0082 4.01845 0.273333 4.48311 0.738Z"/>
+            {{ buttonText }}
+          </svg>
         </template>
       </CommonButton>
     </div>
@@ -110,24 +114,46 @@ export default {
 .wrapper {
   width: 100%;
   border-radius: 10px;
-  padding: 1vh;
+  padding: 1vh 1vw;
   border: 1px solid var(--input-border);
   background: white;
   display: grid;
-  grid-template-columns: 30% auto;
+  grid-template-columns: 4% 50% 42%;
   align-items: center;
-  column-gap: 3%;
-  height: 8vh;
+  column-gap: 2%;
+  height: 6vh;
+
+  .test-name {
+    white-space: nowrap;
+    overflow: hidden;
+  }
   .buttons {
     display: flex;
-    gap: 1vw;
     justify-content: flex-end;
+    height: 4vh;
+    gap: 1vw;
 
     .btn, .select {
-      max-width: 30%;
       display: flex;
-      justify-content: center;
       height: 100%;
+      max-width: 40%;
+    }
+
+    .btn.add {
+      padding: 0;
+      max-width: 4vh;
+      svg {
+        scale: 45%;
+        stroke: white;
+        transition: all 0.3s;
+        path {
+          fill: white;
+        }
+      }
+    }
+
+    .submit_button svg {
+      transform: rotate(-45deg) scale(0.8);
     }
   }
 }

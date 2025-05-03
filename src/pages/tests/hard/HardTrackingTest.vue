@@ -97,6 +97,7 @@ export default defineComponent({
     testBlockId: String,
     setupId: String,
   },
+  emits: ['test-completed'],
   data() {
     return {
       trackWidth: 800,
@@ -268,7 +269,7 @@ export default defineComponent({
         this.overlapTimes.push(overlapDuration);
       }
     },
-    saveResults(): void {
+    async saveResults() {
       const popUpStore = usePopupStore()
       new TestResolver().createHardTracking(this.testResults).catch((err) => {
         popUpStore.activateErrorPopup(err.message)
@@ -276,7 +277,7 @@ export default defineComponent({
       if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
         let setupId = this.setupId ? parseInt(this.setupId) : undefined;
         if (setupId && isNaN(setupId)) setupId = undefined
-        new TestBlockResolver().updateTestBlock({
+        const result = await new TestBlockResolver().updateTestBlock({
           testBlockId: parseInt(this.testBlockId),
           updatedTest: {
             name: "HARD_TRACKING",
@@ -284,6 +285,7 @@ export default defineComponent({
             available: false
           }
         })
+        this.$emit('test-completed', result.body)
       }
     },
     async load() {

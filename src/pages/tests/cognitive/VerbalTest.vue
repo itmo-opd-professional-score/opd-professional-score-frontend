@@ -51,7 +51,7 @@ export default defineComponent({
     testBlockId: String,
     setupId: String
   },
-
+  emits: ['test-completed'],
   computed: {
     remainingTime() {
       if (this.testState === 'completed') return null;
@@ -191,7 +191,7 @@ export default defineComponent({
         this.result = 0;
       }
     },
-    saveResults(): void {
+    async saveResults() {
       const popUpStore = usePopupStore()
       new TestResolver().createCognitive(this.testResults).catch((err) => {
         popUpStore.activateErrorPopup(err.message)
@@ -199,7 +199,7 @@ export default defineComponent({
       if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
         let setupId = this.setupId ? parseInt(this.setupId) : undefined;
         if (setupId && isNaN(setupId)) setupId = undefined
-        new TestBlockResolver().updateTestBlock({
+        const result = await new TestBlockResolver().updateTestBlock({
           testBlockId: parseInt(this.testBlockId),
           updatedTest: {
             name: "VERBAL",
@@ -207,6 +207,7 @@ export default defineComponent({
             available: false
           }
         })
+        this.$emit('test-completed', result.body)
       }
     },
     async resetTest() {

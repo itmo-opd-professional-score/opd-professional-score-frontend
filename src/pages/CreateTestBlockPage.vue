@@ -36,7 +36,7 @@ export default {
       const usersFromApi = await this.userResolver.getAll();
       const types = await new TestTypeResolver().getAll();
       if (usersFromApi !== null) this.users = usersFromApi.body.sort((a, b) => a.id - b.id);
-      if (types !== null) this.tests = types;
+      if (types !== null) this.tests = types.sort((a, b) => a.id - b.id);
     } catch (e) {}
   },
   methods: {
@@ -47,11 +47,9 @@ export default {
           userIDs: this.approvedUsers,
         };
 
-        await this.testBlockResolver.createTestBlock(data).then((res) => {
-          if (res.status == 200) {
-            this.popupStore.activateInfoPopup('Блок тестов создан успешно!');
-            router.push('/profile');
-          }
+        await this.testBlockResolver.createTestBlock(data).then(() => {
+          this.popupStore.activateInfoPopup('Блок тестов создан успешно!');
+          router.push('/profile');
         });
       } else {
         this.popupStore.activateErrorPopup(
@@ -121,7 +119,7 @@ export default {
   padding: 3vw 2vw;
   background-color: white;
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: 1.2fr 1fr;
   column-gap: 2vw;
   grid-template-rows: repeat(3, auto);
 }
@@ -141,12 +139,11 @@ export default {
 .user-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
 }
 
 .tests-container, .user-container {
   overflow-y: scroll;
-  height: 43vh;
+  height: 41vh;
   width: 100%;
   gap: 1vh;
   grid-row: 3 / 4;

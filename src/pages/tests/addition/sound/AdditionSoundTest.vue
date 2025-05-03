@@ -33,6 +33,7 @@ const props = defineProps<{
   testBlockId?: string,
   setupId?: string
 }>();
+const emits = defineEmits(['test-completed'])
 
 speechSynthesis.onvoiceschanged = () => {
   voices = speechSynthesis.getVoices();
@@ -120,7 +121,7 @@ const resetTest = async () => {
   else router.go(0)
 }
 
-const saveResults = () => {
+const saveResults = async () => {
   const testResolver = new TestResolver();
   const popUpStore = usePopupStore();
   const data: CreateAdditionInputDto = {
@@ -144,7 +145,7 @@ const saveResults = () => {
   if (props.testBlockId && !isNaN(parseInt(props.testBlockId))) {
     let setupId = props.setupId ? parseInt(props.setupId) : undefined;
     if (setupId && isNaN(setupId)) setupId = undefined
-    new TestBlockResolver().updateTestBlock({
+    const result = await new TestBlockResolver().updateTestBlock({
       testBlockId: parseInt(props.testBlockId),
       updatedTest: {
         name: "ADDITION_SOUND",
@@ -152,6 +153,7 @@ const saveResults = () => {
         available: false
       }
     })
+    emits('test-completed', result.body)
   }
 };
 onMounted(async () => {
@@ -232,7 +234,7 @@ onMounted(async () => {
               Среднее стандартное отклонение:
               {{
                 calculateDispersion(
-                  answers.map((answer) => answer.elapsedTime),
+                  answers.map((answer: SoundHardTestAnswerDto) => answer.elapsedTime),
                 ).toFixed(2)
               }}
               сек

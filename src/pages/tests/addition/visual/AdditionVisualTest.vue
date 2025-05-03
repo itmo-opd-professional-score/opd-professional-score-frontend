@@ -15,6 +15,7 @@ export default {
     testBlockId: String,
     setupId: String
   },
+  emits: ['test-completed'],
   data() {
     return {
       number1: 0,
@@ -76,7 +77,7 @@ export default {
         ) / this.responseTimes.length;
       this.standardDeviation = Math.sqrt(variance);
     },
-    saveResults() {
+    async saveResults() {
       const popUpStore = usePopupStore()
       new TestResolver().createAddition({
         userId: UserState.id ? UserState.id : null,
@@ -92,7 +93,7 @@ export default {
       if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
         let setupId = this.setupId ? parseInt(this.setupId) : undefined;
         if (setupId && isNaN(setupId)) setupId = undefined
-        new TestBlockResolver().updateTestBlock({
+        const result = await new TestBlockResolver().updateTestBlock({
           testBlockId: parseInt(this.testBlockId),
           updatedTest: {
             name: "ADDITION_VISUAL",
@@ -100,6 +101,7 @@ export default {
             available: false
           }
         })
+        this.$emit('test-completed', result.body)
       }
     },
     async resetTest() {

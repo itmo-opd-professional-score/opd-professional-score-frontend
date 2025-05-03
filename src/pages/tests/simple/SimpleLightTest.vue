@@ -17,6 +17,7 @@ export default defineComponent({
     testBlockId: String,
     setupId: String
   },
+  emits: ['test-completed'],
   data() {
     return {
       isButtonActive: false,
@@ -100,7 +101,7 @@ export default defineComponent({
         router.go(0)
       }
     },
-    saveResults(): void {
+    async saveResults(): void {
       this.isTestRunning = false
       this.isButtonActive = false
       this.buttonText = 'Тест окончен'
@@ -115,7 +116,7 @@ export default defineComponent({
       if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
         let setupId = this.setupId ? parseInt(this.setupId) : undefined;
         if (setupId && isNaN(setupId)) setupId = undefined
-        new TestBlockResolver().updateTestBlock({
+        const result = await new TestBlockResolver().updateTestBlock({
           testBlockId: parseInt(this.testBlockId),
           updatedTest: {
             name: "SIMPLE_LIGHT",
@@ -123,6 +124,7 @@ export default defineComponent({
             available: false
           }
         })
+        this.$emit('test-completed', result.body)
       }
     },
     async load() {
