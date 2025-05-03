@@ -20,27 +20,23 @@ export function useTest(options: UseTestOptions) {
 
   const updateTestBlockToken = async (): Promise<void>  => {
     if (testBlockId) {
-      const newToken = (await new TestBlockResolver().updateTestBlock({
+      await new TestBlockResolver().updateTestBlock({
         testBlockId: testBlockId,
         updatedTest: {
           name: options.testType,
           setupId: setupId,
           available: false
         },
-      })).body
-      if (newToken) {
-        localStorage.setItem('currentTestBlock', newToken);
-        await router.push(`/testBlock/${testBlockId}/${newToken}`)
-        return
-      }
-    } router.go(0)
+      })
+      return
+    } await router.push('/profile')
   }
 
   onMounted(async () => {
     if (setupId) new TestSetupsResolver().getById(setupId).then((result => {
       settings.value = result
     })).catch(() => {settings.value = undefined})
-    if (!settings.value)  settings.value = {
+    if (!settings.value) settings.value = {
       id: 0,
       testName: '',
       testTypeId: -1,

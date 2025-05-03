@@ -18,7 +18,6 @@ export default defineComponent({
     testBlockId: String,
     setupId: String,
   },
-  emits: ['test-completed'],
   setup(props) {
     const { settings, updateTestBlockToken } = useTest({
       setupId: props.setupId,
@@ -44,7 +43,7 @@ export default defineComponent({
       missedCount: 0,
       buttonText: 'Начать тест',
       settings: undefined as TestSetupOutputDTO | undefined,
-      updatedTestBlockToken: undefined as string | undefined
+      updatedTestBlockToken: undefined as string | undefined,
     };
   },
   computed: {
@@ -179,6 +178,7 @@ export default defineComponent({
           `Error code: ${error.status}. ${error.response.data.message}`,
         );
       });
+      await this.updateTestBlockToken()
     },
   },
   beforeUnmount() {
@@ -238,7 +238,10 @@ export default defineComponent({
           Количество пропусков: <strong>{{ missedCount }}</strong>
         </p>
       </div>
-      <CommonButton class="retry-button" @click="updateTestBlockToken">
+      <CommonButton
+        class="retry-button"
+        @click="testBlockId ? router().push(`/testBlock/${testBlockId}`) : router().go(0)"
+      >
         <template v-slot:placeholder>{{ testBlockId ? 'Вернуться к текущему блоку тестов' : 'Пройти заново'}}</template>
       </CommonButton>
     </div>

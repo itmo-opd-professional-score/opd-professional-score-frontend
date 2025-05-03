@@ -76,13 +76,13 @@ const testBlockRoutes = [
     meta: { ruName: 'Создание блока тестов', requiresAuth: true },
   },
   {
-    path: '/testBlock/:testBlockId/:testBlockToken',
+    path: '/testBlock/:blockId',
     component: TestBlockPage,
     meta: { ruName: 'Блок тестов' },
     props: true,
   },
   {
-    path: `/testBlock/:testBlockId/test/:testTypeName`,
+    path: `/testBlock/:blockId/test/:testTypeName`,
     component: TestMapper,
     props: true,
   },

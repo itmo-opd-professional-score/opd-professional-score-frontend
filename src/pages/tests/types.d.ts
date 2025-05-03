@@ -18,6 +18,7 @@ export interface TestJwt {
   exp: number;
 }
 export interface TestBlockJwt {
+  id: number;
   tests: TestBlockTest[];
   userId: number;
   iat: number;

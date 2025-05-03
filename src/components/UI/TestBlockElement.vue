@@ -14,7 +14,7 @@ defineProps<{
     <div class="field" id="name">
       <slot name="name">Название</slot>
     </div>
-    <CommonButton class="open-button" id="btn" @click="router.push(`/testBlock/${blockId}/${token}`)">
+    <CommonButton class="open-button" id="btn" @click="router.push(`/testBlock/${blockId}`)">
       <template v-slot:placeholder>Перейти</template>
     </CommonButton>
   </div>
