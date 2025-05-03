@@ -93,6 +93,7 @@ export default {
         :user-email="user.email"
         :user-id="user.id"
         :user-name="user.username"
+        :disabled="approvedUsers.some(id => id == 999999)"
         @apply-user="(id: number) => approvedUsers.push(id)"
         @remove-user="
           (id: number) => {
@@ -105,6 +106,23 @@ export default {
         "
       />
     </div>
+    <UserRowElement
+      class="anonymous"
+      user-email=""
+      :user-id="999999"
+      :disabled="approvedUsers.some(id => id !== 999999)"
+      user-name="Сделать доступным для гостей"
+      @apply-user="(id: number) => approvedUsers.push(id)"
+      @remove-user="
+          (id: number) => {
+            const i = approvedUsers.indexOf(id);
+            approvedUsers = [
+              ...approvedUsers.slice(0, i),
+              ...approvedUsers.slice(i + 1),
+            ];
+          }
+        "
+    />
 
     <CommonButton class="submit_button save" @click="save">
       <template v-slot:placeholder> Сохранить </template>
@@ -154,11 +172,11 @@ export default {
 }
 
 .save {
-  grid-column: 1 / 3;
-  margin-left: auto;
-  margin-bottom: -2vw;
-  margin-right: -1vw;
-  width: 20%;
+  grid-column: 2 / 3;
+  align-self: center;
+  justify-self: flex-end;
+  width: 40%;
+  margin-top: 2vw;
 }
 
 @media only screen and (max-width: 900px) {

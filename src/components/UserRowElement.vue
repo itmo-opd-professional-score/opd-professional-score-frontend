@@ -6,6 +6,7 @@ export default {
   components: { CommonButton },
   emits: ['removeUser', 'applyUser'],
   props: {
+    disabled: Boolean,
     userName: {
       type: String,
       required: true,
@@ -55,7 +56,7 @@ export default {
     <p class="wrapper-block user-id">{{ userId }}</p>
     <p class="wrapper-block user-name">{{ userName }}</p>
     <p class="wrapper-block user-email">{{ userEmail }}</p>
-    <CommonButton class="user-button" :class="buttonClass" @click="applyTest">
+    <CommonButton :disabled="disabled" class="user-button" :class="buttonClass" @click="applyTest">
       <template v-slot:placeholder>{{ buttonText }}</template>
     </CommonButton>
   </div>
@@ -77,6 +78,16 @@ export default {
 
   .wrapper-block, .user-button {
     width: 100%;
+  }
+}
+
+.anonymous {
+  grid-template-columns: 64% 26%;
+  gap: 6vh;
+  margin-top: 2vw;
+  white-space: nowrap;
+  .user-id, .user-email {
+    display: none;
   }
 }
 </style>
