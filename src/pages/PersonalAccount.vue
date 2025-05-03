@@ -103,7 +103,6 @@ const reloadTests = async () => {
     try {
       let additionTests: TestDataOutputDto[];
       let rdoTests: TestDataOutputDto[];
-      let trackingTests: TestDataOutputDto[];
       let cognitiveTests: TestDataOutputDto[];
       if (UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT) {
         allTests.value.push(...(await testResolver.getAllByType('at')));
@@ -111,8 +110,9 @@ const reloadTests = async () => {
         allTests.value.push(...(await testResolver.getAllByType('slt')));
         allTests.value.push(...(await testResolver.getAllByType('hlt')));
         allTests.value.push(...(await testResolver.getAllByType('rdo')));
-        // allTests.value.push(...(await testResolver.getAllByType('tracking')));
-        // allTests.value.push(...(await testResolver.getAllByType('cognitive')));
+        allTests.value.push(...(await testResolver.getAllByType('tracking/simple')));
+        allTests.value.push(...(await testResolver.getAllByType('tracking/hard')));
+        allTests.value.push(...(await testResolver.getAllByType('cognitive')));
       }
       additionTests = await testResolver.getTestsByTypeByUserId(
         UserState.id!,
@@ -122,14 +122,10 @@ const reloadTests = async () => {
         UserState.id!,
         'rdo'
       );
-      // trackingTests = await testResolver.getTestsByTypeByUserId(
-      //   UserState.id!,
-      //   'tracking'
-      // );
-      // cognitiveTests = await testResolver.getTestsByTypeByUserId(
-      //   UserState.id!,
-      //   'cognitive'
-      // );
+      cognitiveTests = await testResolver.getTestsByTypeByUserId(
+        UserState.id!,
+        'cognitive'
+      );
       if (additionTests) {
         tests.value.additionSound = additionTests.filter((test) =>
           testTypesStore.checkTestType(test).name == 'ADDITION_SOUND' ? test : null,
@@ -144,14 +140,6 @@ const reloadTests = async () => {
         );
         tests.value.hardRdo = rdoTests.filter((test) =>
           testTypesStore.checkTestType(test).name == 'HARD_RDO' ? test : null,
-        );
-      }
-      if (trackingTests) {
-        tests.value.simpleTracking = trackingTests.filter((test) =>
-          testTypesStore.checkTestType(test).name == 'SIMPLE_TRACKING' ? test : null,
-        );
-        tests.value.hardTracking = trackingTests.filter((test) =>
-          testTypesStore.checkTestType(test).name == 'HARD_TRACKING' ? test : null,
         );
       }
       if (cognitiveTests) {
@@ -174,6 +162,12 @@ const reloadTests = async () => {
       tests.value.hardLight.push(
         ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'hlt')),
       );
+      tests.value.simpleTracking.push(
+        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'tracking/simple'))
+      )
+      tests.value.hardTracking.push(
+        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'tracking/hard'))
+      )
       allTests.value.sort((a, b) => {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       });
