@@ -43,7 +43,6 @@ export default defineComponent({
       missedCount: 0,
       buttonText: 'Начать тест',
       settings: undefined as TestSetupOutputDTO | undefined,
-      updatedTestBlockToken: undefined as string | undefined,
     };
   },
   computed: {
@@ -173,12 +172,12 @@ export default defineComponent({
     },
     async saveResults() {
       const popUpStore = usePopupStore()
-      new TestResolver().createSimple(this.testResultDto, "slt").catch((error) => {
+      new TestResolver().createSimple(this.testResultDto, "sst").catch((error) => {
         popUpStore.activateErrorPopup(
           `Error code: ${error.status}. ${error.response.data.message}`,
         );
       });
-      await this.updateTestBlockToken()
+      if (this.testBlockId) await this.updateTestBlockToken()
     },
   },
   beforeUnmount() {

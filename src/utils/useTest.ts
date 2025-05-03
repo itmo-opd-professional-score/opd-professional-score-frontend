@@ -3,7 +3,6 @@ import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resol
 import { onMounted, ref } from 'vue';
 import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
 import type { TestType } from '../pages/tests/types';
-import router from '../router/router.ts';
 
 export interface UseTestOptions {
   testBlockId: string | undefined;
@@ -28,8 +27,7 @@ export function useTest(options: UseTestOptions) {
           available: false
         },
       })
-      return
-    } await router.push('/profile')
+    }
   }
 
   onMounted(async () => {

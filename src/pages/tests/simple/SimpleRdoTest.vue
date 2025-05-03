@@ -53,7 +53,6 @@ export default defineComponent({
       checkLooped: false,
 
       settings: {} as TestSetupOutputDTO,
-      updatedTestBlockToken: undefined as string | undefined,
     };
   },
   computed: {
@@ -121,9 +120,7 @@ export default defineComponent({
           this.checkLooped = true;
         }
       } else {
-        this.updatedTestBlockToken ?
-          await router.push(`/testBlock/${this.testBlockId}/${this.updatedTestBlockToken}`) :
-          router.go(0)
+        this.testBlockId ? await router.push(`/testBlock/${this.testBlockId}`) : router.go(0)
       }
     },
     startTimer() {
@@ -157,7 +154,7 @@ export default defineComponent({
       new TestResolver().createRdo(this.testResultsDto).catch((err) => {
         popUpStore.activateErrorPopup(err.message)
       })
-      this.updatedTestBlockToken = this.updateTestBlockToken()
+      await this.updateTestBlockToken()
     },
   },
   watch: {

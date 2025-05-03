@@ -9,6 +9,8 @@ import type { CreateRdoInputDto } from '../../../api/resolvers/test/dto/input/cr
 import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 import SimpleRdoTest from '../simple/SimpleRdoTest.vue';
 import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
+import { useTest } from '../../../utils/useTest.ts';
+import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
@@ -30,18 +32,23 @@ export default defineComponent({
     testBlockId: String,
     setupId: String
   },
-  emits: ['test-completed'],
+  setup(props) {
+    const { settings, updateTestBlockToken } = useTest({
+      setupId: props.setupId,
+      testBlockId: props.testBlockId,
+      testType: "SIMPLE_SOUND"
+    });
+    return {
+      settings,
+      updateTestBlockToken,
+    }
+  },
   data() {
     return {
       balls: [null, null, null] as Array<SimpleRdoTest | null>,
-      completedTestsLinks: [] as Array<string>,
-      completedTestsResults: [] as Array<string>,
-      duration: 10,
-      showTimer: true,
-      showTotalResults: true,
-      showProgressBar: true,
       remainingSeconds: 0,
       timerIntervalId: 0,
+      settings: {} as TestSetupOutputDTO,
     };
   },
   computed: {
@@ -106,7 +113,7 @@ export default defineComponent({
     },
     progressBarWidth() {
       if (this.remainingSeconds === 0) return '0%';
-      return `${this.remainingSeconds / this.duration * 100}%`;
+      return `${this.remainingSeconds / this.settings.duration * 100}%`;
     },
   },
   methods: {
@@ -120,7 +127,7 @@ export default defineComponent({
             this.remainingSeconds--
           }, 1000)
         }
-        this.remainingSeconds = this.duration
+        this.remainingSeconds = this.settings.duration
         this.balls.forEach((ball) => {
           if (ball != null) {
             ball.testState = 'ready'
@@ -156,20 +163,8 @@ export default defineComponent({
         this.$emit('test-completed', result.body)
       }
     },
-    async load () {
-      if (this.setupId && !isNaN(parseInt(this.setupId))) {
-        const settings = await new TestSetupsResolver().getById(parseInt(this.setupId))
-        if (settings) {
-          this.duration = settings.duration
-          this.showProgressBar = settings.showProgress
-          this.showTimer = settings.showTimer
-          this.showTotalResults = settings.showTotalResults
-        }
-      }
-    },
   },
   mounted() {
-    this.load()
     this.balls.forEach((_, index) => {
       this.balls[index] = (this.$refs.simpleRdoTest as SimpleRdoTest[])[index];
     })

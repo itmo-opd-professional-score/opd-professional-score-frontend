@@ -111,8 +111,8 @@ const reloadTests = async () => {
         allTests.value.push(...(await testResolver.getAllByType('slt')));
         allTests.value.push(...(await testResolver.getAllByType('hlt')));
         allTests.value.push(...(await testResolver.getAllByType('rdo')));
-        allTests.value.push(...(await testResolver.getAllByType('tracking')));
-        allTests.value.push(...(await testResolver.getAllByType('cognitive')));
+        // allTests.value.push(...(await testResolver.getAllByType('tracking')));
+        // allTests.value.push(...(await testResolver.getAllByType('cognitive')));
       }
       additionTests = await testResolver.getTestsByTypeByUserId(
         UserState.id!,
@@ -122,14 +122,14 @@ const reloadTests = async () => {
         UserState.id!,
         'rdo'
       );
-      trackingTests = await testResolver.getTestsByTypeByUserId(
-        UserState.id!,
-        'tracking'
-      );
-      cognitiveTests = await testResolver.getTestsByTypeByUserId(
-        UserState.id!,
-        'cognitive'
-      );
+      // trackingTests = await testResolver.getTestsByTypeByUserId(
+      //   UserState.id!,
+      //   'tracking'
+      // );
+      // cognitiveTests = await testResolver.getTestsByTypeByUserId(
+      //   UserState.id!,
+      //   'cognitive'
+      // );
       if (additionTests) {
         tests.value.additionSound = additionTests.filter((test) =>
           testTypesStore.checkTestType(test).name == 'ADDITION_SOUND' ? test : null,
@@ -174,6 +174,9 @@ const reloadTests = async () => {
       tests.value.hardLight.push(
         ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'hlt')),
       );
+      allTests.value.sort((a, b) => {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      });
     } catch (error) {}
   }
 };
