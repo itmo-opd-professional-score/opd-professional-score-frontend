@@ -95,15 +95,7 @@ export default {
         :user-name="user.username"
         :disabled="approvedUsers.some(id => id == 999999)"
         @apply-user="(id: number) => approvedUsers.push(id)"
-        @remove-user="
-          (id: number) => {
-            const i = approvedUsers.indexOf(id);
-            approvedUsers = [
-              ...approvedUsers.slice(0, i),
-              ...approvedUsers.slice(i + 1),
-            ];
-          }
-        "
+        @remove-user="(id: number) => approvedUsers = approvedUsers.filter(userId => userId !== id)"
       />
     </div>
     <UserRowElement
@@ -113,15 +105,7 @@ export default {
       :disabled="approvedUsers.some(id => id !== 999999)"
       user-name="Сделать доступным для гостей"
       @apply-user="(id: number) => approvedUsers.push(id)"
-      @remove-user="
-          (id: number) => {
-            const i = approvedUsers.indexOf(id);
-            approvedUsers = [
-              ...approvedUsers.slice(0, i),
-              ...approvedUsers.slice(i + 1),
-            ];
-          }
-        "
+      @remove-user="(id: number) => approvedUsers = approvedUsers.filter(userId => userId !== id)"
     />
 
     <CommonButton class="submit_button save" @click="save">
