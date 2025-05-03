@@ -1,16 +1,16 @@
 <script lang="ts">
-import TestRowElement from '../components/TestRowElement.vue';
-import CommonButton from '../components/UI/CommonButton.vue';
-import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
-import { UserResolver } from '../api/resolvers/user/user.resolver.ts';
-import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-data-output.dto.ts';
-import UserRowElement from '../components/UserRowElement.vue';
-import type { CreateTestBlockInputDto } from '../api/resolvers/testBlocks/dto/input/create-test-block-input.dto.ts';
-import { usePopupStore } from '../store/popup.store.ts';
-import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
-import router from '../router/router.ts';
-import type { TestBlockTest } from './tests/types';
-import { TestTypeResolver } from '../api/resolvers/testType/testType.resolver.ts';
+import TestRowElement from '../../components/TestRowElement.vue';
+import CommonButton from '../../components/UI/CommonButton.vue';
+import { TestBlockResolver } from '../../api/resolvers/testBlocks/test-block.resolver.ts';
+import { UserResolver } from '../../api/resolvers/user/user.resolver.ts';
+import type { UserDataOutputDto } from '../../api/resolvers/user/dto/output/user-data-output.dto.ts';
+import UserRowElement from '../../components/UserRowElement.vue';
+import type { CreateTestBlockInputDto } from '../../api/resolvers/testBlocks/dto/input/create-test-block-input.dto.ts';
+import { usePopupStore } from '../../store/popup.store.ts';
+import type { TestTypeDataOutputDto } from '../../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
+import router from '../../router/router.ts';
+import type { TestBlockTest } from '../tests/types';
+import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver.ts';
 
 export default {
   name: 'CreateTestBlockPage',
