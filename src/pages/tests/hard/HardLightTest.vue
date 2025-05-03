@@ -1,5 +1,5 @@
 <template>
-  <div class="container" v-if="settings">
+  <div class="container">
     <div v-if="!testStarted">
       <h1>Тест на реакцию на цвета</h1>
       <div class="instructions">

@@ -175,7 +175,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="container" v-if="settings">
+  <div class="container">
     <div class="instruction" v-show="testState === 'ready'">
       <h2 class="title">Тест на скорость реакции на движущиеся объекты</h2>
       <p class="description">

@@ -122,7 +122,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="container" v-if="settings">
+  <div class="container">
     <div class="test" v-if="!showResults">
       <h2 class="title1">Оценка скорости простых реакции на свет</h2>
       <p class="description">
@@ -161,7 +161,7 @@ export default defineComponent({
       <div class="congrats">
         <h2>Поздравляем с прохождением теста!</h2>
       </div>
-      <div class="final-results" v-if="settings?.showTotalResults">
+      <div class="final-results" v-if="settings.showTotalResults">
         <h2 class="title">Результаты:</h2>
         <p>
           Среднее время: <strong>{{ results.average }} мс</strong>

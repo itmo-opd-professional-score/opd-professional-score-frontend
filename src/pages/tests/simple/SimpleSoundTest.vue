@@ -219,7 +219,7 @@ export default defineComponent({
 
     <div v-else class="results">
       <h2 class="title">Поздравляем с прохождением теста!</h2>
-      <div class="full" v-if="settings?.showTotalResults">
+      <div class="full" v-if="settings.showTotalResults">
         <h2 class="title">Результаты:</h2>
         <p>
           Среднее время: <strong>{{ results.average }} мс</strong>

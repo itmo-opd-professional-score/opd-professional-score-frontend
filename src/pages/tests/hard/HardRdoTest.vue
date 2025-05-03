@@ -6,7 +6,6 @@ import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
 import router from '../../../router/router.ts';
 import type { CreateRdoInputDto } from '../../../api/resolvers/test/dto/input/create-rdo-input.dto.ts';
-import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 import SimpleRdoTest from '../simple/SimpleRdoTest.vue';
 import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
 import { useTest } from '../../../utils/useTest.ts';
@@ -184,7 +183,7 @@ export default defineComponent({
         </p>
       </div>
       <div class="description" v-else>
-        <p v-if="showTotalResults">
+        <p v-if="settings.showTotalResults">
           Поздравляем с прохождением теста!<br>
           Ваши результаты:<br>
           - Среднее время ответа: {{ testResultsDto.averageCallbackTime.toFixed(2) }}<br>
@@ -202,10 +201,10 @@ export default defineComponent({
       </CommonButton>
     </div>
     <div class="test" v-show="balls.some(ball => ball?.testState === 'reacting')">
-      <div v-if="showTimer" class="timer">
+      <div v-if="settings.showTimer" class="timer">
         Осталось времени: {{ remainingTime }}
       </div>
-      <div v-if="showProgressBar" class="progress-bar-container">
+      <div v-if="settings.showProgress" class="progress-bar-container">
         <div class="progress-bar" :style="{ width: progressBarWidth }"></div>
       </div>
       <div class="balls-row">
