@@ -73,7 +73,7 @@ const reloadTestBlocks = async () => {
 const reloadUsers = async () => {
   const result = await userResolver.getAll();
   if (result != null) {
-    users.value = result.body;
+    users.value = result.body.filter(user => user.id !== 999999);
   }
 };
 

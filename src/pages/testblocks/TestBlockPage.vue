@@ -11,8 +11,9 @@ const props = defineProps<{
 const testTypes = ref()
 onMounted(async () => {
   const { testBlock } = await useTestBlock(parseInt(props.blockId))
-  if (testBlock.value) testTypes.value = testBlock.value.tests
-  else console.log(props.blockId)
+  if (testBlock.value) {
+    testTypes.value = testBlock.value.tests
+  } else await router.push('/profile')
 })
 </script>
 
@@ -47,7 +48,7 @@ onMounted(async () => {
 
     .test-block {
       width: 50%;
-      height: 79%;
+      max-height: 79%;
       overflow-y: scroll;
       background-color: var(--background-primary);
       padding: 2vw;

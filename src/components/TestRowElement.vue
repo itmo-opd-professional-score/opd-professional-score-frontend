@@ -49,12 +49,12 @@ export default {
       this.added
         ? this.$emit('removeTest', {
             name: this.testMeta,
-            setup: this.currentSetup,
+            setupId: parseInt(this.currentSetup),
             available: true
           } as TestBlockTest)
         : this.$emit('applyTest', {
             name: this.testMeta,
-            setup: this.currentSetup,
+            setupId: parseInt(this.currentSetup),
             available: true
           } as TestBlockTest);
       this.added = !this.added;

@@ -14,6 +14,11 @@ import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver
 
 export default {
   name: 'CreateTestBlockPage',
+  computed: {
+    TestBlockTest() {
+      return TestBlockTest
+    }
+  },
   components: { UserRowElement, CommonButton, TestRowElement },
   data() {
     const popupStore = usePopupStore();
@@ -35,7 +40,9 @@ export default {
     try {
       const usersFromApi = await this.userResolver.getAll();
       const types = await new TestTypeResolver().getAll();
-      if (usersFromApi !== null) this.users = usersFromApi.body.sort((a, b) => a.id - b.id);
+      if (usersFromApi !== null) this.users = usersFromApi.body
+        .filter(user => user.id !== 999999)
+        .sort((a, b) => a.id - b.id);
       if (types !== null) this.tests = types.sort((a, b) => a.id - b.id);
     } catch (e) {}
   },
@@ -47,10 +54,12 @@ export default {
           userIDs: this.approvedUsers,
         };
 
-        await this.testBlockResolver.createTestBlock(data).then(() => {
-          this.popupStore.activateInfoPopup('Блок тестов создан успешно!');
-          router.push('/profile');
-        });
+        const token = await this.testBlockResolver.createTestBlock(data);
+        this.popupStore.activateInfoPopup('Блок тестов создан успешно!');
+        if (this.approvedUsers.some(userId => userId === 999999)) {
+          console.log(token)
+        }
+        await router.push('/profile');
       } else {
         this.popupStore.activateErrorPopup(
           'Должен быть выбран хотя бы 1 тест и 1 пользователь!',
@@ -73,7 +82,7 @@ export default {
         :test-type-id="test.id"
         :test-name="test.description"
         :test-meta="test.name"
-        @apply-test="(meta) => approvedTests.push(meta)"
+        @apply-test="(meta: TestBlockTest) => approvedTests.push(meta)"
         @remove-test="
           (meta) => {
             const i = approvedTests.indexOf(meta);

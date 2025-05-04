@@ -2,7 +2,7 @@ import type { TestSetupOutputDTO } from '../api/resolvers/testSetup/dto/output/t
 import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resolver.ts';
 import { onMounted, ref } from 'vue';
 import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
-import type { TestType } from '../pages/tests/types';
+import type { TestBlockJwt, TestType } from '../pages/tests/types';
 
 export interface UseTestOptions {
   testBlockId: string | undefined;
@@ -30,14 +30,22 @@ export function useTest(options: UseTestOptions) {
 
   const updateTestBlockToken = async (): Promise<void>  => {
     if (testBlockId) {
-      await new TestBlockResolver().updateTestBlock({
-        testBlockId: testBlockId,
-        updatedTest: {
-          name: options.testType,
-          setupId: setupId,
-          available: false
-        },
-      })
+      if (localStorage.getItem(`guestTestBlock-${testBlockId}`)) {
+        const testBlock = JSON.parse(localStorage.getItem(`guestTestBlock-${testBlockId}`)!) as TestBlockJwt;
+        testBlock.tests.forEach(test => {
+          if (test.name === options.testType) test.available = false
+        })
+        localStorage.setItem(`guestTestBlock-${testBlockId}`, JSON.stringify(testBlock));
+      } else {
+        await new TestBlockResolver().updateTestBlock({
+          testBlockId: testBlockId,
+          updatedTest: {
+            name: options.testType,
+            setupId: setupId,
+            available: false
+          },
+        })
+      }
     }
   }
 

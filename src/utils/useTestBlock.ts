@@ -8,13 +8,17 @@ import router from '../router/router.ts';
 
 export const useTestBlock = async (blockId: number) => {
   const testBlock = ref<TestBlockJwt | undefined>()
-
-  const testBlocks: GetTestBlockOutputDto[] = await new TestBlockResolver().getAllByUserId(UserState.id!)
-  const testBlockToken = testBlocks.find(block => block.id === blockId)?.testBlockToken
-  testBlock.value = testBlockToken ? jwtDecode(testBlockToken) as TestBlockJwt : undefined
-  if (!testBlock.value || testBlock.value.userId !== UserState.id) await router.push('/profile')
-
-  return {
-    testBlock,
+  const userId = UserState.id ? UserState.id : 999999
+  if (localStorage.getItem(`guestTestBlock-${blockId}`) !== null) {
+    testBlock.value = JSON.parse(localStorage.getItem(`guestTestBlock-${blockId}`)!) as TestBlockJwt;
+  } else {
+    const testBlocks: GetTestBlockOutputDto[] = await new TestBlockResolver().getAllByUserId(userId)
+    const testBlockToken = testBlocks.find(block => block.id === blockId)?.testBlockToken
+    testBlock.value = testBlockToken ? jwtDecode(testBlockToken) as TestBlockJwt : undefined
+    if (testBlock.value) {
+      if (userId == 999999) localStorage.setItem(`guestTestBlock-${blockId}`, JSON.stringify(testBlock.value));
+      if (testBlock.value.userId !== userId) await router.push('/profile')
+    }
   }
+  return { testBlock }
 }

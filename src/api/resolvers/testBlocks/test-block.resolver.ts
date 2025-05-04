@@ -38,6 +38,7 @@ export class TestBlockResolver {
   }
 
   public async createTestBlock(data: CreateTestBlockInputDto) {
+    console.log(data)
     return await this.apiResolver.request<
       CreateTestBlockInputDto,
       DefaultOutputDto<GetTestBlockOutputDto>
