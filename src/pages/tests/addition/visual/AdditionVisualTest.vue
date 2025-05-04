@@ -95,7 +95,7 @@ export default {
       if (this.testBlockId) await this.updateTestBlockToken()
     },
     async resetTest() {
-      if (this.testBlockId) await router.push(`/testblock/${this.testBlockId}`);
+      if (this.testBlockId) await router.push(`/testBlock/${this.testBlockId}`);
       else router.go(0)
     },
   },

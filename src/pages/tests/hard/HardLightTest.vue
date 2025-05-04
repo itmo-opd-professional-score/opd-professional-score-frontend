@@ -248,7 +248,7 @@ const saveResults = async () => {
   border-radius: 1vh;
   box-shadow: 0 0 2vw rgba(0, 0, 0, 0.1);
   max-width: 80vw;
-  width: 90vw;
+  width: 40vw;
   margin: 0 auto;
   position: absolute;
   top: 50%;
@@ -268,7 +268,7 @@ const saveResults = async () => {
 
 .buttons {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 1vw;
   margin: 2vh 0;
 }
