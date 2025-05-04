@@ -138,7 +138,7 @@ export class TestResolver {
       CreateHardTrackingInputDto,
       CreateOutputDto
     >(
-      'tracking/simple/create',
+      'tracking/hard/create',
       'POST',
       data,
       this.token ? this.token : undefined,
