@@ -183,8 +183,8 @@ export default defineComponent({
         </p>
       </div>
       <div class="description" v-else>
+        <p>Поздравляем с прохождением теста!<br></p>
         <p v-if="settings.showTotalResults">
-          Поздравляем с прохождением теста!<br>
           Ваши результаты:<br>
           - Среднее время ответа: {{ testResultsDto.averageCallbackTime.toFixed(2) }}<br>
           - Среднее стандартное отклонение: {{ testResultsDto.dispersion.toFixed(2) }}<br>
@@ -196,7 +196,10 @@ export default defineComponent({
         class="start-button"
       >
         <template #placeholder>
-          {{ balls.every(ball => ball?.testState === 'ready') ? 'Начать тест' : 'Пройти заново' }}
+          {{
+            balls.every(ball => ball?.testState === 'ready') ? 'Начать тест' :
+              testBlockId ? 'Вернуться к текущему блоку' : 'Пройти заново'
+          }}
         </template>
       </CommonButton>
     </div>

@@ -4,7 +4,7 @@
       <h2>Тест на аналоговое слежение</h2>
       <div class="instructions">
         <p>Ваша задача - поймать движущийся шарик и перетащить его в центр.</p>
-        <p>Тест продлится {{ duration }} секунд.</p>
+        <p>Тест продлится {{ settings.duration }} секунд.</p>
         <ul>
           <li>Шарик начинает движение из центра</li>
           <li>Кликните и удерживайте, чтобы поймать</li>
@@ -42,7 +42,7 @@
       ></div>
 
       <div class="status-indicator">
-        <div>Осталось: {{ remainingTime.toFixed(1) }} сек</div>
+        <div v-if="settings.showTimer">Осталось: {{ remainingTime.toFixed(1) }} сек</div>
         <div>Успешных попыток: {{ successCount }}</div>
         <div v-if="lastSuccessTime">Последнее время: {{ lastSuccessTime.toFixed(2) }} сек</div>
       </div>
@@ -52,7 +52,7 @@
     <div v-if="testEnded" class="results-screen">
       <h2>Тест завершён!</h2>
 
-      <div class="stats-container">
+      <div class="stats-container" v-if="settings.showTotalResults">
         <div class="stat-card">
           <div class="stat-value">{{ successCount }}</div>
           <div class="stat-label">Успешных попыток</div>
@@ -88,11 +88,9 @@ import { defineComponent } from 'vue';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
-import type { AccelerationMode } from '../types';
 import type { CreateSimpleTrackingInputDto } from '../../../api/resolvers/test/dto/input/create-simple-tracking-input.dto.ts';
-import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
-import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 import router from '../../../router/router.ts';
+import { useTest } from '../../../utils/useTest.ts';
 
 export default defineComponent({
   name: 'SimpleTrackingTest',
@@ -103,7 +101,18 @@ export default defineComponent({
     testBlockId: String,
     setupId: String,
   },
-  emits: ['test-completed'],
+  setup(props) {
+    const { settings, updateTestBlockToken } = useTest({
+      testBlockId: props.testBlockId,
+      setupId: props.setupId,
+      testType: "SIMPLE_TRACKING"
+    })
+
+    return {
+      settings,
+      updateTestBlockToken,
+    }
+  },
   data() {
     return {
       animationFrame: null as number | null,
@@ -124,12 +133,6 @@ export default defineComponent({
       isDragging: false,
       currentDragTime: 0,
       lastSuccessTime: 0,
-
-      duration: 30,
-      accelerationMode: 'DISCRETE' as AccelerationMode,
-      showProgressBar: true,
-      showTimer: false,
-      showTotalResults: false,
     };
   },
 
@@ -163,29 +166,7 @@ export default defineComponent({
       new TestResolver().createSimpleTracking(this.testResultsDto).catch((err) => {
         popUpStore.activateErrorPopup(err.message)
       })
-      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
-        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
-        if (setupId && isNaN(setupId)) setupId = undefined
-        const result = await new TestBlockResolver().updateTestBlock({
-          testBlockId: parseInt(this.testBlockId),
-          updatedTest: {
-            name: "SIMPLE_TRACKING",
-            setupId: setupId,
-            available: false
-          }
-        })
-        this.$emit('test-completed', result.body)
-      }
-    },
-
-    getErrorMessage(error: unknown): string {
-      if (typeof error !== 'object' || error === null) {
-        return 'Неизвестная ошибка';
-      }
-
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      return axiosError?.response?.data?.message ??
-        (error instanceof Error ? error.message : 'Неизвестная ошибка');
+      if (this.testBlockId) await this.updateTestBlockToken()
     },
 
     startTest() {
@@ -194,7 +175,7 @@ export default defineComponent({
       this.successCount = 0;
       this.successTimes = [];
       this.startTime = performance.now();
-      this.remainingTime = this.duration;
+      this.remainingTime = this.settings.duration;
 
       this.resetBall();
       this.animate();
@@ -212,10 +193,10 @@ export default defineComponent({
       if (this.testEnded) return;
 
       const now = performance.now();
-      this.remainingTime = this.duration - (now - this.startTime) / 1000;
+      this.remainingTime = this.settings.duration - (now - this.startTime) / 1000;
 
       if (this.remainingTime <= 0) {
-        this.testEnded = true;
+        this.stopTest()
         return;
       }
 
@@ -272,20 +253,7 @@ export default defineComponent({
       if (this.testBlockId) await router.push(`/testBlock/${this.testBlockId}`);
       else router.go(0)
     },
-    async load() {
-      if (this.setupId && !isNaN(parseInt(this.setupId))) {
-        const settings = await new TestSetupsResolver().getById(parseInt(this.setupId))
-        if (settings) {
-          this.duration = settings.duration
-          this.showProgressBar = settings.showProgress
-          this.showTimer = settings.showTimer
-          this.showTotalResults = settings.showTotalResults
-          this.accelerationMode = settings.accelerationMode
-        }
-      }
-    }
   },
-  mounted() { this.load() },
   beforeUnmount() {
     if (this.animationFrame) {
       cancelAnimationFrame(this.animationFrame);
