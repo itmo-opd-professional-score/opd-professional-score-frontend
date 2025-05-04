@@ -5,22 +5,18 @@ import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resol
 import router from '../router/router.ts';
 import type { TestBlockTest } from '../pages/tests/types';
 import type { DefaultErrorDto } from '../api/dto/common/default-error.dto.ts';
+import type { PropType } from 'vue';
+import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 
 export default {
   name: 'TestRowElement',
   components: { CustomSelect, CommonButton },
   emits: ['removeTest', 'applyTest'],
   props: {
-    testName: {
-      type: String,
+    test: {
+      type: {} as PropType<TestTypeDataOutputDto>,
       required: true,
-      default: 'Введите название теста',
-    },
-    testMeta: {
-      type: String,
-      required: true,
-    },
-    testTypeId: Number,
+    }
   },
   data() {
     return {
@@ -48,12 +44,12 @@ export default {
     applyTest() {
       this.added
         ? this.$emit('removeTest', {
-            name: this.testMeta,
+            name: this.test.name,
             setupId: parseInt(this.currentSetup),
             available: true
           } as TestBlockTest)
         : this.$emit('applyTest', {
-            name: this.testMeta,
+            name: this.test.name,
             setupId: parseInt(this.currentSetup),
             available: true
           } as TestBlockTest);
@@ -61,35 +57,35 @@ export default {
     },
   },
   async mounted() {
-    if (this.testTypeId) {
-      try {
-        const setups = await new TestSetupsResolver().getAllByTestTypeId(this.testTypeId)
-        setups.forEach((setup) => {
-          this.setups.push({
-            value: setup.id.toString(),
-            text: `Конфиг №${setup.id}`,
-          });
-        })
-      } catch (e) { return (e as DefaultErrorDto).message }
-    }
+    try {
+      const setups = await new TestSetupsResolver().getAllByTestType(this.test.name)
+      setups.forEach((setup) => {
+        this.setups.push({
+          value: setup.id.toString(),
+          text: `Конфиг №${setup.id}`,
+        });
+      })
+    } catch (e) { return (e as DefaultErrorDto).message }
   },
 };
 </script>
 
 <template>
   <div class="wrapper">
-    <p class="wrapper-block test-name">{{ testTypeId }}</p>
-    <p class="wrapper-block test-name">{{ testName }}</p>
+    <p class="wrapper-block test-name">{{ test.description }}</p>
     <div class="buttons">
       <CustomSelect
         v-if="setups.length > 0"
         v-model="currentSetup"
-        :options="setups"
+        :options="[
+          {value: '', text: 'Не выбран'},
+          ...setups
+        ]"
+        placeholder="Не выбран"
         class="select"
       />
       <CommonButton
-        v-if="testTypeId"
-        @click="router().push(`/test/settings/${testTypeId}`)"
+        @click="router().push(`/test/settings/${test.name}`)"
         class="submit_button btn"
       >
         <template v-slot:placeholder>Настроить</template>
@@ -118,9 +114,9 @@ export default {
   border: 1px solid var(--input-border);
   background: white;
   display: grid;
-  grid-template-columns: 4% 50% 42%;
+  grid-template-columns: 50% 46%;
   align-items: center;
-  column-gap: 2%;
+  column-gap: 4%;
   height: 6vh;
 
   .test-name {
@@ -136,7 +132,10 @@ export default {
     .btn, .select {
       display: flex;
       height: 100%;
-      max-width: 40%;
+    }
+
+    .btn {
+      max-width: calc((100% - 4vh - 2vw) / 2.5);
     }
 
     .btn.add {

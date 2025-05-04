@@ -3,6 +3,7 @@ import { usePopupStore } from '../../../store/popup.store.ts';
 import type { TestSetupOutputDTO } from './dto/output/test-setup-output.dto.ts';
 import type { TestSetupInputDto } from './dto/input/test-setup-input.dto.ts';
 import type { DefaultOutputDto } from '../../dto/common/default-output.dto.ts';
+import type { TestType } from '../../../pages/tests/types';
 
 export class TestSetupsResolver {
   private apiResolver = new ApiResolverUtil('testSetup');
@@ -18,9 +19,9 @@ export class TestSetupsResolver {
     )
   }
 
-  public async getAllByTestTypeId(testTypeId: number): Promise<TestSetupOutputDTO[]> {
+  public async getAllByTestType(testType: TestType): Promise<TestSetupOutputDTO[]> {
     return await this.apiResolver.request<null, TestSetupOutputDTO[]>(
-      `getAllSetupsByTestType/${testTypeId}`,
+      `getAllSetupsByTestType/${testType}`,
       'GET',
       null,
       this.token ? this.token : undefined,

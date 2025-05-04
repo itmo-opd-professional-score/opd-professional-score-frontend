@@ -87,7 +87,7 @@ const testBlockRoutes = [
     props: true,
   },
   {
-    path: '/test/settings/:testType',
+    path: '/test/settings/:testTypeId',
     component: SelectSettingsPage,
     meta: { ruName: 'Настройки теста', requiresAuth: true },
     props: true,

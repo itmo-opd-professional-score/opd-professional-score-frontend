@@ -14,11 +14,6 @@ import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver
 
 export default {
   name: 'CreateTestBlockPage',
-  computed: {
-    TestBlockTest() {
-      return TestBlockTest
-    }
-  },
   components: { UserRowElement, CommonButton, TestRowElement },
   data() {
     const popupStore = usePopupStore();
@@ -79,10 +74,8 @@ export default {
       <TestRowElement
         v-for="(test, index) in tests"
         :key="index"
-        :test-type-id="test.id"
-        :test-name="test.description"
-        :test-meta="test.name"
-        @apply-test="(meta: TestBlockTest) => approvedTests.push(meta)"
+        :test="test"
+        @apply-test="(configuredTest: TestBlockTest) => approvedTests.push(configuredTest)"
         @remove-test="
           (meta) => {
             const i = approvedTests.indexOf(meta);
@@ -130,7 +123,7 @@ export default {
   padding: 3vw 2vw;
   background-color: white;
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1.3fr 1fr;
   column-gap: 2vw;
   grid-template-rows: repeat(3, auto);
 }
