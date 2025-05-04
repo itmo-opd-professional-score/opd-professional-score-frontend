@@ -6,9 +6,7 @@ import { UserState } from '../../../utils/userState/UserState.ts';
 import router from '../../../router/router.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
-import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
-import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
-import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import { useTest } from '../../../utils/useTest.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 type DifficultyLevel = 0 | 1 | 2;
@@ -39,11 +37,6 @@ export default defineComponent({
       penaltyOnWrong: 2,
       requiredCorrect: 5,
       result: 0,
-
-      duration: 10,
-      showTimer: false,
-      showProgressBar: true,
-      showTotalResults: false,
     }
   },
 
@@ -51,7 +44,18 @@ export default defineComponent({
     testBlockId: String,
     setupId: String
   },
-  emits: ['test-completed'],
+  setup(props) {
+    const { settings, updateTestBlockToken } = useTest({
+      testBlockId: props.testBlockId,
+      setupId: props.setupId,
+      testType: "VERBAL"
+    })
+
+    return {
+      settings,
+      updateTestBlockToken,
+    }
+  },
   computed: {
     remainingTime() {
       if (this.testState === 'completed') return null;
@@ -65,7 +69,7 @@ export default defineComponent({
     },
     progressBarWidth() {
       if (this.remainingTimeValue === 0) return '0%';
-      return `${(1 - this.remainingTimeValue / (this.duration * 1000)) * 100}%`;
+      return `${(1 - this.remainingTimeValue / (this.settings.duration * 1000)) * 100}%`;
     },
     testResults(): CreateCognitiveInputDto {
       return {
@@ -79,15 +83,14 @@ export default defineComponent({
   },
 
   created() {
-    this.wordsPerLevel = Math.ceil((this.duration / 60) * 20 / 3);
+    this.wordsPerLevel = Math.ceil((this.settings.duration / 60) * 20 / 3);
   },
 
   methods: {
     startTest() {
-      this.resetTest();
       this.testState = 'reacting';
       this.generateWordsForLevel(0);
-      this.startTimer(this.duration);
+      this.startTimer(this.settings.duration);
       this.nextWord();
     },
 
@@ -190,43 +193,20 @@ export default defineComponent({
       if (this.score == 0) {
         this.result = 0;
       }
+      this.saveResults();
     },
     async saveResults() {
       const popUpStore = usePopupStore()
       new TestResolver().createCognitive(this.testResults).catch((err) => {
         popUpStore.activateErrorPopup(err.message)
       })
-      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
-        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
-        if (setupId && isNaN(setupId)) setupId = undefined
-        const result = await new TestBlockResolver().updateTestBlock({
-          testBlockId: parseInt(this.testBlockId),
-          updatedTest: {
-            name: "VERBAL",
-            setupId: setupId,
-            available: false
-          }
-        })
-        this.$emit('test-completed', result.body)
-      }
+      if (this.testBlockId) await this.updateTestBlockToken()
     },
     async resetTest() {
       if (this.testBlockId) await router.push(`/testBlock/${this.testBlockId}`);
       else router.go(0)
     },
-    async load () {
-      if (this.setupId && !isNaN(parseInt(this.setupId))) {
-        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
-        if (settings) {
-          this.duration = settings.duration
-          this.showTotalResults = settings.showTotalResults
-          this.showTimer = settings.showTimer
-          this.showProgressBar = settings.showProgress
-        }
-      }
-    },
   },
-  mounted() { this.load() },
 });
 </script>
 
@@ -246,20 +226,14 @@ export default defineComponent({
       </CommonButton>
     </div>
 
-    <!-- Контейнер теста -->
     <div v-else-if="testState === 'reacting'" class="test-container">
-      <!-- Таймер -->
-      <div v-if="showTimer" class="timer">Осталось времени: {{ remainingTime }}</div>
-
-      <!-- Прогресс-бар -->
-      <div v-if="showProgressBar" class="progress-bar-container">
+      <div v-if="settings.showTimer" class="timer">
+        Осталось времени: {{ remainingTime }}
+      </div>
+      <div v-if="settings.showProgress" class="progress-bar-container">
         <div class="progress-bar" :style="{ width: progressBarWidth }"></div>
       </div>
-
-      <!-- Текущее слово -->
       <h2 class="current-word">{{ currentWord }}</h2>
-
-      <!-- Кнопки "Было" и "Не было" -->
       <div class="button-container">
         <CommonButton class="reaction-button" @click="checkResponse(true)">
           <template v-slot:placeholder>Было</template>
@@ -268,25 +242,22 @@ export default defineComponent({
           <template v-slot:placeholder>Не было</template>
         </CommonButton>
       </div>
-
-      <!-- Статистика -->
       <div class="stats">
         <p>Очки: {{ score }}</p>
         <p>Ошибки: {{ mistakes }}</p>
       </div>
     </div>
 
-    <!-- Результаты -->
     <div v-else-if="testState === 'completed'" class="test-container">
       <h2 class="title">Тест завершен!</h2>
-      <div class="full" v-if="showTotalResults">
+      <div class="full" v-if="settings.showTotalResults">
         <p class="result">Правильных ответов: {{ score }}</p>
         <p class="result">Ошибок: {{ mistakes }}</p>
         <p class="result">Результат: {{ result }}%</p>
       </div>
       <CommonButton class="restart-button" @click="resetTest">
         <template v-slot:placeholder>
-          {{ testBlockId ? 'Назад к блоку' : 'Начать заново'}}
+          {{ testBlockId ? 'Вернуться к текущему блоку' : 'Пройти снова'}}
         </template>
       </CommonButton>
     </div>
