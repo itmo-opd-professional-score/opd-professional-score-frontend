@@ -1,26 +1,25 @@
 <script setup lang="ts">
-import Button from '../components/UI/CommonButton.vue';
-import { onMounted, ref } from 'vue';
-import TestsManagerList from '../components/TestsManagerList.vue';
-import UserManagerList from '../components/UserManagerList.vue';
-import ProfessionsManagerList from '../components/ProfessionsManagerList.vue';
-import { calculateAge, UserState } from '../utils/userState/UserState.ts';
-import { ProfessionResolver } from '../api/resolvers/profession/profession.resolver.ts';
-import type { GetProfessionOutputDto } from '../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
-import { usePopupStore } from '../store/popup.store.ts';
-import type { DefaultErrorDto } from '../api/dto/common/default-error.dto.ts';
-import { AuthResolver } from '../api/resolvers/auth/auth.resolver.ts';
-import router from '../router/router.ts';
-import { TestResolver } from '../api/resolvers/test/test.resolver.ts';
-import { UserResolver } from '../api/resolvers/user/user.resolver.ts';
-import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-data-output.dto.ts';
-import type { TestDataOutputDto } from '../api/resolvers/test/dto/output/test-data-output.dto.ts';
-import { UserRole } from '../utils/userState/UserState.types.ts';
-import { useTestTypesStore } from '../store/test-types.store.ts';
-import type { GetTestBlockOutputDto } from '../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
-import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
-import TestBlocksManagerList from '../components/TestBlocksManagerList.vue';
-import CommonButton from '../components/UI/CommonButton.vue';
+import Button from '../../components/UI/CommonButton.vue';
+import { computed, onMounted, ref } from 'vue';
+import TestsManagerList from '../../components/TestsManagerList.vue';
+import UserManagerList from '../../components/UserManagerList.vue';
+import ProfessionsManagerList from '../../components/ProfessionsManagerList.vue';
+import { calculateAge, UserState } from '../../utils/userState/UserState.ts';
+import { ProfessionResolver } from '../../api/resolvers/profession/profession.resolver.ts';
+import type { GetProfessionOutputDto } from '../../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
+import type { DefaultErrorDto } from '../../api/dto/common/default-error.dto.ts';
+import { AuthResolver } from '../../api/resolvers/auth/auth.resolver.ts';
+import router from '../../router/router.ts';
+import { TestResolver } from '../../api/resolvers/test/test.resolver.ts';
+import { UserResolver } from '../../api/resolvers/user/user.resolver.ts';
+import type { UserDataOutputDto } from '../../api/resolvers/user/dto/output/user-data-output.dto.ts';
+import type { TestDataOutputDto } from '../../api/resolvers/test/dto/output/test-data-output.dto.ts';
+import { UserRole } from '../../utils/userState/UserState.types.ts';
+import { useTestTypesStore } from '../../store/test-types.store.ts';
+import type { GetTestBlockOutputDto } from '../../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
+import { TestBlockResolver } from '../../api/resolvers/testBlocks/test-block.resolver.ts';
+import TestBlocksManagerList from '../../components/TestBlocksManagerList.vue';
+import CommonButton from '../../components/UI/CommonButton.vue';
 
 const authResolver = new AuthResolver();
 const userResolver = new UserResolver();
@@ -28,7 +27,6 @@ const testResolver = new TestResolver();
 const testBlockResolver = new TestBlockResolver();
 const professionResolver = new ProfessionResolver();
 
-const popupStore = usePopupStore();
 const testTypesStore = useTestTypesStore();
 testTypesStore.loadTestTypes();
 
@@ -42,6 +40,11 @@ const tests = ref<{
   hardLight: TestDataOutputDto[];
   simpleRdo: TestDataOutputDto[];
   hardRdo: TestDataOutputDto[];
+  simpleTracking: TestDataOutputDto[];
+  hardTracking: TestDataOutputDto[];
+  numerical: TestDataOutputDto[];
+  stroop: TestDataOutputDto[];
+  verbal: TestDataOutputDto[];
 }>({
   additionSound: [],
   additionVisual: [],
@@ -50,6 +53,11 @@ const tests = ref<{
   hardLight: [],
   simpleRdo: [],
   hardRdo: [],
+  simpleTracking: [],
+  hardTracking: [],
+  numerical: [],
+  stroop: [],
+  verbal: [],
 });
 const allTests = ref<TestDataOutputDto[]>([]);
 const professionsArchive = ref<GetProfessionOutputDto[]>([]);
@@ -57,16 +65,15 @@ const professionsPublished = ref<GetProfessionOutputDto[]>([]);
 const testBlocks = ref<GetTestBlockOutputDto[]>([]);
 
 const reloadTestBlocks = async () => {
-  const res = await testBlockResolver.getByUserId(
-    UserState.id ? UserState.id : 0,
-  );
-  if (res != null) testBlocks.value = res;
+  try {
+    testBlocks.value = await testBlockResolver.getAllByUserId(UserState.id!);
+  } catch (e) {}
 };
 
 const reloadUsers = async () => {
   const result = await userResolver.getAll();
   if (result != null) {
-    users.value = result.body;
+    users.value = result.body.filter(user => user.id !== 999999);
   }
 };
 
@@ -85,79 +92,102 @@ const reloadProfessions = async () => {
       });
       professionsArchive.value.sort((a, b) => a.id - b.id);
       professionsPublished.value.sort((a, b) => a.id - b.id);
-    } else {
-      popupStore.activateErrorPopup('Error occurred. No one profession found.');
     }
   } catch (e) {
-    popupStore.activateErrorPopup((e as DefaultErrorDto).message);
+    console.log((e as DefaultErrorDto).message)
   }
 };
 
 const reloadTests = async () => {
   if (UserState.role) {
-    let additionTests: TestDataOutputDto[];
-    let rdoTests: TestDataOutputDto[];
-    if (UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT) {
-      allTests.value.push(...(await testResolver.getAllByType('at')));
-      allTests.value.push(...(await testResolver.getAllByType('sst')));
-      allTests.value.push(...(await testResolver.getAllByType('slt')));
-      allTests.value.push(...(await testResolver.getAllByType('hlt')));
-      allTests.value.push(...(await testResolver.getAllByType('rdo')));
-    }
-    additionTests = await testResolver.getTestsByTypeByUserId(
-      UserState.id!,
-      'at',
-    );
-    rdoTests = await testResolver.getTestsByTypeByUserId(
-      UserState.id!,
-      'rdo'
-    )
-    if (additionTests) {
-      tests.value.additionSound = additionTests.filter((test) =>
-        testTypesStore.checkTestType(test).name == 'ADDITION_SOUND' ? test : null,
+    try {
+      let additionTests: TestDataOutputDto[];
+      let rdoTests: TestDataOutputDto[];
+      let cognitiveTests: TestDataOutputDto[];
+      if (UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT) {
+        allTests.value.push(...(await testResolver.getAllByType('at')));
+        allTests.value.push(...(await testResolver.getAllByType('sst')));
+        allTests.value.push(...(await testResolver.getAllByType('slt')));
+        allTests.value.push(...(await testResolver.getAllByType('hlt')));
+        allTests.value.push(...(await testResolver.getAllByType('rdo')));
+        allTests.value.push(...(await testResolver.getAllByType('tracking/simple')));
+        allTests.value.push(...(await testResolver.getAllByType('tracking/hard')));
+        allTests.value.push(...(await testResolver.getAllByType('cognitive')));
+      }
+      additionTests = await testResolver.getTestsByTypeByUserId(
+        UserState.id!,
+        'at',
       );
-      tests.value.additionVisual = additionTests.filter((test) =>
-        testTypesStore.checkTestType(test).name == 'ADDITION_VISUAL' ? test : null,
+      rdoTests = await testResolver.getTestsByTypeByUserId(
+        UserState.id!,
+        'rdo'
       );
-    }
-    if (rdoTests) {
-      tests.value.simpleRdo = rdoTests.filter((test) =>
-        testTypesStore.checkTestType(test).name == 'SIMPLE_RDO' ? test : null,
+      cognitiveTests = await testResolver.getTestsByTypeByUserId(
+        UserState.id!,
+        'cognitive'
       );
-      tests.value.hardRdo = rdoTests.filter((test) =>
-        testTypesStore.checkTestType(test).name == 'HARD_RDO' ? test : null,
+      if (additionTests) {
+        tests.value.additionSound = additionTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'ADDITION_SOUND' ? test : null,
+        );
+        tests.value.additionVisual = additionTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'ADDITION_VISUAL' ? test : null,
+        );
+      }
+      if (rdoTests) {
+        tests.value.simpleRdo = rdoTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'SIMPLE_RDO' ? test : null,
+        );
+        tests.value.hardRdo = rdoTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'HARD_RDO' ? test : null,
+        );
+      }
+      if (cognitiveTests) {
+        tests.value.numerical = cognitiveTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'NUMERICAL' ? test : null,
+        );
+        tests.value.stroop = cognitiveTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'STROOP' ? test : null,
+        );
+        tests.value.verbal = cognitiveTests.filter((test) =>
+          testTypesStore.checkTestType(test).name == 'VERBAL' ? test : null,
+        );
+      }
+      tests.value.simpleSound.push(
+        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst')),
       );
-    }
-
-    tests.value.simpleSound.push(
-      ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst')),
-    );
-    tests.value.simpleLight.push(
-      ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'slt')),
-    );
-    tests.value.hardLight.push(
-      ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'hlt')),
-    );
+      tests.value.simpleLight.push(
+        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'slt')),
+      );
+      tests.value.hardLight.push(
+        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'hlt')),
+      );
+      tests.value.simpleTracking.push(
+        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'tracking/simple'))
+      )
+      tests.value.hardTracking.push(
+        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'tracking/hard'))
+      )
+      allTests.value.sort((a, b) => {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      });
+    } catch (error) {}
   }
 };
 
-const connectLocalTestsResults = () => {
-  const resultsData = localStorage.getItem('completedTestsResults');
-  if (resultsData && UserState.id) {
-    const completedTestsResults: string[] = JSON.parse(resultsData);
-    testResolver.updateUserIDs({
-      userId: UserState.id,
-      tokens: completedTestsResults,
-    });
-  }
-};
+const emptyProfile = computed(() => {
+  return allTests.value.length == 0 &&
+    Object.values(tests.value).reduce((acc, category) => acc + category.length, 0) == 0 &&
+    users.value.length == 0
+})
 
 onMounted(() => {
   if (UserState.role == UserRole.ADMIN) {
     reloadUsers();
   }
-  connectLocalTestsResults();
-  reloadProfessions();
+  if (UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN) {
+    reloadProfessions();
+  }
   reloadTests();
   reloadTestBlocks();
 });
@@ -189,44 +219,6 @@ onMounted(() => {
           <p class="field_label">Gender</p>
           <p class="field">{{ UserState.gender }}</p>
         </div>
-        <div class="test buttons" v-if="UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT">
-          <CommonButton
-            @click="router.push('/test/simple/sound')"
-            class="submit_button"
-          >
-            <template #placeholder>Simple sound test</template>
-          </CommonButton>
-          <CommonButton
-            @click="router.push('/test/simple/light')"
-            class="submit_button"
-          >
-            <template #placeholder>Simple light test</template>
-          </CommonButton>
-          <CommonButton
-            @click="router.push('/test/addition/sound')"
-            class="submit_button"
-          >
-            <template #placeholder>Addition sound test</template>
-          </CommonButton>
-          <CommonButton
-            @click="router.push('/test/addition/visual')"
-            class="submit_button"
-          >
-            <template #placeholder>Addition visual test</template>
-          </CommonButton>
-          <CommonButton
-            @click="router.push('/test/simple/rdo')"
-            class="submit_button"
-          >
-            <template #placeholder>Simple rdo test</template>
-          </CommonButton>
-          <CommonButton
-            @click="router.push('/test/hard/rdo')"
-            class="submit_button"
-          >
-            <template #placeholder>Hard rdo test</template>
-          </CommonButton>
-        </div>
       </div>
       <div class="buttons_container">
         <Button @click="router.push('/profile/change')">
@@ -252,7 +244,8 @@ onMounted(() => {
       <div
         class="tests-info"
         v-if="
-          UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN
+          (UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN)
+          && allTests.length > 0
         "
       >
         <p class="block_header">Все тесты</p>
@@ -323,7 +316,6 @@ onMounted(() => {
           />
         </div>
 
-
         <div class="test-info" v-if="tests.additionSound.length > 0">
           <p class="block_header">Реакция на сложение по звуку</p>
           <TestsManagerList
@@ -364,6 +356,57 @@ onMounted(() => {
           />
         </div>
 
+        <div class="test-info" v-if="tests.simpleTracking.length > 0">
+          <p class="block_header">Простая реакция на аналаговое преследование</p>
+          <TestsManagerList
+            :tests="tests.simpleTracking"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.hardTracking.length > 0">
+          <p class="block_header">Сложная реакция на аналаговое преследование</p>
+          <TestsManagerList
+            :tests="tests.hardTracking"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.numerical.length > 0">
+          <p class="block_header">Числовые последовательности</p>
+          <TestsManagerList
+            :tests="tests.numerical"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.stroop.length > 0">
+          <p class="block_header">Тест Струпа</p>
+          <TestsManagerList
+            :tests="tests.stroop"
+            :max-elements-count="5"
+          />
+        </div>
+
+        <div class="test-info" v-if="tests.verbal.length > 0">
+          <p class="block_header">Тест на вербальное восприятие</p>
+          <TestsManagerList
+            :tests="tests.verbal"
+            :max-elements-count="5"
+          />
+        </div>
+      </div>
+      <div
+        v-if="emptyProfile"
+        class="empty-profile tests-info"
+      >
+        <h2>Похоже, тут еще ничего нет</h2>
+        <CommonButton
+          class="submit_button"
+          @click="router.push('/tests')"
+        >
+          <template #placeholder>Перейти в каталог тестов</template>
+        </CommonButton>
       </div>
     </div>
   </div>
@@ -452,5 +495,15 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+.empty-profile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .submit_button {
+    width: 50%;
+  }
 }
 </style>

@@ -6,9 +6,10 @@ import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
 import router from '../../../router/router.ts';
 import type { CreateRdoInputDto } from '../../../api/resolvers/test/dto/input/create-rdo-input.dto.ts';
-import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 import SimpleRdoTest from '../simple/SimpleRdoTest.vue';
 import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
+import { useTest } from '../../../utils/useTest.ts';
+import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
@@ -30,17 +31,23 @@ export default defineComponent({
     testBlockId: String,
     setupId: String
   },
+  setup(props) {
+    const { settings, updateTestBlockToken } = useTest({
+      setupId: props.setupId,
+      testBlockId: props.testBlockId,
+      testType: "SIMPLE_SOUND"
+    });
+    return {
+      settings,
+      updateTestBlockToken,
+    }
+  },
   data() {
     return {
       balls: [null, null, null] as Array<SimpleRdoTest | null>,
-      completedTestsLinks: [] as Array<string>,
-      completedTestsResults: [] as Array<string>,
-      duration: 10,
-      showTimer: true,
-      showTotalResults: true,
-      showProgressBar: true,
       remainingSeconds: 0,
       timerIntervalId: 0,
+      settings: {} as TestSetupOutputDTO,
     };
   },
   computed: {
@@ -105,7 +112,7 @@ export default defineComponent({
     },
     progressBarWidth() {
       if (this.remainingSeconds === 0) return '0%';
-      return `${this.remainingSeconds / this.duration * 100}%`;
+      return `${this.remainingSeconds / this.settings.duration * 100}%`;
     },
   },
   methods: {
@@ -119,7 +126,7 @@ export default defineComponent({
             this.remainingSeconds--
           }, 1000)
         }
-        this.remainingSeconds = this.duration
+        this.remainingSeconds = this.settings.duration
         this.balls.forEach((ball) => {
           if (ball != null) {
             ball.testState = 'ready'
@@ -136,7 +143,7 @@ export default defineComponent({
       })
       this.saveResults()
     },
-    saveResults(): void {
+    async saveResults() {
       const popUpStore = usePopupStore()
       new TestResolver().createRdo(this.testResultsDto).catch((err) => {
         popUpStore.activateErrorPopup(err.message)
@@ -144,7 +151,7 @@ export default defineComponent({
       if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
         let setupId = this.setupId ? parseInt(this.setupId) : undefined;
         if (setupId && isNaN(setupId)) setupId = undefined
-        new TestBlockResolver().updateTestBlock({
+        const result = await new TestBlockResolver().updateTestBlock({
           testBlockId: parseInt(this.testBlockId),
           updatedTest: {
             name: "HARD_RDO",
@@ -152,22 +159,11 @@ export default defineComponent({
             available: false
           }
         })
-      }
-    },
-    async load () {
-      if (this.setupId && !isNaN(parseInt(this.setupId))) {
-        const settings = await new TestSetupsResolver().getById(parseInt(this.setupId))
-        if (settings) {
-          this.duration = settings.duration
-          this.showProgressBar = settings.showProgress
-          this.showTimer = settings.showTimer
-          this.showTotalResults = settings.showTotalResults
-        }
+        this.$emit('test-completed', result.body)
       }
     },
   },
   mounted() {
-    this.load()
     this.balls.forEach((_, index) => {
       this.balls[index] = (this.$refs.simpleRdoTest as SimpleRdoTest[])[index];
     })
@@ -187,8 +183,8 @@ export default defineComponent({
         </p>
       </div>
       <div class="description" v-else>
-        <p v-if="showTotalResults">
-          Поздравляем с прохождением теста!<br>
+        <p>Поздравляем с прохождением теста!<br></p>
+        <p v-if="settings.showTotalResults">
           Ваши результаты:<br>
           - Среднее время ответа: {{ testResultsDto.averageCallbackTime.toFixed(2) }}<br>
           - Среднее стандартное отклонение: {{ testResultsDto.dispersion.toFixed(2) }}<br>
@@ -200,15 +196,18 @@ export default defineComponent({
         class="start-button"
       >
         <template #placeholder>
-          {{ balls.every(ball => ball?.testState === 'ready') ? 'Начать тест' : 'Пройти заново' }}
+          {{
+            balls.every(ball => ball?.testState === 'ready') ? 'Начать тест' :
+              testBlockId ? 'Вернуться к текущему блоку' : 'Пройти заново'
+          }}
         </template>
       </CommonButton>
     </div>
     <div class="test" v-show="balls.some(ball => ball?.testState === 'reacting')">
-      <div v-if="showTimer" class="timer">
+      <div v-if="settings.showTimer" class="timer">
         Осталось времени: {{ remainingTime }}
       </div>
-      <div v-if="showProgressBar" class="progress-bar-container">
+      <div v-if="settings.showProgress" class="progress-bar-container">
         <div class="progress-bar" :style="{ width: progressBarWidth }"></div>
       </div>
       <div class="balls-row">

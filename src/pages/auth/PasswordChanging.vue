@@ -1,13 +1,13 @@
 <script lang="ts">
-import CustomInput from '../components/UI/inputs/CustomInput.vue';
-import CommonButton from '../components/UI/CommonButton.vue';
-import { UserResolver } from '../api/resolvers/user/user.resolver.ts';
+import CustomInput from '../../components/UI/inputs/CustomInput.vue';
+import CommonButton from '../../components/UI/CommonButton.vue';
+import { UserResolver } from '../../api/resolvers/user/user.resolver.ts';
 import CodeVerification from './CodeVerification.vue';
-import router from '../router/router.ts';
-import { usePopupStore } from '../store/popup.store.ts';
-import { AuthResolver } from '../api/resolvers/auth/auth.resolver.ts';
-import type { SendCodeAgainInputDto } from '../api/resolvers/auth/dto/input/send-code-again-input.dto.ts';
-import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-data-output.dto.ts';
+import router from '../../router/router.ts';
+import { usePopupStore } from '../../store/popup.store.ts';
+import { AuthResolver } from '../../api/resolvers/auth/auth.resolver.ts';
+import type { SendCodeAgainInputDto } from '../../api/resolvers/auth/dto/input/send-code-again-input.dto.ts';
+import type { UserDataOutputDto } from '../../api/resolvers/user/dto/output/user-data-output.dto.ts';
 
 export default {
   name: 'PasswordChangingPage',
@@ -141,7 +141,7 @@ export default {
     <div class="header-container">
       <img
         class="icon"
-        src="../assets/icons/arrow-left-icon.svg"
+        src="../../assets/icons/arrow-left-icon.svg"
         alt="arrow-back"
         @click="goToFirstStep"
       />

@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { jwtDecode } from 'jwt-decode';
-import type { TestBlockJwt, TestType } from './types';
-import { usePopupStore } from '../../store/popup.store.ts';
+import type { TestType } from './types';
 import NotFound from '../NotFound.vue';
 import AdditionSoundTest from './addition/sound/AdditionSoundTest.vue';
 import AdditionVisualTest from './addition/visual/AdditionVisualTest.vue';
@@ -11,18 +9,21 @@ import SimpleLightTest from './simple/SimpleLightTest.vue';
 import HardLightTest from './hard/HardLightTest.vue';
 import SimpleRdoTest from './simple/SimpleRdoTest.vue';
 import HardRdoTest from './hard/HardRdoTest.vue';
-import { TestBlockResolver } from '../../api/resolvers/testBlocks/test-block.resolver.ts';
 import router from '../../router/router.ts';
+import SimpleTrackingTest from './simple/SimpleTrackingTest.vue';
+import HardTrackingTest from './hard/HardTrackingTest.vue';
+import NumericalSeriesTest from './cognitive/NumericalSeriesTest.vue';
+import StroopTest from './cognitive/StroopTest.vue';
+import VerbalTest from './cognitive/VerbalTest.vue';
+import { useTestBlock } from '../../utils/useTestBlock.ts';
 
-const usePopUp = usePopupStore()
-const testType = ref<TestType | null>(null)
 const testSetupId = ref<number | undefined>(undefined)
 const props = defineProps<{
-  testBlockId: string;
+  blockId: string;
   testTypeName: string;
 }>();
 const testComponent = computed(() => {
-  switch (testType.value) {
+  switch (props.testTypeName as TestType) {
     case 'ADDITION_SOUND':
       return AdditionSoundTest;
     case 'ADDITION_VISUAL':
@@ -37,30 +38,38 @@ const testComponent = computed(() => {
       return SimpleRdoTest;
     case 'HARD_RDO':
       return HardRdoTest;
+    case 'SIMPLE_TRACKING':
+      return SimpleTrackingTest;
+    case 'HARD_TRACKING':
+      return HardTrackingTest;
+    case 'NUMERICAL':
+      return NumericalSeriesTest;
+    case 'STROOP':
+      return StroopTest;
+    case 'VERBAL':
+      return VerbalTest;
     default:
       return NotFound;
   }
 });
 
 onMounted(async () => {
-  try {
-    const testBlockId = !isNaN(parseInt(props.testBlockId)) ? parseInt(props.testBlockId) : -1;
-    if (testBlockId < 0) usePopUp.activateErrorPopup("Test Block id is incorrect!");
-    else {
-      const testBlockToken = (await new TestBlockResolver().getById(testBlockId)).testBlockToken
-      const data = jwtDecode(testBlockToken) as TestBlockJwt
-      const test = data.tests.find(test => test.name === props.testTypeName)
-      if (test && test.available) testSetupId.value = test.setupId
-      else await router.push(`/testBlock/${testBlockId}`)
+  const { testBlock } = await useTestBlock(parseInt(props.blockId))
+  if (testBlock.value) {
+    const test = testBlock.value.tests.find(test => test.name === props.testTypeName)
+    if (test && test.available) {
+      testSetupId.value = test.setupId
+      return
     }
-  } catch (error) {}
+  }
+  await router.push(`/testBlock/${props.blockId}`)
 })
 </script>
 
 <template>
   <component
-    :test-block-id="testBlockId"
-    :setup-id="testSetupId"
+    :test-block-id="blockId"
+    :setup="testSetupId"
     :is="testComponent"
   />
 </template>

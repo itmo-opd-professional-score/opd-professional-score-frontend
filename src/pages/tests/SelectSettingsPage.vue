@@ -11,6 +11,7 @@ import { UserState } from '../../utils/userState/UserState.ts';
 import { UserRole } from '../../utils/userState/UserState.types.ts';
 import router from '../../router/router.ts';
 import { max, min } from '@floating-ui/utils';
+import type { DefaultErrorDto } from '../../api/dto/common/default-error.dto.ts';
 
 
 export default defineComponent({
@@ -28,7 +29,6 @@ export default defineComponent({
       showTimer: false,
       showTotalResults: false,
       showProgress: false,
-      difficultyMode: true,
       accelerationMode: 'DISCRETE' as AccelerationMode,
       currentTestType: null as TestTypeDataOutputDto | null,
       specialTypes: [
@@ -69,16 +69,20 @@ export default defineComponent({
     max,
     async saveSettings() {
       const settings: TestSetupInputDto = {
+        testName: `LOL-{this.testTypeId}`,
         testTypeId: parseInt(this.testTypeId),
         duration: this.duration,
         showTimer: this.showTimer,
         showTotalResults: this.showTotalResults,
         showProgress: this.showProgress,
         accelerationMode: this.accelerationMode,
-        difficultyMode: this.difficultyMode,
       };
-      await new TestSetupsResolver().create(settings)
-      await router.push('/testBlock/create')
+      try {
+        await new TestSetupsResolver().create(settings)
+        await router.push('/testBlock/create')
+      } catch (e) {
+        console.log((e as DefaultErrorDto).message)
+      }
     },
   },
   async mounted() {
@@ -110,7 +114,7 @@ export default defineComponent({
           />
           <div class="slider-labels">
             <span>{{ minTimeValue > 60 ? (minTimeValue / 60).toFixed(1) + ' мин' : minTimeValue + ' сек'}}</span>
-            <span>{{ maxTimeValue > 60 ? (minTimeValue / 60).toFixed(1) + ' мин' : maxTimeValue + ' сек'}}</span>
+            <span>{{ maxTimeValue > 60 ? (maxTimeValue / 60).toFixed(1) + ' мин' : maxTimeValue + ' сек'}}</span>
           </div>
           <div class="setting-item">
             <CustomInput
@@ -156,30 +160,6 @@ export default defineComponent({
                 labelText="Непрерывное"
                 name="accelerationMode"
                 @click="accelerationMode = 'STEADY'"
-              />
-            </div>
-            <br />
-          </div>
-          <div
-            class="special-settings"
-            v-if="specialTypes.includes(currentTestType.name)"
-          >
-            <h3>Выберите уровень сложности:</h3>
-            <div class="radio-group">
-              <CustomInput
-                type="radio"
-                labelText="Произвольный режим"
-                name="diff"
-                @click="difficultyMode = true"
-                :checked="true"
-                selector="radio"
-              />
-              <CustomInput
-                type="radio"
-                labelText="Режим от простого к сложному"
-                name="diff"
-                @click="difficultyMode = false"
-                selector="radio"
               />
             </div>
             <br />

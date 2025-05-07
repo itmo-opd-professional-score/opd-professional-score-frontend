@@ -64,7 +64,7 @@ const prevPage = () => {
     </div>
     <TestManagerElement
       v-for="item in paginatedData"
-      :key="item.id"
+      :key="item.id * 10 + item.testTypeId"
       @click="router.push(`/test/results/${item.testTypeId}/${item.id}`)"
     >
       <template #id>{{ item.id }}</template>

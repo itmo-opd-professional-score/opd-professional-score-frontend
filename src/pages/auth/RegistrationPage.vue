@@ -1,13 +1,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import CustomInput from '../components/UI/inputs/CustomInput.vue';
-import CommonButton from '../components/UI/CommonButton.vue';
-import { AuthResolver } from '../api/resolvers/auth/auth.resolver.ts';
-import { usePopupStore } from '../store/popup.store.ts';
-import type { RegUserFirstStepInputDto } from '../api/resolvers/auth/dto/input/reg-user-first-step-input.dto.ts';
+import CustomInput from '../../components/UI/inputs/CustomInput.vue';
+import CommonButton from '../../components/UI/CommonButton.vue';
+import { AuthResolver } from '../../api/resolvers/auth/auth.resolver.ts';
+import { usePopupStore } from '../../store/popup.store.ts';
+import type { RegUserFirstStepInputDto } from '../../api/resolvers/auth/dto/input/reg-user-first-step-input.dto.ts';
 import CodeVerification from './CodeVerification.vue';
-import type { SendCodeAgainInputDto } from '../api/resolvers/auth/dto/input/send-code-again-input.dto.ts';
-import type { RegUserSecondStepInputDto } from '../api/resolvers/auth/dto/input/reg-user-second-step-input.dto.ts';
+import type { SendCodeAgainInputDto } from '../../api/resolvers/auth/dto/input/send-code-again-input.dto.ts';
+import type { RegUserSecondStepInputDto } from '../../api/resolvers/auth/dto/input/reg-user-second-step-input.dto.ts';
 
 export default defineComponent({
   name: 'RegistrationPage',

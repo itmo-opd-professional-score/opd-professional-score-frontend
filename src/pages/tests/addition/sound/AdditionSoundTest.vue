@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CommonButton from '../../../../components/UI/CommonButton.vue';
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import router from '../../../../router/router.ts';
 import type {
   SoundHardTestAnswerDto,
@@ -10,15 +10,12 @@ import type {
 import { TestResolver } from '../../../../api/resolvers/test/test.resolver.ts';
 import { usePopupStore } from '../../../../store/popup.store.ts';
 import { UserState } from '../../../../utils/userState/UserState.ts';
+import { useTest } from '../../../../utils/useTest.ts';
 import type { CreateAdditionInputDto } from '../../../../api/resolvers/test/dto/input/create-addition-input.dto.ts';
-import type { TestSetupOutputDTO } from '../../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
-import { TestSetupsResolver } from '../../../../api/resolvers/testSetup/test-setups.resolver.ts';
-import { TestBlockResolver } from '../../../../api/resolvers/testBlocks/test-block.resolver.ts';
 
 const questionsCount = 5;
 const step = ref<number>(0);
 const score = ref<number>(0);
-const showTotalResults = ref<boolean>(true);
 const questionStartTime = ref<number>(0);
 const testStartTime = ref<number>(0);
 const questionNumber = ref<number>(-1);
@@ -33,6 +30,12 @@ const props = defineProps<{
   testBlockId?: string,
   setupId?: string
 }>();
+
+const { settings, updateTestBlockToken } = useTest({
+  testBlockId: props.testBlockId,
+  setupId: props.setupId,
+  testType: "ADDITION_SOUND"
+})
 
 speechSynthesis.onvoiceschanged = () => {
   voices = speechSynthesis.getVoices();
@@ -116,11 +119,11 @@ const calculateDispersion = (data: number[]) => {
 };
 
 const resetTest = async () => {
-  if (props.testBlockId) await router.push(`/testblock/${props.testBlockId}`);
+  if (props.testBlockId) await router.push(`/testBlock/${props.testBlockId}`);
   else router.go(0)
 }
 
-const saveResults = () => {
+const saveResults = async () => {
   const testResolver = new TestResolver();
   const popUpStore = usePopupStore();
   const data: CreateAdditionInputDto = {
@@ -141,25 +144,8 @@ const saveResults = () => {
         `Error code: ${error.status}. ${error.response.data.message}`,
       );
     });
-  if (props.testBlockId && !isNaN(parseInt(props.testBlockId))) {
-    let setupId = props.setupId ? parseInt(props.setupId) : undefined;
-    if (setupId && isNaN(setupId)) setupId = undefined
-    new TestBlockResolver().updateTestBlock({
-      testBlockId: parseInt(props.testBlockId),
-      updatedTest: {
-        name: "ADDITION_SOUND",
-        setupId: setupId,
-        available: false
-      }
-    })
-  }
+  if (props.testBlockId) await updateTestBlockToken()
 };
-onMounted(async () => {
-  if (props.setupId && !isNaN(parseInt(props.setupId))) {
-    const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(props.setupId))
-    if (settings) showTotalResults.value = settings.showTotalResults
-  }
-});
 </script>
 
 <template>
@@ -222,7 +208,7 @@ onMounted(async () => {
           Поздравляем Вас с прохождением теста на проверку скорости реакции на
           сложный звуковой сигнал!
         </p>
-        <div class="full" v-if="showTotalResults">
+        <div class="full" v-if="settings.showTotalResults">
           <p>Ваши результаты:</p>
           <ul>
             <li>Кол-во вопросов: {{ questionsCount }}</li>
@@ -232,7 +218,7 @@ onMounted(async () => {
               Среднее стандартное отклонение:
               {{
                 calculateDispersion(
-                  answers.map((answer) => answer.elapsedTime),
+                  answers.map((answer: SoundHardTestAnswerDto) => answer.elapsedTime),
                 ).toFixed(2)
               }}
               сек

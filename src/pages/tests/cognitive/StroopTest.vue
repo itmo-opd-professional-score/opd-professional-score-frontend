@@ -3,18 +3,28 @@ import { defineComponent } from 'vue';
 import CommonButton from '../../../components/UI/CommonButton.vue';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
-import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
-import type { CreateCognitiveInputDto } from '../../../api/resolvers/test/dto/input/create-cognitive.dto.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
-import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
-import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
 import router from '../../../router/router.ts';
+import type { CreateCognitiveInputDto } from '../../../api/resolvers/test/dto/input/create-cognitive-input.dto.ts';
+import { useTest } from '../../../utils/useTest.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
   name: 'StroopTest',
   components: { CommonButton },
+  setup(props) {
+    const { settings, updateTestBlockToken } = useTest({
+      testBlockId: props.testBlockId,
+      setupId: props.setupId,
+      testType: "STROOP"
+    })
+
+    return {
+      settings,
+      updateTestBlockToken,
+    }
+  },
   data() {
     return {
       colors: ['red', 'green', 'yellow', 'blue', 'purple'],
@@ -28,12 +38,6 @@ export default defineComponent({
       roundTimeoutId: null as ReturnType<typeof setTimeout> | null,
       testState: 'ready' as TestState,
       result: 0,
-      randomChangeOfDifficulty: false,
-
-      duration: 10,
-      showTimer: false,
-      showTotalResults: false,
-      showProgressBar: true
     };
   },
   props: {
@@ -46,7 +50,8 @@ export default defineComponent({
         userId: UserState.id,
         allSignals: this.score + this.mistakes,
         mistakes: this.mistakes,
-        score: this.score
+        score: this.score,
+        testType: 'STROOP'
       }
     }
   },
@@ -69,9 +74,6 @@ export default defineComponent({
       }
     },
     giveProbabilityOfWordAndColorMatch() {
-      if (this.randomChangeOfDifficulty) {
-        return [0.7, 0.4, 0.1][Math.floor(Math.random() * 3)];
-      }
       return [0.7, 0.4, 0.1][this.levelOfDifficulty];
     },
     checkAnswer(selectedColor: string) {
@@ -84,18 +86,14 @@ export default defineComponent({
       this.nextRound();
     },
     nextRound() {
-      if (!this.randomChangeOfDifficulty) {
-        const timePassed = (this.duration * 1000 - this.remainingTimeValue) / 1000;
-        const thirdTime = this.duration / 3;
-        if (timePassed >= thirdTime * 2 && this.levelOfDifficulty < 2) {
-          this.levelOfDifficulty = 2;
-        } else if (timePassed >= thirdTime && this.levelOfDifficulty < 1) {
-          this.levelOfDifficulty = 1;
-        }
-      } else {
-
-        this.levelOfDifficulty = Math.floor(Math.random() * 3);
+      const timePassed = (this.settings.duration * 1000 - this.remainingTimeValue) / 1000;
+      const thirdTime = this.settings.duration / 3;
+      if (timePassed >= thirdTime * 2 && this.levelOfDifficulty < 2) {
+        this.levelOfDifficulty = 2;
+      } else if (timePassed >= thirdTime && this.levelOfDifficulty < 1) {
+        this.levelOfDifficulty = 1;
       }
+
       this.clearRoundTimeout();
       this.giveColorName();
       this.giveColorOfWord();
@@ -105,10 +103,10 @@ export default defineComponent({
       }, 3000);
     },
     startTest() {
-      this.remainingTimeValue = this.duration * 1000;
+      this.remainingTimeValue = this.settings.duration * 1000;
       this.testState = 'reacting';
       this.nextRound();
-      this.startTimer(this.duration);
+      this.startTimer(this.settings.duration);
     },
     startTimer(totalSeconds: number) {
       this.remainingTimeValue = totalSeconds * 1000;
@@ -130,34 +128,18 @@ export default defineComponent({
       else {
         this.result = Math.round((this.score / (this.score + this.mistakes)) * 100);
       }
+      this.saveResults()
     },
-    saveResults(): void {
+    async saveResults() {
       const popUpStore = usePopupStore()
       new TestResolver().createCognitive(this.testResults).catch((err) => {
         popUpStore.activateErrorPopup(err.message)
       })
-      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
-        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
-        if (setupId && isNaN(setupId)) setupId = undefined
-        new TestBlockResolver().updateTestBlock({
-          testBlockId: parseInt(this.testBlockId),
-          updatedTest: {
-            name: "STROOP",
-            setupId: setupId,
-            available: false
-          }
-        })
-      }
+      if (this.testBlockId) await this.updateTestBlockToken()
     },
     async resetTest() {
       if (this.testBlockId) await router.push(`/testBlock/${this.testBlockId}`);
       else router.go(0)
-    },
-    cancelTimer() {
-      if (this.timerIntervalId) {
-        clearInterval(this.timerIntervalId);
-        this.timerIntervalId = null;
-      }
     },
     clearRoundTimeout() {
       if (this.roundTimeoutId) {
@@ -172,26 +154,14 @@ export default defineComponent({
     },
     progressBarWidth() {
       if (this.remainingTimeValue === 0) return '0%';
-      return `${(1 - this.remainingTimeValue / (this.duration * 1000)) * 100}%`;
+      return `${(1 - this.remainingTimeValue / (this.settings.duration * 1000)) * 100}%`;
     },
     clickButton() {
       if (this.testState === 'ready') {
         this.startTest();
       }
     },
-    async load () {
-      if (this.setupId && !isNaN(parseInt(this.setupId))) {
-        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
-        if (settings) {
-          this.duration = settings.duration
-          this.showTotalResults = settings.showTotalResults
-          this.showTimer = settings.showTimer
-          this.showProgressBar = settings.showProgress
-        }
-      }
-    },
   },
-  mounted() { this.load() },
 });
 </script>
 
@@ -214,11 +184,11 @@ export default defineComponent({
     </div>
     <div class="test-container" v-if="testState == 'reacting'">
       <div class="info-block" v-if="testState == 'reacting'">
-        <div v-if="showTimer" class="timer">
+        <div v-if="settings.showTimer" class="timer">
           Осталось времени: {{ remainingTime() }}
         </div>
 
-        <div v-if="showProgressBar" class="progress-bar-container">
+        <div v-if="settings.showProgress" class="progress-bar-container">
           <div
             class="progress-bar"
             :style="{ width: progressBarWidth() }"
@@ -247,7 +217,7 @@ export default defineComponent({
     </div>
     <div v-if="testState == 'completed'" class="test-container">
       <h2 class="title">Тест завершен!</h2>
-      <div class="full" v-if="showTotalResults">
+      <div class="full" v-if="settings.showTotalResults">
         <p class="result">Правильных ответов: {{ score }}</p>
         <p class="result">Ошибок: {{ mistakes }}</p>
         <p class="result">Результат: {{ result }}%</p>
@@ -334,7 +304,7 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
-  max-width: 35vw;
+  max-width: 55vw;
   padding: 2rem;
   text-align: center;
 }

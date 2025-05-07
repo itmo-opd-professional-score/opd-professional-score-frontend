@@ -6,9 +6,7 @@ import CommonButton from '../../../components/UI/CommonButton.vue';
 import type { CreateSimpleInputDto } from '../../../api/resolvers/test/dto/input/create-simple-input.dto.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
-import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
-import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
-import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
+import { useTest } from '../../../utils/useTest.ts';
 
 export default defineComponent({
   name: "LightSimpleTest",
@@ -16,6 +14,17 @@ export default defineComponent({
   props: {
     testBlockId: String,
     setupId: String
+  },
+  setup(props) {
+    const { settings, updateTestBlockToken } = useTest({
+      setupId: props.setupId,
+      testBlockId: props.testBlockId,
+      testType: "SIMPLE_LIGHT"
+    });
+    return {
+      settings,
+      updateTestBlockToken,
+    }
   },
   data() {
     return {
@@ -25,12 +34,9 @@ export default defineComponent({
       showResults: false,
       isTestRunning: false,
       startTime: 0,
-      completedTestsLinks: [] as Array<string>,
-      completedTestsResults: [] as Array<string>,
       TRIAL_COUNT: 3,
       currentTrial: 0,
       timer: 0,
-      showTotalResults: false,
     }
   },
   computed: {
@@ -70,6 +76,9 @@ export default defineComponent({
     },
   },
   methods: {
+    router() {
+      return router
+    },
     changeButtonColor(): void {
       this.isButtonActive = true;
       this.buttonText = 'Нажмите на кнопку';
@@ -93,14 +102,7 @@ export default defineComponent({
       this.buttonText = 'Ждите...';
       this.timer = setTimeout(this.changeButtonColor, Math.random() * 3000 + 1000);
     },
-    async resetTest() {
-      if (this.testBlockId) {
-        await router.push(`/testblock/${this.testBlockId}`);
-      } else {
-        router.go(0)
-      }
-    },
-    saveResults(): void {
+    async saveResults() {
       this.isTestRunning = false
       this.isButtonActive = false
       this.buttonText = 'Тест окончен'
@@ -112,27 +114,9 @@ export default defineComponent({
           `Error code: ${error.status}. ${error.response.data.message}`,
         );
       });
-      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
-        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
-        if (setupId && isNaN(setupId)) setupId = undefined
-        new TestBlockResolver().updateTestBlock({
-          testBlockId: parseInt(this.testBlockId),
-          updatedTest: {
-            name: "SIMPLE_LIGHT",
-            setupId: setupId,
-            available: false
-          }
-        })
-      }
+      if (this.testBlockId) await this.updateTestBlockToken()
     },
-    async load() {
-      if (this.setupId && !isNaN(parseInt(this.setupId))) {
-        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
-        if (settings) this.showTotalResults = settings.showTotalResults
-      }
-    }
   },
-  mounted(): void {this.load()}
 })
 
 </script>
@@ -159,7 +143,7 @@ export default defineComponent({
       </div>
       <CommonButton
         class="reset-button"
-        @click="resetTest"
+        @click="router().go(0)"
         v-if="isTestRunning"
       >
         <template v-slot:placeholder>Прервать тест</template>
@@ -177,7 +161,7 @@ export default defineComponent({
       <div class="congrats">
         <h2>Поздравляем с прохождением теста!</h2>
       </div>
-      <div class="final-results">
+      <div class="final-results" v-if="settings.showTotalResults">
         <h2 class="title">Результаты:</h2>
         <p>
           Среднее время: <strong>{{ results.average }} мс</strong>
@@ -197,7 +181,7 @@ export default defineComponent({
       </div>
       <CommonButton
         class="retry-button"
-        @click="resetTest"
+        @click="testBlockId ? router().push(`/testBlock/${testBlockId}`) : router().go(0)"
       >
         <template v-slot:placeholder>{{ testBlockId ? 'Вернуться к блоку тестов' : 'Пройти заново'}}</template>
       </CommonButton>

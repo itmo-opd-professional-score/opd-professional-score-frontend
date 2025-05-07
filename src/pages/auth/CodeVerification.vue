@@ -1,6 +1,6 @@
 <script lang="ts">
-import CustomInput from '../components/UI/inputs/CustomInput.vue';
-import CommonButton from '../components/UI/CommonButton.vue';
+import CustomInput from '../../components/UI/inputs/CustomInput.vue';
+import CommonButton from '../../components/UI/CommonButton.vue';
 
 export default {
   name: 'CodeVerification',

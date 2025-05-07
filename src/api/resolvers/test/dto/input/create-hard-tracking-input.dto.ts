@@ -1,4 +1,4 @@
-export interface CreateHardTrackingTestInputDto {
+export interface CreateHardTrackingInputDto {
   userId: number | null;
   duration: number;
   totalOverlapTime: number;

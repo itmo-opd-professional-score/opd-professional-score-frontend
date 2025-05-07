@@ -60,7 +60,6 @@ export default {
       <div class="field" id="name">Название блока тестов</div>
       <div class="field">Открыть блок</div>
     </div>
-
     <TestBlockElement
       :block-id="testBlock.id"
       :token="testBlock.testBlockToken"

@@ -1,9 +1,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import CustomInput from '../components/UI/inputs/CustomInput.vue';
-import CommonButton from '../components/UI/CommonButton.vue';
-import { AuthResolver } from '../api/resolvers/auth/auth.resolver.ts';
-import type { LoginUserInputDto } from '../api/resolvers/auth/dto/input/login-user-input.dto.ts';
+import CustomInput from '../../components/UI/inputs/CustomInput.vue';
+import CommonButton from '../../components/UI/CommonButton.vue';
+import { AuthResolver } from '../../api/resolvers/auth/auth.resolver.ts';
+import type { LoginUserInputDto } from '../../api/resolvers/auth/dto/input/login-user-input.dto.ts';
 
 export default defineComponent({
   name: 'LogInPage',

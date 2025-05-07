@@ -3,19 +3,29 @@ import { defineComponent } from 'vue';
 import CommonButton from '../../../components/UI/CommonButton.vue';
 import CustomInput from '../../../components/UI/inputs/CustomInput.vue';
 import { UserState } from '../../../utils/userState/UserState.ts';
-import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
-import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
-import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { usePopupStore } from '../../../store/popup.store.ts';
 import type { CreateCognitiveInputDto } from '../../../api/resolvers/test/dto/input/create-cognitive-input.dto.ts';
 import router from '../../../router/router.ts';
+import { useTest } from '../../../utils/useTest.ts';
 
 type TestState= 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
   name: 'NumericalSeriesTest',
   components: { CustomInput, CommonButton },
+  setup(props) {
+    const { settings, updateTestBlockToken } = useTest({
+      testBlockId: props.testBlockId,
+      setupId: props.setupId,
+      testType: "NUMERICAL"
+    })
+
+    return {
+      settings,
+      updateTestBlockToken,
+    }
+  },
   data() {
     return {
       userAnswer: '',
@@ -36,12 +46,6 @@ export default defineComponent({
       roundTimeoutId:  null as ReturnType<typeof setInterval> | null,
       roundRemainingTime: 0,
       roundTimerIntervalId: null as ReturnType<typeof setInterval> | null,
-
-      duration: 12,
-      randomChangeOfDifficulty: false,
-      showTimer: false,
-      showTotalResults: false,
-      showProgressBar: true,
 
       functionsForFirstDifficulty: [
         (x: number, y: number): string => (x + y).toString(),
@@ -82,7 +86,7 @@ export default defineComponent({
     },
     progressBarWidth() {
       if (this.remainingTimeValue === 0) return '0%';
-      return `${(1 - this.remainingTimeValue / (this.duration * 1000)) * 100}%`;
+      return `${(1 - this.remainingTimeValue / (this.settings.duration * 1000)) * 100}%`;
     },
     remainingTime() {
       const minutes = Math.floor(this.remainingTimeValue / 60000);
@@ -95,6 +99,7 @@ export default defineComponent({
         allSignals: this.score + this.mistakes,
         score: this.score,
         mistakes: this.mistakes,
+        testType: 'NUMERICAL'
       }
     }
   },
@@ -125,10 +130,10 @@ export default defineComponent({
       else router.go(0)
     },
     startTest() {
-      this.totalTime = this.duration;
-      this.remainingTimeValue = this.duration;
+      this.totalTime = this.settings.duration;
+      this.remainingTimeValue = this.settings.duration;
       this.testState = 'reacting';
-      this.startTimer(this.duration);
+      this.startTimer(this.settings.duration);
       this.levelOfDifficulty = 0;
       this.nextRound();
     },
@@ -143,39 +148,24 @@ export default defineComponent({
       }
       this.saveResults()
     },
-    saveResults(): void {
+    async saveResults() {
       const popUpStore = usePopupStore()
       new TestResolver().createCognitive(this.testResultsDto).catch((err) => {
         popUpStore.activateErrorPopup(err.message)
       })
-      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
-        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
-        if (setupId && isNaN(setupId)) setupId = undefined
-        new TestBlockResolver().updateTestBlock({
-          testBlockId: parseInt(this.testBlockId),
-          updatedTest: {
-            name: "NUMERICAL",
-            setupId: setupId,
-            available: false
-          }
-        })
-      }
+      if (this.testBlockId) await this.updateTestBlockToken()
     },
     nextRound() {
       if (this.testState !== 'reacting') return;
 
       this.stopRoundTimer(); // Остановить предыдущий раунд
-      if (!this.randomChangeOfDifficulty) {
-        const timePassed = this.totalTime - this.remainingTimeValue / 1000;
-        if (timePassed > this.totalTime * 0.66) {
-          this.levelOfDifficulty = 2;
-        } else if (timePassed > this.totalTime * 0.33) {
-          this.levelOfDifficulty = 1;
-        } else {
-          this.levelOfDifficulty = 0;
-        }
+      const timePassed = this.totalTime - this.remainingTimeValue / 1000;
+      if (timePassed > this.totalTime * 0.66) {
+        this.levelOfDifficulty = 2;
+      } else if (timePassed > this.totalTime * 0.33) {
+        this.levelOfDifficulty = 1;
       } else {
-        this.levelOfDifficulty = this.generateRandomNumeric(0, 2);
+        this.levelOfDifficulty = 0;
       }
 
       let lambda: (current: number, step: number) => string;
@@ -256,19 +246,7 @@ export default defineComponent({
       const seconds = Math.floor(effectiveRoundTime / 1000);
       return `${seconds < 10 ? '0' : ''}${seconds}`;
     },
-    async load () {
-      if (this.setupId && !isNaN(parseInt(this.setupId))) {
-        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
-        if (settings) {
-          this.duration = settings.duration
-          this.showTotalResults = settings.showTotalResults
-          this.showTimer = settings.showTimer
-          this.showProgressBar = settings.showProgress
-        }
-      }
-    },
   },
-  mounted() { this.load( )},
 });
 </script>
 
@@ -291,13 +269,13 @@ export default defineComponent({
       </div>
 
       <div class="test-container" v-if="testState == 'reacting'" >
-        <div v-if="showTimer" class="timer">
+        <div v-if="settings.showTimer" class="timer">
           Осталось времени: {{ remainingTime }}
         </div>
-        <div v-if="showProgressBar" class="progress-bar-container">
+        <div v-if="settings.showProgress" class="progress-bar-container">
           <div class="progress-bar" :style="{ width: progressBarWidth }"></div>
         </div>
-        <div v-if="showTimer" class="timer">
+        <div v-if="settings.showTimer" class="timer">
           Время на раунд: {{ roundTimeFormatted() }} сек
         </div>
           <div class="sequence">
@@ -318,7 +296,7 @@ export default defineComponent({
       </div>
       <div class="test-container" v-if="testState == 'completed'">
         <h2 class="title">Тест завершен!</h2>
-        <div class="full" v-if="showTotalResults">
+        <div class="full" v-if="settings.showTotalResults">
           <p class="result">Правильных ответов: {{ score }}</p>
           <p class="result">Ошибок: {{ mistakes }}</p>
           <p class="result">Результат: {{ result }}%</p>
@@ -328,7 +306,7 @@ export default defineComponent({
           @click="resetTest"
         >
           <template v-slot:placeholder>
-            {{ testBlockId ? 'Назад к блоку' : 'Начать заново'}}
+            {{ testBlockId ? 'Вернуться к текущему блоку' : 'Начать заново'}}
           </template>
         </CommonButton>
       </div>

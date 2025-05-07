@@ -6,7 +6,7 @@
       <div class="instructions">
         <p>Ваша задача - удерживать синий шарик как можно ближе к зелёному.</p>
         <p>Чем дольше они будут совпадать, тем лучше ваш результат.</p>
-        <p>Тест продлится {{ duration }} секунд.</p>
+        <p>Тест продлится {{ settings.duration }} секунд.</p>
         <ul>
           <li>Перемещайте синий шарик, удерживая его мышкой</li>
           <li>Зелёный шарик двигается самостоятельно</li>
@@ -25,7 +25,7 @@
     </div>
 
     <div
-      v-if="!introVisible"
+      v-if="!introVisible && !testEnded"
       class="test-container"
       @mousedown="startDrag"
       @mousemove="onDrag"
@@ -45,7 +45,7 @@
         ref="ball"
       ></div>
 
-      <div class="timer" v-if="showTimer && !testEnded">
+      <div class="timer" v-if="settings.showTimer && !testEnded">
         Осталось: {{ formattedTime }}
       </div>
 
@@ -57,7 +57,7 @@
     <div v-if="testEnded" class="results-screen">
       <h2>Тест завершён!</h2>
 
-      <div class="result-card">
+      <div class="result-card" v-if="settings.showTotalResults">
         <div class="result-value">{{ bestOverlap.toFixed(2) }} сек</div>
         <div class="result-label">Лучшее совпадение</div>
       </div>
@@ -69,19 +69,25 @@
         :height="'50px'"
         :color="'success'"
       >
-        <template v-slot:placeholder>Попробовать ещё раз</template>
+        <template v-slot:placeholder>
+          {{ testBlockId ? 'Вернуться к текущему блоку' : 'Пройти снова' }}
+        </template>
       </CommonButton>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import CommonButton from '../../components/UI/CommonButton.vue';
+import CommonButton from '../../../components/UI/CommonButton.vue';
 import { defineComponent } from 'vue';
+import { UserState } from '../../../utils/userState/UserState.ts';
 import type {
-  CreateHardTrackingTestInputDto
-} from '../../api/resolvers/test/dto/input/create-hard-tracking-test-input.dto.ts';
-import { UserState } from '../../utils/userState/UserState.ts';
+  CreateHardTrackingInputDto
+} from '../../../api/resolvers/test/dto/input/create-hard-tracking-input.dto.ts';
+import { usePopupStore } from '../../../store/popup.store.ts';
+import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
+import { useTest } from '../../../utils/useTest.ts';
+import router from '../../../router/router.ts';
 
 
 export default defineComponent({
@@ -89,7 +95,22 @@ export default defineComponent({
   components: {
     CommonButton
   },
+  props: {
+    testBlockId: String,
+    setupId: String,
+  },
+  setup(props) {
+    const { settings, updateTestBlockToken } = useTest({
+      testBlockId: props.testBlockId,
+      setupId: props.setupId,
+      testType: "HARD_TRACKING"
+    })
 
+    return {
+      settings,
+      updateTestBlockToken,
+    }
+  },
   data() {
     return {
       trackWidth: 800,
@@ -118,16 +139,13 @@ export default defineComponent({
 
       animationFrame: null as number | null,
       introVisible: true,
-
-      duration: 30,
-      showTimer: true,
     };
   },
 
   computed: {
     formattedTime() {
-      if (!this.showTimer || this.testEnded) return '';
-      return `${Math.max(0, parseInt((this.duration - this.elapsedTime / 1000).toFixed(1)))} сек`;
+      if (!this.settings.showTimer || this.testEnded) return '';
+      return `${Math.max(0, parseInt((this.settings.duration - this.elapsedTime / 1000).toFixed(1)))} сек`;
     },
 
     bestOverlap() {
@@ -136,22 +154,18 @@ export default defineComponent({
     },
 
 
-    testResults() {
-      if (!this.testEnded) {
-        return null;
-      }
-
+    testResults(): CreateHardTrackingInputDto {
 
       const totalOverlapTime = this.overlapTimes.reduce((sum, t) => sum + t, 0);
       const averageOverlap = this.overlapTimes.length
         ? totalOverlapTime / this.overlapTimes.length
         : 0;
-      const successRate = (totalOverlapTime / this.duration) * 100;
+      const successRate = (totalOverlapTime / this.settings.duration) * 100;
 
 
       return {
-        userId: UserState.id,
-        duration: this.duration,
+        userId: UserState.id ? UserState.id : null,
+        duration: this.settings.duration,
         totalOverlapTime,
         bestOverlap: this.bestOverlap,
         averageOverlap,
@@ -169,16 +183,9 @@ export default defineComponent({
       this.animate();
     },
 
-    restartTest() {
-      this.autoBallPosition = 200;
-      this.userBallPosition = 400;
-      this.overlapTimes = [];
-      this.elapsedTime = 0;
-      this.testEnded = false;
-      this.isOverlapping = false;
-      this.overlapStart = null;
-
-      this.startTest();
+    async restartTest() {
+      if (this.testBlockId) await router.push(`/testBlock/${this.testBlockId}`);
+      else router.go(0)
     },
 
     startDrag(event: any) {
@@ -210,7 +217,7 @@ export default defineComponent({
       this.lastFrameTime = now;
 
       this.elapsedTime += deltaTime;
-      if (this.elapsedTime >= this.duration * 1000) {
+      if (this.elapsedTime >= this.settings.duration * 1000) {
         this.finishTest();
         return;
       }
@@ -262,25 +269,16 @@ export default defineComponent({
         const overlapDuration = (now - this.overlapStart) / 1000;
         this.overlapTimes.push(overlapDuration);
       }
-
-      const stats: CreateHardTrackingTestInputDto = {
-        userId: 123,
-        duration: this.duration,
-        totalOverlapTime: this.overlapTimes.reduce((sum, t) => sum + t, 0),
-        bestOverlap: this.bestOverlap,
-        averageOverlap: this.overlapTimes.length
-          ? this.overlapTimes.reduce((sum, t) => sum + t, 0) / this.overlapTimes.length
-          : 0,
-        overlapCount: this.overlapTimes.length,
-        successRate:
-          (this.overlapTimes.reduce((sum, t) => sum + t, 0) / this.duration) *
-          100,
-      };
-
-      console.log('Результаты теста:', stats);
-    }
+      this.saveResults()
+    },
+    async saveResults() {
+      const popUpStore = usePopupStore()
+      new TestResolver().createHardTracking(this.testResults).catch((err) => {
+        popUpStore.activateErrorPopup(err.message)
+      })
+      if (this.testBlockId) await this.updateTestBlockToken()
+    },
   },
-
   beforeUnmount() {
     if (this.animationFrame != null) cancelAnimationFrame(this.animationFrame);
   },

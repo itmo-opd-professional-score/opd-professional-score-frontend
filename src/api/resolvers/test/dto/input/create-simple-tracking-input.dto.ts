@@ -1,5 +1,5 @@
-export interface CreateTrackingInputDto {
-  userId: string | null;
+export interface CreateSimpleTrackingInputDto {
+  userId: number | null;
   allSignals: number;
   successCount: number;
   avgTime: number;

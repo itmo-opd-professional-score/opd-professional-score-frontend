@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { UserState } from '../utils/userState/UserState.ts';
-import CustomInput from '../components/UI/inputs/CustomInput.vue';
-import router from '../router/router.ts';
-import Button from '../components/UI/CommonButton.vue';
-import { UserResolver } from '../api/resolvers/user/user.resolver.ts';
-import { usePopupStore } from '../store/popup.store.ts';
-import { AuthResolver } from '../api/resolvers/auth/auth.resolver.ts';
+import { UserState } from '../../utils/userState/UserState.ts';
+import CustomInput from '../../components/UI/inputs/CustomInput.vue';
+import router from '../../router/router.ts';
+import Button from '../../components/UI/CommonButton.vue';
+import { UserResolver } from '../../api/resolvers/user/user.resolver.ts';
+import { usePopupStore } from '../../store/popup.store.ts';
+import { AuthResolver } from '../../api/resolvers/auth/auth.resolver.ts';
 
 const updateProfile = async () => {
   const userResolver = new UserResolver();

@@ -1,7 +1,6 @@
 import ApiResolverUtil from '../../../utils/ApiResolver.ts';
 import type { UpdateUserIdsInputDto } from './dto/input/update-user-ids-input.dto.ts';
 import type { DefaultOutputDto } from '../../dto/common/default-output.dto.ts';
-import { usePopupStore } from '../../../store/popup.store.ts';
 import type { TestDataOutputDto } from './dto/output/test-data-output.dto.ts';
 import type { CreateAdditionInputDto } from './dto/input/create-addition-input.dto.ts';
 import type { CreateOutputDto } from './dto/output/create-output.dto.ts';
@@ -9,15 +8,14 @@ import type { CreateSimpleInputDto } from './dto/input/create-simple-input.dto.t
 import type { CreateRdoInputDto } from './dto/input/create-rdo-input.dto.ts';
 import type { TestType } from '../../../pages/tests/types';
 import type { CreateHardLightInputDto } from './dto/input/create-hard-light-input.dto.ts';
-import type { CreateTrackingInputDto } from './dto/input/create-tracking-input.dto.ts';
-import type { CreateCognitiveInputDto } from './dto/input/create-cognitive.dto.ts';
+import type { CreateSimpleTrackingInputDto } from './dto/input/create-simple-tracking-input.dto.ts';
 import type { CreateCognitiveInputDto } from './dto/input/create-cognitive-input.dto.ts';
+import type { CreateHardTrackingInputDto } from './dto/input/create-hard-tracking-input.dto.ts';
 
 
 export class TestResolver {
   private apiResolver = new ApiResolverUtil('test');
   private token = localStorage.getItem('token');
-  private usePopUp = usePopupStore();
 
   public async getAllByType(typeEndpoint: string) {
     return await this.apiResolver.request<null, TestDataOutputDto[]>(
@@ -25,7 +23,7 @@ export class TestResolver {
       'GET',
       null,
       this.token ? this.token : undefined,
-    );
+    )
   }
 
   public async getByTypeById(typeEndpoint: string, id: number) {
@@ -43,7 +41,7 @@ export class TestResolver {
       'GET',
       null,
       this.token ? this.token : undefined,
-    );
+    )
   }
 
   public async createAddition(data: CreateAdditionInputDto, endpoint: string) {
@@ -55,7 +53,7 @@ export class TestResolver {
       'POST',
       data,
       this.token ? this.token : undefined,
-    );
+    )
   }
 
   public async createSimple(data: CreateSimpleInputDto, endpoint: string) {
@@ -108,14 +106,10 @@ export class TestResolver {
         data,
         this.token ? this.token : undefined,
       )
-      .then((res) => {
+      .then(() => {
         localStorage.removeItem('completedTestsLinks');
         localStorage.removeItem('completedTestsResults');
-        this.usePopUp.activateInfoPopup(res.body);
       })
-      .catch((error) => {
-        this.usePopUp.activateErrorPopup(error.message);
-      });
   }
 
   public async generateTestLink(testType: {testType: TestType}) {
@@ -124,23 +118,30 @@ export class TestResolver {
       'POST',
       testType,
       this.token ? this.token : undefined,
-    ).catch((err) => {
-      this.usePopUp.activateErrorPopup(err.message);
-      return null
-    })
+    )
   }
 
-  public async createTracking(data: CreateTrackingInputDto) {
+  public async createSimpleTracking(data: CreateSimpleTrackingInputDto) {
     return await this.apiResolver.request<
-      CreateTrackingInputDto,
+      CreateSimpleTrackingInputDto,
       CreateOutputDto
     >(
-      'tracking/create',
+      'tracking/simple/create',
       'POST',
       data,
       this.token ? this.token : undefined,
-    ).catch((error) => {
-      this.usePopUp.activateErrorPopup(error.message);
-    });
+    )
+  }
+
+  public async createHardTracking(data: CreateHardTrackingInputDto) {
+    return await this.apiResolver.request<
+      CreateHardTrackingInputDto,
+      CreateOutputDto
+    >(
+      'tracking/hard/create',
+      'POST',
+      data,
+      this.token ? this.token : undefined,
+    )
   }
 }

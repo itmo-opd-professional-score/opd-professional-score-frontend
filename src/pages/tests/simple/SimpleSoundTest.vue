@@ -6,9 +6,8 @@ import CommonButton from '../../../components/UI/CommonButton.vue';
 import { UserState } from '../../../utils/userState/UserState.ts';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
-import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
-import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
 import router from '../../../router/router.ts';
+import { useTest } from '../../../utils/useTest.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
@@ -18,6 +17,17 @@ export default defineComponent({
   props: {
     testBlockId: String,
     setupId: String,
+  },
+  setup(props) {
+    const { settings, updateTestBlockToken } = useTest({
+      setupId: props.setupId,
+      testBlockId: props.testBlockId,
+      testType: "SIMPLE_SOUND"
+    });
+    return {
+      settings,
+      updateTestBlockToken,
+    }
   },
   data() {
     return {
@@ -31,10 +41,8 @@ export default defineComponent({
       inactivityTimeout: null as number | null,
       popupStore: usePopupStore(),
       missedCount: 0,
-      completedTestsLinks: [] as Array<string>,
-      completedTestsResults: [] as Array<string>,
       buttonText: 'Начать тест',
-      showTotalResults: false,
+      settings: undefined as TestSetupOutputDTO | undefined,
     };
   },
   computed: {
@@ -71,6 +79,9 @@ export default defineComponent({
     },
   },
   methods: {
+    router() {
+      return router
+    },
     handleClick() {
       if (this.testState == 'ready') {
         this.startTest();
@@ -155,49 +166,24 @@ export default defineComponent({
       this.buttonText = 'Тест окончен'
       this.saveResults()
     },
-    async resetTest() {
-      if (this.testBlockId) {
-        await router.push(`/testblock/${this.testBlockId}`);
-      } else {
-        router.go(0)
-      }
-    },
     clearTimeouts() {
       this.timeoutIds.forEach((id) => clearTimeout(id));
       this.timeoutIds = [];
     },
-    saveResults() {
+    async saveResults() {
       const popUpStore = usePopupStore()
-      new TestResolver().createSimple(this.testResultDto, "slt").catch((error) => {
+      new TestResolver().createSimple(this.testResultDto, "sst").catch((error) => {
         popUpStore.activateErrorPopup(
           `Error code: ${error.status}. ${error.response.data.message}`,
         );
       });
-      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
-        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
-        if (setupId && isNaN(setupId)) setupId = undefined
-        new TestBlockResolver().updateTestBlock({
-          testBlockId: parseInt(this.testBlockId),
-          updatedTest: {
-            name: "SIMPLE_SOUND",
-            setupId: setupId,
-            available: false
-          }
-        })
-      }
-    },
-    async load () {
-      if (this.setupId && !isNaN(parseInt(this.setupId))) {
-        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
-        if (settings) this.showTotalResults = settings.showTotalResults
-      }
+      if (this.testBlockId) await this.updateTestBlockToken()
     },
   },
   beforeUnmount() {
     this.clearTimeouts();
     clearTimeout(this.inactivityTimeout!);
   },
-  mounted() {this.load() },
 });
 </script>
 
@@ -224,7 +210,7 @@ export default defineComponent({
 
       <CommonButton
         class="reset-button"
-        @click="resetTest"
+        @click="router().go(0)"
         v-if="testState == 'reacting'"
       >
         <template v-slot:placeholder>Прервать тест</template>
@@ -232,24 +218,30 @@ export default defineComponent({
     </div>
 
     <div v-else class="results">
-      <h2 class="title">Результаты:</h2>
-      <p>
-        Среднее время: <strong>{{ results.average }} мс</strong>
-      </p>
-      <p>
-        Стандартное отклонение: <strong>{{ results.deviation }} мс</strong>
-      </p>
-      <p>
-        Лучшее время: <strong>{{ results.best }} мс</strong>
-      </p>
-      <p>
-        Худшее время: <strong>{{ results.worst }} мс</strong>
-      </p>
-      <p>
-        Количество пропусков: <strong>{{ missedCount }}</strong>
-      </p>
-      <CommonButton class="retry-button" @click="resetTest">
-        <template v-slot:placeholder>Пройти заново</template>
+      <h2 class="title">Поздравляем с прохождением теста!</h2>
+      <div class="full" v-if="settings.showTotalResults">
+        <h2 class="title">Результаты:</h2>
+        <p>
+          Среднее время: <strong>{{ results.average }} мс</strong>
+        </p>
+        <p>
+          Стандартное отклонение: <strong>{{ results.deviation }} мс</strong>
+        </p>
+        <p>
+          Лучшее время: <strong>{{ results.best }} мс</strong>
+        </p>
+        <p>
+          Худшее время: <strong>{{ results.worst }} мс</strong>
+        </p>
+        <p>
+          Количество пропусков: <strong>{{ missedCount }}</strong>
+        </p>
+      </div>
+      <CommonButton
+        class="retry-button"
+        @click="testBlockId ? router().push(`/testBlock/${testBlockId}`) : router().go(0)"
+      >
+        <template v-slot:placeholder>{{ testBlockId ? 'Вернуться к текущему блоку тестов' : 'Пройти заново'}}</template>
       </CommonButton>
     </div>
   </div>

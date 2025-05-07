@@ -4,13 +4,10 @@ import CommonButton from "../../../components/UI/CommonButton.vue";
 import { usePopupStore } from '../../../store/popup.store.ts';
 import { TestResolver } from '../../../api/resolvers/test/test.resolver.ts';
 import { UserState } from '../../../utils/userState/UserState.ts';
-import router from '../../../router/router.ts';
-import type { AccelerationMode } from '../types';
 import type { CreateRdoInputDto } from '../../../api/resolvers/test/dto/input/create-rdo-input.dto.ts';
-import { TestSetupsResolver } from '../../../api/resolvers/testSetup/test-setups.resolver.ts';
+import { useTest } from '../../../utils/useTest.ts';
 import type { TestSetupOutputDTO } from '../../../api/resolvers/testSetup/dto/output/test-setup-output.dto.ts';
-import { TestBlockResolver } from '../../../api/resolvers/testBlocks/test-block.resolver.ts';
-
+import router from '../../../router/router.ts';
 type TestState = 'ready' | 'reacting' | 'completed';
 
 export default defineComponent({
@@ -23,6 +20,17 @@ export default defineComponent({
     isModule: Boolean,
     startAcceleration: Number,
     timeAsModule: Number
+  },
+  setup(props) {
+    const { settings, updateTestBlockToken } = useTest({
+      setupId: props.setupId,
+      testBlockId: props.testBlockId,
+      testType: "SIMPLE_RDO"
+    });
+    return {
+      settings,
+      updateTestBlockToken,
+    }
   },
   data() {
     return {
@@ -40,18 +48,11 @@ export default defineComponent({
       deviationHistory: [] as Array<number>,
       testState: 'ready' as TestState,
       remainingSeconds: 0,
-      duration: 10,
-
-      completedTestsLinks: [] as Array<string>,
-      completedTestsResults: [] as Array<string>,
-
-      accelerationMode: 'DISCRETE' as AccelerationMode,
       timerIntervalId: 0,
-      showTimer: true,
-      showProgressBar: true,
-      showTotalResults: true,
       loopChecked: false,
-      checkLooped: false
+      checkLooped: false,
+
+      settings: {} as TestSetupOutputDTO,
     };
   },
   computed: {
@@ -68,7 +69,9 @@ export default defineComponent({
       switch (this.testState) {
         case 'ready': return 'Начать тест';
         case 'reacting': return 'Жмите';
-        case 'completed': return 'Тест окончен';
+        case 'completed': return this.testBlockId ?
+          'Вернуться к текущему блоку тестов' :
+          'Пройти снова';
         default: return '';
       }
     },
@@ -80,7 +83,7 @@ export default defineComponent({
     },
     progressBarWidth() {
       if (this.remainingSeconds === 0) return '0%';
-      return `${this.remainingSeconds / this.duration * 100}%`;
+      return `${this.remainingSeconds / this.settings.duration * 100}%`;
     },
     averageCallbackTime(): number {
       if (this.deviationHistory.length == 0) return 0;
@@ -102,7 +105,7 @@ export default defineComponent({
       if (this.testState === 'ready') {
         this.testState = 'reacting';
         this.animationFrameId = requestAnimationFrame(this.animate)
-        this.remainingSeconds = this.duration
+        this.remainingSeconds = this.settings.duration
         this.startTimer()
       } else if (this.testState === 'reacting') {
         if (!this.checkLooped) {
@@ -119,8 +122,7 @@ export default defineComponent({
           this.checkLooped = true;
         }
       } else {
-        if (this.testBlockId) await router.push(`/testblock/${this.testBlockId}`);
-        else router.go(0)
+        this.testBlockId ? await router.push(`/testBlock/${this.testBlockId}`) : router.go(0)
       }
     },
     startTimer() {
@@ -131,11 +133,7 @@ export default defineComponent({
     },
     stopTest(){
       this.testState = 'completed'
-      if (this.isModule) {
-        this.$emit("test completed", this.testResultsDto)
-      } else {
-        this.saveResults()
-      }
+      if (!this.isModule) this.saveResults()
     },
     animate() {
       if (this.testState == 'completed') cancelAnimationFrame(this.animationFrameId)
@@ -153,52 +151,18 @@ export default defineComponent({
         requestAnimationFrame(this.animate)
       }
     },
-    saveResults(): void {
+    async saveResults() {
       const popUpStore = usePopupStore()
       new TestResolver().createRdo(this.testResultsDto).catch((err) => {
         popUpStore.activateErrorPopup(err.message)
       })
-      if (this.testBlockId && !isNaN(parseInt(this.testBlockId))) {
-        let setupId = this.setupId ? parseInt(this.setupId) : undefined;
-        if (setupId && isNaN(setupId)) setupId = undefined
-        new TestBlockResolver().updateTestBlock({
-          testBlockId: parseInt(this.testBlockId),
-          updatedTest: {
-            name: "SIMPLE_RDO",
-            setupId: setupId,
-            available: false
-          }
-        })
-      }
+      await this.updateTestBlockToken()
     },
-    async load () {
-      if (this.setupId && !isNaN(parseInt(this.setupId))) {
-        const settings: TestSetupOutputDTO | null = await new TestSetupsResolver().getById(parseInt(this.setupId))
-        if (settings) {
-          this.duration = settings.duration
-          if (!this.isModule) {
-            this.showProgressBar = settings.showProgress
-            this.showTimer = settings.showTimer
-            this.accelerationMode = settings.accelerationMode
-          }
-          this.showTotalResults = settings.showTotalResults
-        }
-      }
-    },
-  },
-  mounted() {
-    if (!this.isModule) this.load()
-    else {
-      if (this.timeAsModule) this.duration = this.timeAsModule
-      this.showProgressBar = false
-      this.showTimer = false
-    }
-    if (this.startAcceleration) this.acceleration = this.startAcceleration
   },
   watch: {
     loopCount(): void {
       if (this.loopCount % (this.acceleration * 1000  + 1) == 0) {
-        if (this.accelerationMode == 'DISCRETE') {
+        if (this.settings.accelerationMode == 'DISCRETE') {
           this.acceleration += 0.005
         } else {
           this.acceleration **= 1.01
@@ -229,10 +193,10 @@ export default defineComponent({
       </CommonButton>
     </div>
     <div class="test-container" v-show="testState === 'reacting'">
-      <div v-if="showTimer" class="timer">
+      <div v-if="settings.showTimer" class="timer">
         Осталось времени: {{ remainingTime }}
       </div>
-      <div v-if="showProgressBar" class="progress-bar-container">
+      <div v-if="settings.showProgress" class="progress-bar-container">
         <div class="progress-bar" :style="{ width: progressBarWidth }"></div>
       </div>
       <div class="circle" ref="reactionCircle">
@@ -265,7 +229,7 @@ export default defineComponent({
       <h2 class="title">Результаты</h2>
       <div>
         <p>Поздравляем с прохождением теста!</p>
-        <div v-if="showTotalResults">
+        <div v-if="settings.showTotalResults">
           <p>Ваши результаты:</p>
           <ul>
             <li :key="index" v-for="(deviation, index) in deviationHistory">
