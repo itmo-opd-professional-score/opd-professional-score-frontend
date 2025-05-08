@@ -4,16 +4,24 @@ import { onMounted, ref } from 'vue';
 import CommonButton from '../../components/UI/CommonButton.vue';
 import router from '../../router/router.ts';
 import { useTestBlock } from '../../utils/useTestBlock.ts';
+import type { TestType } from '../tests/types';
 
 const props = defineProps<{
   blockId: string,
 }>()
-const testTypes = ref()
+const { loadTestBlock, loadMatchedTests } = useTestBlock(parseInt(props.blockId))
+const tests = ref<{
+  id?: number,
+  name: TestType,
+  setupId?: number,
+  available: boolean,
+  testTypeId?: number
+}[]>([])
 onMounted(async () => {
-  const { testBlock } = await useTestBlock(parseInt(props.blockId))
+  const testBlock = await loadTestBlock()
   if (testBlock.value) {
-    testTypes.value = testBlock.value.tests
-  } else await router.push('/profile')
+    tests.value = await loadMatchedTests(testBlock.value.tests)
+  }
 })
 </script>
 
@@ -21,15 +29,22 @@ onMounted(async () => {
   <div class="container">
     <div class="test-block">
       <div
-        v-for="(testType, index) in testTypes"
+        v-for="(test, index) in tests"
         :key="index"
         class="test-block-element"
       >
-        <p class="test-name">Тест {{ testType.name }}</p>
+        <p class="test-name">Тест {{ test.name }}</p>
         <CommonButton
-          :disabled="!testType.available"
+          v-if="test.id && test.testTypeId"
           class="submit_button"
-          @click="router.push(`/testBlock/${blockId}/test/${testType.name}`)"
+          @click="router.push(`/test/results/${test.testTypeId}/${test.id}`)"
+        >
+          <template v-slot:placeholder>Результаты</template>
+        </CommonButton>
+        <CommonButton
+          :disabled="!test.available"
+          class="submit_button"
+          @click="router.push(`/testBlock/${blockId}/test/${test.name}`)"
         >
           <template v-slot:placeholder>Пройти тест</template>
         </CommonButton>

@@ -44,6 +44,15 @@ export class TestResolver {
     )
   }
 
+  public async getByTypeByTestBlockId(typeEndpoint: string, testBlockId: number) {
+    return await this.apiResolver.request<null, TestDataOutputDto>(
+      `${typeEndpoint}/getByTestBlockId/${testBlockId}`,
+      'GET',
+      null,
+      this.token ? this.token : undefined,
+    )
+  }
+
   public async createAddition(data: CreateAdditionInputDto, endpoint: string) {
     return await this.apiResolver.request<
       CreateAdditionInputDto,
