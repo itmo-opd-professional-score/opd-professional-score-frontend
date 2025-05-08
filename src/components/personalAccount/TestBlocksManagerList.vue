@@ -1,7 +1,7 @@
 <script lang="ts">
-import TestBlockElement from './UI/TestBlockElement.vue';
-import type { GetTestBlockOutputDto } from '../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
-import CommonButton from './UI/CommonButton.vue';
+import TestBlockElement from './TestBlockElement.vue';
+import type { GetTestBlockOutputDto } from '../../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
+import CommonButton from '../UI/CommonButton.vue';
 import type { PropType } from 'vue';
 
 export default {

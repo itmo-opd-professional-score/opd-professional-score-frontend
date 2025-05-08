@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CommonButton from './CommonButton.vue';
+import CommonButton from '../UI/CommonButton.vue';
 
 defineEmits(['changeRole']);
 defineProps<{ isDisabled: boolean }>();

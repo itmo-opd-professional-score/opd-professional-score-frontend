@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CommonButton from './CommonButton.vue';
+import CommonButton from '../UI/CommonButton.vue';
 import { onMounted, ref } from 'vue';
 import { ProfessionStatisticResolver } from '../../api/resolvers/professionStatistic/professionStatistic.resolver.ts';
 const props = defineProps<{ id: number }>();

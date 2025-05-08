@@ -1,12 +1,12 @@
 <script lang="ts">
-import CommonButton from './UI/CommonButton.vue';
-import CustomSelect from './UI/inputs/CustomSelect.vue';
-import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resolver.ts';
-import router from '../router/router.ts';
-import type { TestBlockTest } from '../pages/tests/types';
-import type { DefaultErrorDto } from '../api/dto/common/default-error.dto.ts';
+import CommonButton from '../UI/CommonButton.vue';
+import CustomSelect from '../UI/inputs/CustomSelect.vue';
+import { TestSetupsResolver } from '../../api/resolvers/testSetup/test-setups.resolver.ts';
+import router from '../../router/router.ts';
+import type { TestBlockTest } from '../../pages/tests/types';
+import type { DefaultErrorDto } from '../../api/dto/common/default-error.dto.ts';
 import type { PropType } from 'vue';
-import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
+import type { TestTypeDataOutputDto } from '../../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 
 export default {
   name: 'TestRowElement',

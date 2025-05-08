@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Button from '../../components/UI/CommonButton.vue';
 import { computed, onMounted, ref } from 'vue';
-import TestsManagerList from '../../components/TestsManagerList.vue';
-import UserManagerList from '../../components/UserManagerList.vue';
-import ProfessionsManagerList from '../../components/ProfessionsManagerList.vue';
+import TestsManagerList from '../../components/personalAccount/TestsManagerList.vue';
+import UserManagerList from '../../components/personalAccount/UserManagerList.vue';
+import ProfessionsManagerList from '../../components/personalAccount/ProfessionsManagerList.vue';
 import { calculateAge, UserState } from '../../utils/userState/UserState.ts';
 import { ProfessionResolver } from '../../api/resolvers/profession/profession.resolver.ts';
 import type { GetProfessionOutputDto } from '../../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
@@ -18,7 +18,7 @@ import { UserRole } from '../../utils/userState/UserState.types.ts';
 import { useTestTypesStore } from '../../store/test-types.store.ts';
 import type { GetTestBlockOutputDto } from '../../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
 import { TestBlockResolver } from '../../api/resolvers/testBlocks/test-block.resolver.ts';
-import TestBlocksManagerList from '../../components/TestBlocksManagerList.vue';
+import TestBlocksManagerList from '../../components/personalAccount/TestBlocksManagerList.vue';
 import CommonButton from '../../components/UI/CommonButton.vue';
 
 const authResolver = new AuthResolver();

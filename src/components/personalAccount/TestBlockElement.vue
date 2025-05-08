@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CommonButton from './CommonButton.vue';
+import CommonButton from '../UI/CommonButton.vue';
 import router from '../../router/router.ts';
 
 defineProps<{

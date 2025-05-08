@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import CommonButton from './UI/CommonButton.vue';
-import TestManagerElement from './UI/TestManagerElement.vue';
-import type { TestDataOutputDto } from '../api/resolvers/test/dto/output/test-data-output.dto.ts';
-import { useTestTypesStore } from '../store/test-types.store.ts';
-import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-data-output.dto.ts';
-import { UserState } from '../utils/userState/UserState.ts';
-import router from '../router/router.ts';
+import CommonButton from '../UI/CommonButton.vue';
+import TestManagerElement from './TestManagerElement.vue';
+import type { TestDataOutputDto } from '../../api/resolvers/test/dto/output/test-data-output.dto.ts';
+import { useTestTypesStore } from '../../store/test-types.store.ts';
+import type { UserDataOutputDto } from '../../api/resolvers/user/dto/output/user-data-output.dto.ts';
+import { UserState } from '../../utils/userState/UserState.ts';
+import router from '../../router/router.ts';
 
 const props = withDefaults(
   defineProps<{

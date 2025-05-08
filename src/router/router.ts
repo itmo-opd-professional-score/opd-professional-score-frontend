@@ -1,9 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import PersonalAccount from '../pages/profile/PersonalAccount.vue';
 import { UserState } from '../utils/userState/UserState.ts';
-import ProfessionsList from '../components/ProfessionsList.vue';
+import ProfessionsList from '../components/main/ProfessionsList.vue';
 import ProfessionPage from '../pages/ProfessionPage.vue';
-import ProfessionForm from '../components/ProfessionForm.vue';
 import PvkSetupPage from '../pages/PvkSetupPage.vue';
 import PasswordChanging from '../pages/auth/PasswordChanging.vue';
 import LogInPage from '../pages/auth/LogInPage.vue';
@@ -28,6 +27,8 @@ import SimpleTrackingTest from '../pages/tests/simple/SimpleTrackingTest.vue';
 import NumericalSeriesTest from '../pages/tests/cognitive/NumericalSeriesTest.vue';
 import StroopTest from '../pages/tests/cognitive/StroopTest.vue';
 import VerbalTest from '../pages/tests/cognitive/VerbalTest.vue';
+import MainPage from '../pages/auth/MainPage.vue';
+import ProfessionFormPage from '../pages/ProfessionFormPage.vue';
 const authRoutes = [
   {
     path: '/auth/login',
@@ -53,7 +54,7 @@ const professionRoutes = [
   },
   {
     path: `/profession/new`,
-    component: ProfessionForm,
+    component: ProfessionFormPage,
     meta: { ruName: 'Новая профессия', requiresAuth: true, },
   },
   {
@@ -176,7 +177,7 @@ const routes = [
   ...testRoutes,
   {
     path: '/',
-    component: ProfessionsList,
+    component: MainPage,
     meta: { ruName: 'Главная' },
   },
   {

@@ -9,6 +9,7 @@ import type { GetProfessionStatisticsOutputDto } from '../api/resolvers/professi
 import type { GetProfessionOutputDto } from '../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
 import { usePopupStore } from '../store/popup.store.ts';
 import type { DefaultErrorDto } from '../api/dto/common/default-error.dto.ts';
+import { UserRole } from '../utils/userState/UserState.types.ts';
 
 const props = defineProps<{
   id: number;
@@ -56,6 +57,12 @@ const filteredItems = (items: GetProfessionStatisticsOutputDto[]) => {
           {{ `Требования: ${profession.requirements}` }}
         </p>
         <p class="sphere">{{ `Сфера деятельности: ${profession.sphere}` }}</p>
+        <CommonButton
+          class="submit_button"
+          @click="router.push('/testBlock/999999')"
+        >
+          <template #placeholder>Насколько мне подходит эта професия</template>
+        </CommonButton>
       </div>
       <div class="qualities" v-if="professionStatistics">
         <h3>Профессионально-важные качества</h3>
@@ -72,7 +79,8 @@ const filteredItems = (items: GetProfessionStatisticsOutputDto[]) => {
           <p class="rating">{{ (statistics.averageScore / 2).toFixed(1) }}</p>
         </div>
         <CommonButton
-          v-if="UserState.role == 'ADMIN' || UserState.role == 'EXPERT'"
+          v-if="UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT"
+          class="submit_button"
           @click="router.push(`/profession/setup/${id}`)"
           :disabled="false"
         >

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-  import type { UserDataOutputDto } from '../../api/resolvers/user/dto/output/user-data-output.dto.ts';
+  import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-data-output.dto.ts';
   import { onMounted, ref } from 'vue';
-  import { UserResolver } from '../../api/resolvers/user/user.resolver.ts';
-  import type { DefaultOutputDto } from '../../api/dto/common/default-output.dto.ts';
+  import { UserResolver } from '../api/resolvers/user/user.resolver.ts';
+  import type { DefaultOutputDto } from '../api/dto/common/default-output.dto.ts';
   const props = defineProps<{
     userId?: number
   }>()

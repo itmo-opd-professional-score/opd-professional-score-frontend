@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import CommonButton from './UI/CommonButton.vue';
-import UserManagerElement from './UI/UserManagerElement.vue';
+import CommonButton from '../UI/CommonButton.vue';
+import UserManagerElement from './UserManagerElement.vue';
 import { autoUpdate, hide, useFloating } from '@floating-ui/vue';
 import RoleSelectForm from './RoleSelectForm.vue';
-import { UserState } from '../utils/userState/UserState.ts';
-import type { UserRole } from '../utils/userState/UserState.types.ts';
-import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-data-output.dto.ts';
+import { UserState } from '../../utils/userState/UserState.ts';
+import type { UserRole } from '../../utils/userState/UserState.types.ts';
+import type { UserDataOutputDto } from '../../api/resolvers/user/dto/output/user-data-output.dto.ts';
 
 interface CurrentUser {
   id: number;

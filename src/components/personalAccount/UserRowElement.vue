@@ -1,5 +1,5 @@
 <script lang="ts">
-import CommonButton from './UI/CommonButton.vue';
+import CommonButton from '../UI/CommonButton.vue';
 
 export default {
   name: 'UserRowElement',
