@@ -4,4 +4,5 @@ export interface CreateSimpleTrackingInputDto {
   successCount: number;
   avgTime: number;
   timeDeviation: number;
+  testBlockId?: number;
 }

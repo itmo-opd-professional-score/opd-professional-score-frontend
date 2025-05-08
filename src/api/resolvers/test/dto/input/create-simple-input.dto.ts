@@ -4,4 +4,5 @@ export interface CreateSimpleInputDto {
   allSignals: number;
   misclicks: number;
   dispersion: number;
+  testBlockId?: number;
 }

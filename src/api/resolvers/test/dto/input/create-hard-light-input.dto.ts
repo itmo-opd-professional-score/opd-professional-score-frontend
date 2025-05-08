@@ -5,4 +5,5 @@ export interface CreateHardLightInputDto {
   misclicks: number;
   mistakes: number;
   dispersion: number;
+  testBlockId?: number;
 }

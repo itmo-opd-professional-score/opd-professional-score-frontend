@@ -6,4 +6,5 @@ export interface CreateCognitiveInputDto {
   score: number;
   mistakes: number;
   testType: TestType
+  testBlockId?: number;
 }

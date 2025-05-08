@@ -4,4 +4,5 @@ export interface CreateAdditionInputDto {
   dispersion: number;
   allSignals: number;
   mistakes: number;
+  testBlockId?: number;
 }
