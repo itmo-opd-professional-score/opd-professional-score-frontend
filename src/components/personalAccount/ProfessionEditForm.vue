@@ -47,12 +47,6 @@ const updateProfession = async () => {
       <CustomInput
         required
         type="text"
-        id="profName"
-        v-model="localProfession.updatedData.name"
-      />
-      <CustomInput
-        required
-        type="text"
         id="profSphere"
         v-model="localProfession.updatedData.sphere"
       />
@@ -90,8 +84,10 @@ const updateProfession = async () => {
   flex-direction: column;
   background-color: var(--background-primary);
   padding: 2vw;
-  width: 20vw;
+  width: 25vw;
   box-sizing: border-box;
+  backdrop-filter: blur(15px);
+  border-radius: 15px;
 }
 
 .profession-edit form {
