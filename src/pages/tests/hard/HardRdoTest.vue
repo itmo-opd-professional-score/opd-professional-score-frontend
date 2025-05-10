@@ -240,6 +240,7 @@ export default defineComponent({
   color: black;
   text-align: left;
   display: flex;
+  flex-direction: column;
 }
 .container {
   max-width: 35vw;
