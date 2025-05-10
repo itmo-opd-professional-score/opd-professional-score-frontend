@@ -29,6 +29,7 @@ const toggleForm = (
     isOpen.value = false;
   }
   if (!isOpen.value) {
+    reference.value = el;
     currentProfession.value = {
       id: id,
       updatedData: {

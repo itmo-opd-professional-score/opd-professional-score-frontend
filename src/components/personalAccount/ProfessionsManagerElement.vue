@@ -2,6 +2,8 @@
 import CommonButton from '../UI/CommonButton.vue';
 import { onMounted, ref } from 'vue';
 import { ProfessionStatisticResolver } from '../../api/resolvers/professionStatistic/professionStatistic.resolver.ts';
+import { UserRole } from '../../utils/userState/UserState.types.ts';
+import { UserState } from '../../utils/userState/UserState.ts';
 const props = defineProps<{ id: number }>();
 defineEmits(['edit-profession']);
 
@@ -38,7 +40,7 @@ onMounted(async () => {
       <CommonButton
         @click="$emit('edit-profession', $event.currentTarget)"
         :disabled="false"
-        v-if="noStats"
+        v-if="noStats || UserState.role == UserRole.ADMIN"
       >
         <template v-slot:placeholder>
           <slot name="placeholder">Изменить</slot>

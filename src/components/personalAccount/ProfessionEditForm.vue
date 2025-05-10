@@ -1,17 +1,22 @@
 <script setup lang="ts">
 import type { UpdateProfessionInputDto } from '../../api/resolvers/profession/dto/input/update-profession-input.dto.ts';
-import { computed } from 'vue';
+import { ref } from 'vue';
 import { ProfessionResolver } from '../../api/resolvers/profession/profession.resolver.ts';
 import { UserState } from '../../utils/userState/UserState.ts';
+import CustomInput from '../UI/inputs/CustomInput.vue';
+import CustomTextareaInput from '../UI/inputs/CustomTextareaInput.vue';
+import { UserRole } from '../../utils/userState/UserState.types.ts';
+import CommonButton from '../UI/CommonButton.vue';
 
 const emit = defineEmits(['profession-update']);
 const props = defineProps<{
   profession: UpdateProfessionInputDto | null;
 }>();
 
-const localProfession = computed(() => props.profession);
+const localProfession = ref<UpdateProfessionInputDto | null>(props.profession);
 const updateProfession = async () => {
   if (localProfession.value != null) {
+
     const professionResolver = new ProfessionResolver();
     await professionResolver.updateProfession(localProfession.value);
     emit('profession-update');
@@ -23,52 +28,57 @@ const updateProfession = async () => {
   <div class="profession-edit" v-if="localProfession != null">
     <h4>Изменить профессию</h4>
     <form @submit.prevent="updateProfession" id="profession-change-form">
-      <label
-        ><input
-          required
-          type="text"
-          id="profName"
-          v-model="localProfession.updatedData.name"
-      /></label>
-      <label>
-        <textarea
-          required
-          id="profDesc"
-          v-model="localProfession.updatedData.description"
-        ></textarea>
-      </label>
-      <label>
-        <textarea
-          required
-          id="profRequ"
-          v-model="localProfession.updatedData.requirements"
-        ></textarea>
-      </label>
-      <label
-        ><input
-          required
-          type="text"
-          id="profSphere"
-          v-model="localProfession.updatedData.sphere"
-      /></label>
-      <label
-        ><input
-          required
-          type="number"
-          id="profId"
-          hidden="hidden"
-          disabled
-          v-model="localProfession.id"
-      /></label>
-      <label>
-        Архивировать
-        <input
+      <CustomInput
+        required
+        type="text"
+        id="profName"
+        v-model="localProfession.updatedData.name"
+      />
+      <CustomTextareaInput
+        required
+        id="profDesc"
+        v-model="localProfession.updatedData.description"
+      />
+      <CustomTextareaInput
+        required
+        id="profRequ"
+        v-model="localProfession.updatedData.requirements"
+      />
+      <CustomInput
+        required
+        type="text"
+        id="profName"
+        v-model="localProfession.updatedData.name"
+      />
+      <CustomInput
+        required
+        type="text"
+        id="profSphere"
+        v-model="localProfession.updatedData.sphere"
+      />
+      <CustomInput
+        required
+        type="number"
+        id="profId"
+        :hidden="true"
+        v-model="localProfession.id"
+      />
+      <div class="archive">
+        <p>Архивировать</p>
+        <CustomInput
           type="checkbox"
           id="profArchive"
-          :disabled="UserState.role != 'ADMIN'"
-          v-model="localProfession.updatedData.archive"
-      /></label>
-      <input type="submit" value="Изменить" />
+          :disabled="UserState.role != UserRole.ADMIN"
+          :checked="localProfession.updatedData.archived"
+          v-model="localProfession.updatedData.archived"
+        />
+      </div>
+      <CommonButton
+        class="submit_button"
+        type="submit"
+      >
+        <template #placeholder>Изменить</template>
+      </CommonButton>
     </form>
   </div>
 </template>
@@ -91,19 +101,9 @@ const updateProfession = async () => {
   gap: 1vh;
 }
 
-.profession-edit label {
+.archive {
   display: flex;
-  gap: 0.5rem;
-}
-
-.profession-edit input,
-.profession-edit textarea {
-  box-sizing: border-box;
-  width: 100%;
-  padding: 0.5rem;
-}
-
-.profession-edit textarea {
-  min-height: 10vh;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

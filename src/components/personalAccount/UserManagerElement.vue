@@ -6,7 +6,7 @@ defineProps<{ isDisabled: boolean }>();
 </script>
 
 <template>
-  <div class="wrapper" ref="reference">
+  <div class="wrapper">
     <div class="id" id="id">
       #
       <slot name="id">12345</slot>
