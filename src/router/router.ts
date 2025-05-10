@@ -108,7 +108,7 @@ const testRoutes = [
   {
     path: '/test/hard/light',
     component: HardLightTest,
-    meta: { ruName: 'Сложная реакция на свет', requiresAuth: true },
+    meta: { ruName: 'Сложная реакция на цвет', requiresAuth: true },
   },
   {
     path: '/test/addition/visual',
