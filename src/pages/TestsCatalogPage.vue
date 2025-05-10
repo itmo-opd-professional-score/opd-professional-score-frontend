@@ -47,7 +47,7 @@ const testsData = [
   {
     name: "Сложная реакция на преследование",
     category: "Сложный",
-    link: "/test/simple/tracking"
+    link: "/test/hard/tracking"
   },
   {
     name: "Тест Струпа",
