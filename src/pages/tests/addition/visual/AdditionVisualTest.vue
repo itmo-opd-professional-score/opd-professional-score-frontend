@@ -122,7 +122,7 @@ export default {
     </div>
 
     <div v-else :class="testCompleted && testStarted ? 'completed test' : 'test'">
-      <h2>Определите четность суммы</h2>
+      <h2 v-if="!testCompleted">Определите четность суммы</h2>
       <div class="progress" v-if="!testCompleted">
         <div>Правильные ответы: {{ score }}</div>
         <div>Попытки: {{ attempts }}</div>
@@ -135,7 +135,7 @@ export default {
           <p>{{ status }}</p>
           <p>
             Стандартное отклонение времени ответов:
-            {{ standardDeviation.toFixed(2) }} секунд
+            {{ standardDeviation.toFixed(2) }} с
           </p>
         </div>
       </div>
@@ -145,13 +145,13 @@ export default {
         <span>{{ number2 }}</span>
       </div>
       <div class="buttons">
-        <CommonButton v-if="!testCompleted" class="button submit_button" @click="checkEvenOdd(true)">
+        <CommonButton v-if="!testCompleted" class="even submit_button" @click="checkEvenOdd(true)">
           <template v-slot:placeholder>Четное</template>
         </CommonButton>
-        <CommonButton v-if="!testCompleted" class="button submit_button" @click="checkEvenOdd(false)">
+        <CommonButton v-if="!testCompleted" class="odd submit_button" @click="checkEvenOdd(false)">
           <template v-slot:placeholder>Нечетное</template>
         </CommonButton>
-        <CommonButton v-else class="button submit_button" @click="resetTest">
+        <CommonButton v-else class="submit_button" @click="resetTest">
           <template v-slot:placeholder>Пройти еще раз</template>
         </CommonButton>
       </div>
@@ -166,7 +166,7 @@ export default {
   border-radius: 0.625rem;
   box-shadow: 0 0 0.625rem rgba(0, 0, 0, 0.1);
   margin-top: 15vh;
-  width: 40vw;
+  max-width: 30vw;
 
   .instruction, .test {
     display: flex;
@@ -177,6 +177,12 @@ export default {
 
     h2 {
       text-align: center;
+    }
+
+    .results {
+      display: flex;
+      flex-direction: column;
+      gap: 1vw;
     }
   }
 
@@ -203,16 +209,14 @@ export default {
 .buttons {
   display: flex;
   justify-content: space-between;
-}
+  gap: 1vw;
 
-button {
-  padding: 0.625rem 1.25rem;
-  font-size: 1.2rem;
-  cursor: pointer;
-  border: none;
-  border-radius: 0.3125rem;
-  background-color: #4127e4;
-  color: white;
-  transition: background-color 0.3s;
+  button {
+    flex: 1;
+  }
+
+  .even, .odd {
+    aspect-ratio: 2 / 1
+  }
 }
 </style>
