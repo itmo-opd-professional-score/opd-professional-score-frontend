@@ -7,6 +7,7 @@ import { UserState } from '../../../utils/userState/UserState.ts';
 import router from '../../../router/router.ts';
 import type { CreateCognitiveInputDto } from '../../../api/resolvers/test/dto/input/create-cognitive-input.dto.ts';
 import { useTest } from '../../../utils/useTest.ts';
+import { useTranslation } from '../../../utils/useTranslation.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
@@ -29,6 +30,7 @@ export default defineComponent({
     return {
       colors: ['red', 'green', 'yellow', 'blue', 'purple'],
       currentWord: '',
+      currentWordTranslation: undefined,
       currentColor: '',
       levelOfDifficulty: 0,
       score: 0,
@@ -162,6 +164,11 @@ export default defineComponent({
       }
     },
   },
+  watch: {
+    async currentWord() {
+      this.currentWordTranslation = await useTranslation(this.currentWord, 'ru')
+    }
+  }
 });
 </script>
 
@@ -196,7 +203,7 @@ export default defineComponent({
         </div>
       </div>
       <div class="current-word">
-        <h1 :style="{ color: currentColor }">{{ currentWord }}</h1>
+        <h1 :style="{ color: currentColor }">{{ currentWordTranslation ? currentWordTranslation : currentWord }}</h1>
       </div>
       <div class="buttons">
         <CommonButton
