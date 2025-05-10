@@ -67,13 +67,14 @@ const testBlocks = ref<GetTestBlockOutputDto[]>([]);
 const reloadTestBlocks = async () => {
   try {
     testBlocks.value = await testBlockResolver.getAllByUserId(UserState.id!);
+    testBlocks.value.sort((a, b) => a.id - b.id);
   } catch (e) {}
 };
 
 const reloadUsers = async () => {
   const result = await userResolver.getAll();
   if (result != null) {
-    users.value = result.body.filter(user => user.id !== 999999);
+    users.value = result.body.filter(user => user.id !== 999999).sort((a, b) => a.id - b.id);
   }
 };
 
@@ -168,9 +169,10 @@ const reloadTests = async () => {
       tests.value.hardTracking.push(
         ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'tracking/hard'))
       )
-      allTests.value.sort((a, b) => {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      });
+      Object.entries(tests.value).forEach(([_, category]) => {
+        category.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      })
+      allTests.value.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } catch (error) {}
   }
 };
