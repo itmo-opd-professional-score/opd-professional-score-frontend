@@ -35,13 +35,12 @@ export default defineComponent({
       audioContext: null as AudioContext | null,
       reactionTimes: [] as number[],
       timeoutIds: [] as number[],
-      TRIAL_COUNT: 10,
       currentTrial: 0,
       startTime: 0,
       inactivityTimeout: null as number | null,
       popupStore: usePopupStore(),
       missedCount: 0,
-      buttonText: 'Начать тест',
+      buttonText: 'Сейчас недоступно',
       settings: undefined as TestSetupOutputDTO | undefined,
     };
   },
@@ -68,6 +67,10 @@ export default defineComponent({
         worst: Math.max(...times),
       };
     },
+    TRIAL_COUNT() {
+      if (!this.settings) return 10
+      return Math.round(this.settings.duration / 0.6) - 14
+    },
     testResultDto(): CreateSimpleInputDto {
       return {
         userId: UserState.id ? UserState.id : null,
@@ -83,16 +86,10 @@ export default defineComponent({
       return router
     },
     handleClick() {
-      if (this.testState == 'ready') {
-        this.startTest();
-      } else if (this.testState == 'reacting') {
-        if (this.startTime == 0) {
-          this.missedCount++;
-          this.currentTrial++;
-          return;
-        }
+      if (this.testState == 'reacting' && this.buttonText == "Жмите") {
         const reactionTime = Date.now() - this.startTime;
-        this.reactionTimes.push(reactionTime);
+        if (reactionTime < 200) this.missedCount++
+        else this.reactionTimes.push(reactionTime);
         this.buttonText = "Ждите сигнала"
         this.currentTrial++;
         clearTimeout(this.inactivityTimeout!);
@@ -113,15 +110,16 @@ export default defineComponent({
       this.scheduleNextTrial();
     },
     scheduleNextTrial() {
+      this.buttonText = 'Ждите сигнала'
       this.clearTimeouts();
       this.startTime = 0;
       const delay = Math.random() * 700 + 300;
       const audioVolume = Math.random() * 0.8 + 0.1;
       const timerId = setTimeout(() => {
         this.playSound(audioVolume);
+        this.buttonText = "Жмите"
         this.startTime = Date.now();
         this.setupInactivityTimeout();
-        this.buttonText = "Жмите"
       }, delay);
       this.timeoutIds.push(timerId);
     },
@@ -190,18 +188,18 @@ export default defineComponent({
 <template>
   <div class="container">
     <div class="test" v-if="testState != 'completed'">
-      <h2 class="title">Тест на скорость реакции</h2>
+      <h2 class="title">Тест на скорость простой реакции на звук</h2>
       <p class="description">
         Этот тест измеряет время вашей реакции на звуковой сигнал. После начала
-        теста вы услышите 120 звуковых сигналов. Как только услышите сигнал - как
-        можно быстрее нажмите большую кнопку. Старайтесь не нажимать кнопку до
-        сигнала!
+        теста вы услышите {{ TRIAL_COUNT }} звуковых сигналов. Как только услышите сигнал - как
+        можно быстрее нажмите большую кнопку. Не стоит при этом пытаться нажать заранее - попытка не будет засчитана
       </p>
 
       <div class="button-wrapper">
         <CommonButton
           class="reaction-button"
           :class="{ active: testState == 'reacting' }"
+          :disabled="testState != 'reacting' || buttonText != 'Жмите'"
           @click="handleClick"
         >
           <template v-slot:placeholder> {{ buttonText }}</template>
@@ -215,12 +213,19 @@ export default defineComponent({
       >
         <template v-slot:placeholder>Прервать тест</template>
       </CommonButton>
+      <CommonButton
+        class="reset-button"
+        @click="startTest()"
+        v-if="testState == 'ready'"
+      >
+        <template v-slot:placeholder>Начать тест</template>
+      </CommonButton>
     </div>
 
     <div v-else class="results">
-      <h2 class="title">Поздравляем с прохождением теста!</h2>
+      <h2>Поздравляем с прохождением теста!</h2>
       <div class="full" v-if="settings.showTotalResults">
-        <h2 class="title">Результаты:</h2>
+        <h2>Результаты:</h2>
         <p>
           Среднее время: <strong>{{ results.average }} мс</strong>
         </p>
@@ -238,7 +243,7 @@ export default defineComponent({
         </p>
       </div>
       <CommonButton
-        class="retry-button"
+        class="retry-button submit_button"
         @click="testBlockId ? router().push(`/testBlock/${testBlockId}`) : router().go(0)"
       >
         <template v-slot:placeholder>{{ testBlockId ? 'Вернуться к текущему блоку тестов' : 'Пройти заново'}}</template>
@@ -249,28 +254,35 @@ export default defineComponent({
 
 <style scoped>
 .title {
-  font-size: 36px;
-  margin-bottom: 20px;
+  font-size: 2rem;
   color: #fff;
 }
 
-.container {
-  max-width: 45vw;
-  padding: 2rem;
-  text-align: center;
+.test {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3vh;
 }
 
-.description {
+.description, .results {
   background: rgba(255, 255, 255, 0.9);
   padding: 20px;
   border-radius: 15px;
-  margin: 20px 0;
   color: black;
+  max-width: 45vw;
+  display: flex;
+  flex-direction: column;
+  gap: 1vw;
+}
+
+.results {
+  max-width: 25vw;
+  margin: 0 auto auto;
 }
 
 .button-wrapper {
-  margin: 2rem 0;
-  perspective: 1000px;
+  margin: 3vh 0;
 }
 
 .reaction-button {
@@ -286,7 +298,6 @@ export default defineComponent({
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   box-shadow: 0 10px 20px rgba(128, 0, 128, 0.2);
   outline: none;
-  margin: auto;
 }
 
 .reaction-button.active {
@@ -303,25 +314,5 @@ export default defineComponent({
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 1rem;
-  margin: 3rem auto auto;
-}
-
-.results {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 1rem;
-}
-
-.results h2 {
-  margin-bottom: 1rem;
-}
-
-.results p {
-  color: white;
-}
-
-.retry-button {
-  margin: 1rem auto;
 }
 </style>
