@@ -29,12 +29,12 @@ export default defineComponent({
   data() {
     return {
       isButtonActive: false,
-      buttonText: 'Начать тест',
+      buttonText: '',
       reactionTimes: [] as Array<number>,
       showResults: false,
       isTestRunning: false,
       startTime: 0,
-      TRIAL_COUNT: 3,
+      TRIAL_COUNT: 5,
       currentTrial: 0,
       timer: 0,
     }
@@ -85,7 +85,7 @@ export default defineComponent({
       this.startTime = new Date().getTime();
     },
     handleClick(): void {
-      if (this.currentTrial < this.TRIAL_COUNT) {
+      if (this.currentTrial < this.TRIAL_COUNT && this.buttonText === 'Нажмите на кнопку') {
         const endTime = new Date().getTime();
         this.reactionTimes.push(endTime - (this.startTime as number));
         this.isButtonActive = false;
@@ -98,6 +98,7 @@ export default defineComponent({
       }
     },
     startTest(): void {
+      this.TRIAL_COUNT = Math.round(this.settings.duration / 0.6)
       this.isTestRunning = true
       this.buttonText = 'Ждите...';
       this.timer = setTimeout(this.changeButtonColor, Math.random() * 3000 + 1000);
@@ -176,7 +177,7 @@ export default defineComponent({
           Худшее время: <strong>{{ results.worst }} мс</strong>
         </p>
         <p>
-          Количество пропусков: <strong>{{ results.missedCount }}</strong>
+          Всего успешных нажатий: <strong>{{ TRIAL_COUNT - results.missedCount }} / {{ TRIAL_COUNT }}</strong>
         </p>
       </div>
       <CommonButton
