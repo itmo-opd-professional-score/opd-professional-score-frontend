@@ -39,7 +39,6 @@ export default defineComponent({
       minAndMaxForX: [1, 20],
       minAndMaxForY: [1, 5],
       testState: 'ready' as TestState,
-      totalTime: 0,
       remainingTimeValue: 0,
       roundTime: 30,
       timerIntervalId:  null as ReturnType<typeof setInterval> | null,
@@ -101,6 +100,10 @@ export default defineComponent({
         mistakes: this.mistakes,
         testType: 'NUMERICAL'
       }
+    },
+    totalTime(): number {
+      if (!this.settings.duration) return 10
+      return this.settings.duration
     }
   },
   methods: {
@@ -130,7 +133,6 @@ export default defineComponent({
       else router.go(0)
     },
     startTest() {
-      this.totalTime = this.settings.duration;
       this.remainingTimeValue = this.settings.duration;
       this.testState = 'reacting';
       this.startTimer(this.settings.duration);
@@ -254,11 +256,11 @@ export default defineComponent({
     <div class="container">
 
       <div class="info-block" v-if="testState == 'ready'">
-        <h2 class="title">Тест Числовые последовательности</h2>
+        <h2 class="title">Тест на поиск числовых закономерностей</h2>
         <p class="description">
           Вам будет показываться числовая последовательность. Ваша задача — определить закономерность и ввести следующий элемент ряда.
           Чем быстрее и точнее вы отвечаете, тем выше ваш результат. Тест автоматически повышает уровень сложности по мере прохождения.
-          Время на прохождение ограничено. Удачи!
+          Время выполнения  - {{ totalTime }} с
         </p>
         <CommonButton
           class="reaction-button"
@@ -279,12 +281,15 @@ export default defineComponent({
           Время на раунд: {{ roundTimeFormatted() }} сек
         </div>
           <div class="sequence">
-            Последовательность:
-            {{ displayedSequence.join(', ') }}
-          <CustomInput type="text"
-                       v-model="userAnswer"
-                       placeholder="Введите следующий элемент"
-                       @keyup.enter="checkAnswer"/>
+            <p>Последовательность:
+              {{ displayedSequence.join(', ') }}</p>
+            <CustomInput
+              type="text"
+              v-model="userAnswer"
+              placeholder="Введите следующий элемент"
+              class="answer_input"
+              @keyup.enter="checkAnswer"
+            />
             <CommonButton
               class="reaction-button"
               @click="checkAnswer"
@@ -314,12 +319,20 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.description {
+.description, .results {
   background: rgba(255, 255, 255, 0.9);
   padding: 20px;
   border-radius: 15px;
-  margin: 20px 0;
   color: black;
+  max-width: 45vw;
+  display: flex;
+  flex-direction: column;
+  gap: 1vw;
+}
+
+.results {
+  max-width: 25vw;
+  margin: 0 auto auto;
 }
 
 .title {
@@ -356,17 +369,18 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 15px;
+  padding: 3vw;
   border-radius: 15px;
-  min-height: 70vh;
 }
 
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1.5rem;
-  max-width: 50vw;
+  width: 60vw;
+  height: 70vh;
   padding: 2rem;
   text-align: center;
 }
@@ -380,23 +394,25 @@ export default defineComponent({
 .sequence {
   background: rgba(255, 255, 255, 0.8);
   border-radius: 1vh;
-  padding: 2vh;
+  padding: 3vh;
   margin: 2vh 0;
-  width: 90%;
-  max-width: 50vh;
-  min-width: 30vh;
   text-align: center;
   font-size: 1.4rem;
   font-weight: bold;
   color: #4a4a4a;
+  white-space: nowrap;
   box-shadow: 0 0.5vh 1.2vh rgba(0, 0, 0, 0.15);
   transition: background-color 0.3s ease;
+
+  p {
+    margin-bottom: 2vw;
+  }
 }
 
 .reaction-button {
   display: flex;
-  width: 15vh;
-  height: 10vh;
+  width: 25vh;
+  height: 8vh;
   background: rgba(128, 0, 128, 0.6);
   border: none;
   color: white;
