@@ -16,14 +16,16 @@ export default {
     test: {
       type: {} as PropType<TestTypeDataOutputDto>,
       required: true,
-    }
+    },
+    selected: Boolean,
+    setupId: Number
   },
   data() {
     return {
-      added: false,
+      added: this.selected,
       buttonClass: 'submit_button',
       setups: [] as { value: string; text: string }[],
-      currentSetup: '',
+      currentSetup: this.setupId ? this.setupId.toString() : '',
     };
   },
   computed: {
@@ -57,6 +59,7 @@ export default {
     },
   },
   async mounted() {
+    this.added = this.selected
     try {
       const setups = await new TestSetupsResolver().getAllByTestType(this.test.name)
       setups.forEach((setup) => {
@@ -68,6 +71,12 @@ export default {
       this.setups.sort((a, b) => parseInt(a.value) - parseInt(b.value));
     } catch (e) { return (e as DefaultErrorDto).message }
   },
+  watch: {
+    currentSetup() {
+      this.added = true
+      this.applyTest()
+    }
+  }
 };
 </script>
 

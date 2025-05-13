@@ -7,6 +7,7 @@ export default {
   emits: ['removeUser', 'applyUser'],
   props: {
     disabled: Boolean,
+    selected: Boolean,
     userName: {
       type: String,
       required: true,
@@ -25,11 +26,13 @@ export default {
   },
   data() {
     return {
-      added: false,
       buttonClass: 'submit_button',
     };
   },
   computed: {
+    added() {
+      return this.selected
+    },
     buttonText() {
       if (this.added) {
         this.buttonClass = 'logout_button';
@@ -55,7 +58,7 @@ export default {
   <div class="user-row-wrapper">
     <p class="wrapper-block user-id">{{ userId }}</p>
     <p class="wrapper-block user-name">{{ userName }}</p>
-    <p class="wrapper-block user-email">{{ userEmail }}</p>
+    <a class="wrapper-block user-email" :href="`mailto:${userEmail}`">{{ userEmail }}</a>
     <CommonButton :disabled="disabled" class="user-button" :class="buttonClass" @click="applyTest">
       <template v-slot:placeholder>{{ buttonText }}</template>
     </CommonButton>
@@ -65,19 +68,24 @@ export default {
 <style scoped>
 .user-row-wrapper {
   width: 100%;
-  padding: 1vh 1vw;
   border-radius: 10px;
+  padding: 1vh 1vw;
   border: 1px solid var(--input-border);
   background: white;
   display: grid;
-  grid-template-columns: 4% 16% 44% 26%;
+  grid-template-columns: 2% 35% 35% 19%;
   align-items: center;
-  justify-items: center;
-  gap: 2vh;
-  max-height: 8vh;
+  column-gap: 3%;
+  height: 6vh;
 
   .wrapper-block, .user-button {
     width: 100%;
+  }
+
+  .user-email {
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none;
   }
 }
 

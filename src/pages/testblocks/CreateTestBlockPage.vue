@@ -39,6 +39,13 @@ export default {
         .filter(user => user.id !== 999999)
         .sort((a, b) => a.id - b.id);
       if (types !== null) this.tests = types.sort((a, b) => a.id - b.id);
+
+      const testBlockCash = localStorage.getItem("newTestBlock")
+      if (testBlockCash != null) {
+        const testBlock = JSON.parse(testBlockCash) as { approvedUsers: number[], approvedTests: TestBlockTest[] };
+        this.approvedUsers = testBlock.approvedUsers
+        this.approvedTests = testBlock.approvedTests
+      }
     } catch (e) {}
   },
   methods: {
@@ -61,34 +68,45 @@ export default {
         );
       }
     },
+    reset() {
+      this.approvedTests = []
+      this.approvedUsers = []
+    },
+    saveTestBlockConfig() {
+      localStorage.removeItem("newTestBlock");
+      localStorage.setItem("newTestBlock", JSON.stringify({
+        approvedUsers: this.approvedUsers,
+        approvedTests: this.approvedTests,
+      }));
+    }
   },
+  watch: {
+    approvedTests() { this.saveTestBlockConfig() },
+    approvedUsers() { this.saveTestBlockConfig() }
+  }
 };
 </script>
 
 <template>
-  <div class="container">
+  <div class="container" v-if="tests.length > 0 && users.length > 0">
     <h1 class="container-header">Создание блока тестов</h1>
 
     <h2 class="block-header">Выберите тесты:</h2>
-    <div class="tests-container" v-if="tests.length > 0">
+    <div class="tests-container">
       <TestRowElement
         v-for="(test, index) in tests"
         :key="index"
         :test="test"
-        @apply-test="(configuredTest: TestBlockTest) => approvedTests.push(configuredTest)"
-        @remove-test="
-          (meta) => {
-            const i = approvedTests.indexOf(meta);
-            approvedTests = [
-              ...approvedTests.slice(0, i),
-              ...approvedTests.slice(i + 1),
-            ];
-          }
+        :selected="approvedTests.find(tesT => tesT.name == test.name) !== undefined"
+        :setup-id="approvedTests.find(tesT => tesT.name == test.name)?.setupId"
+        @apply-test="(configuredTest: TestBlockTest) => approvedTests = [...approvedTests, configuredTest]"
+        @remove-test="(configuredTest: TestBlockTest) =>
+          approvedTests = approvedTests.filter(tesT => tesT.name !== configuredTest.name)
         "
       />
     </div>
     <h2 class="block-header">Выберите пользователей:</h2>
-    <div class="user-container" v-if="users.length > 0">
+    <div class="user-container">
       <UserRowElement
         v-for="(user, index) in users"
         :key="index"
@@ -96,7 +114,8 @@ export default {
         :user-id="user.id"
         :user-name="user.username"
         :disabled="approvedUsers.some(id => id == 999999)"
-        @apply-user="(id: number) => approvedUsers.push(id)"
+        :selected="approvedUsers.some(userId => userId == user.id)"
+        @apply-user="(id: number) => approvedUsers = [...approvedUsers, id]"
         @remove-user="(id: number) => approvedUsers = approvedUsers.filter(userId => userId !== id)"
       />
     </div>
@@ -105,14 +124,20 @@ export default {
       user-email=""
       :user-id="999999"
       :disabled="approvedUsers.some(id => id !== 999999)"
+      :selected="approvedUsers.some(id => id == 999999)"
       user-name="Сделать доступным для гостей"
-      @apply-user="(id: number) => approvedUsers.push(id)"
+      @apply-user="(id: number) => approvedUsers = [...approvedUsers, id]"
       @remove-user="(id: number) => approvedUsers = approvedUsers.filter(userId => userId !== id)"
     />
 
-    <CommonButton class="submit_button save" @click="save">
-      <template v-slot:placeholder> Сохранить </template>
-    </CommonButton>
+    <div class="controls">
+      <CommonButton class="btn" @click="reset">
+        <template v-slot:placeholder> Сбросить </template>
+      </CommonButton>
+      <CommonButton class="submit_button btn" @click="save">
+        <template v-slot:placeholder> Сохранить </template>
+      </CommonButton>
+    </div>
   </div>
 </template>
 
@@ -157,12 +182,17 @@ export default {
   margin: 2vw 0;
 }
 
-.save {
-  grid-column: 2 / 3;
-  align-self: center;
-  justify-self: flex-end;
-  width: 40%;
+.controls {
+  display: flex;
+  justify-content: space-between;
+  height: 6vh;
   margin-top: 2vw;
+  padding: 1vh 0;
+  gap: 1vw;
+
+  .btn {
+    width: 100%;
+  }
 }
 
 @media only screen and (max-width: 900px) {
