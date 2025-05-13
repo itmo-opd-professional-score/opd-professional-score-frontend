@@ -25,7 +25,7 @@ export default {
       added: this.selected,
       buttonClass: 'submit_button',
       setups: [] as { value: string; text: string }[],
-      currentSetup: this.setupId ? this.setupId.toString() : '',
+      currentSetup: this.setupId ? this.setupId.toString() : 'default',
     };
   },
   computed: {
@@ -68,12 +68,13 @@ export default {
           text: `Конфиг №${setup.id}`,
         });
       })
-      if (!this.setups.find(setup => setup.value == this.currentSetup)) this.currentSetup = ''
+      if (!this.setups.find(setup => setup.value == this.currentSetup)) this.currentSetup = 'default'
       this.setups.sort((a, b) => parseInt(a.value) - parseInt(b.value));
     } catch (e) { return (e as DefaultErrorDto).message }
   },
   watch: {
     currentSetup() {
+      console.log('currentSetup', this.currentSetup);
       this.added = true
       this.applyTest()
     }
@@ -89,7 +90,7 @@ export default {
         v-if="setups.length > 0"
         v-model="currentSetup"
         :options="[
-          {value: '', text: 'Не выбран'},
+          {value: 'default', text: 'Не выбран'},
           ...setups
         ]"
         placeholder="Не выбран"

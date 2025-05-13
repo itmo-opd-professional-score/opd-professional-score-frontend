@@ -66,6 +66,7 @@ export default defineComponent({
     max,
     async saveSettings() {
       if (this.currentTestType) {
+        this.settings.testTypeId = this.currentTestType.id
         try {
           const setupId = this.setupId
           if (!setupId || isNaN(parseInt(setupId))) {
@@ -84,6 +85,7 @@ export default defineComponent({
       }
     },
     async removeSettings() {
+      console.log(this.setupId)
       if (this.setupId && !isNaN(parseInt(this.setupId))) {
         await new TestSetupsResolver().deleteById(parseInt(this.setupId))
       }
@@ -112,16 +114,17 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="choose-settings">
+  <div class="choose-settings" v-if="currentTestType">
     <div class="choose-settings-form">
       <div class="section header-section">
         <h2>Выберите настройки теста: <br />{{ currentTestType ? currentTestType.description : "Load error" }}</h2>
       </div>
-      <div v-if="currentTestType" class="settings-group">
+      <div class="settings-group">
         <div class="setup-name">
           <CustomInput
             type="text"
             v-model="settings.testName"
+            required
           />
         </div>
         <div class="time-interval-selector">
@@ -196,10 +199,10 @@ export default defineComponent({
         </div>
       </div>
       <div class="section">
-        <CommonButton @click="removeSettings">
+        <CommonButton @click="removeSettings" class="logout_button">
           <template v-slot:placeholder>Удалить настройки</template>
         </CommonButton>
-        <CommonButton @click="saveSettings">
+        <CommonButton @click="saveSettings" class="submit_button">
           <template v-slot:placeholder>Сохранить настройки</template>
         </CommonButton>
       </div>
@@ -233,15 +236,18 @@ export default defineComponent({
   padding: 0 2rem;
 }
 
-.choose-settings button {
-  margin: 0.3vh auto;
-}
-
 .section {
   width: 100%;
   background: rgb(16, 73, 231);
-  padding: 0.5rem;
+  padding: 2vh 2vw;
   border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 1vw;
+
+  button {
+    width: 100%;
+  }
 }
 
 .time-interval-selector {
