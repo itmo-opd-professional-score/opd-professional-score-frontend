@@ -16,6 +16,7 @@ export default {
       type: Array as PropType<GetTestBlockOutputDto[] | null>,
       required: true,
     },
+    guest: Boolean
   },
   data() {
     return {
@@ -63,6 +64,7 @@ export default {
     <TestBlockElement
       :block-id="testBlock.id"
       :token="testBlock.testBlockToken"
+      :guest="guest"
       v-for="(testBlock, index) in paginatedData"
       :key="index"
     >

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 import { TestTypeResolver } from '../api/resolvers/testType/testType.resolver.ts';
-import type { TestDataOutputDto } from '../api/resolvers/test/dto/output/test-data-output.dto.ts';
+import type { TestDataOutputUnionDto } from '../api/resolvers/test/dto/output/test-data-output-union.dto.ts';
 
 export const useTestTypesStore = defineStore('testTypes', {
   state: () => ({
@@ -20,7 +20,7 @@ export const useTestTypesStore = defineStore('testTypes', {
         this.types = types;
       }
     },
-    checkTestType(test: TestDataOutputDto): TestTypeDataOutputDto {
+    checkTestType(test: TestDataOutputUnionDto): TestTypeDataOutputDto {
       let testType;
       this.types.map((type) => {
         if (test.testTypeId == type.id) {

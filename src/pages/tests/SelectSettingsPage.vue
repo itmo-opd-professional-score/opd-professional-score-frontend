@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue';
 import CustomInput from '../../components/UI/inputs/CustomInput.vue';
 import CommonButton from '../../components/UI/CommonButton.vue';
-import type { AccelerationMode, TestType } from './types';
+import type { TestType } from './types';
 import type { TestTypeDataOutputDto } from '../../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver.ts';
 import { TestSetupsResolver } from '../../api/resolvers/testSetup/test-setups.resolver.ts';
@@ -12,25 +12,23 @@ import { UserRole } from '../../utils/userState/UserState.types.ts';
 import router from '../../router/router.ts';
 import { max, min } from '@floating-ui/utils';
 import type { DefaultErrorDto } from '../../api/dto/common/default-error.dto.ts';
+import { defaultTestSettingsInput } from '../testSetups/defaultValues.ts';
 
 
 export default defineComponent({
   name: 'SelectSettingsPage',
   components: { CustomInput, CommonButton },
   props: {
-    testTypeId: {
+    testTypeName: {
       type: String,
-      required: true,
+      required: true
     },
+    setupId: String
   },
   data() {
     return {
-      duration: 1200,
-      showTimer: false,
-      showTotalResults: false,
-      showProgress: false,
-      accelerationMode: 'DISCRETE' as AccelerationMode,
       currentTestType: null as TestTypeDataOutputDto | null,
+      settings: defaultTestSettingsInput,
       specialTypes: [
         "SIMPLE_RDO",
         "HARD_RDO",
@@ -41,26 +39,26 @@ export default defineComponent({
   },
   computed: {
     formattedInterval() {
-      const minutes = Math.floor(this.duration / 60);
-      const seconds = (this.duration % 60).toString().padStart(2, '0');
+      const minutes = Math.floor(this.settings.duration / 60);
+      const seconds = (this.settings.duration % 60).toString().padStart(2, '0');
       return `${minutes} мин ${seconds} сек`;
     },
     minTimeValue() {
       if (this.currentTestType === null) return 120
       switch (this.currentTestType.name) {
-        case "HARD_LIGHT":
-          return 0.5
-        default:
-          return 120
+        case "HARD_LIGHT": return 60
+        case "SIMPLE_LIGHT": return 60
+        case "SIMPLE_SOUND": return 60
+        default: return 120
       }
     },
     maxTimeValue() {
       if (this.currentTestType === null) return 2700
       switch (this.currentTestType.name) {
-        case "HARD_LIGHT":
-          return 3
-        default:
-          return 2700
+        case "SIMPLE_LIGHT": return 180
+        case "SIMPLE_SOUND": return 180
+        case "HARD_LIGHT": return 180
+        default: return 2700
       }
     }
   },
@@ -68,26 +66,42 @@ export default defineComponent({
     min,
     max,
     async saveSettings() {
-      const settings: TestSetupInputDto = {
-        testName: `LOL-{this.testTypeId}`,
-        testTypeId: parseInt(this.testTypeId),
-        duration: this.duration,
-        showTimer: this.showTimer,
-        showTotalResults: this.showTotalResults,
-        showProgress: this.showProgress,
-        accelerationMode: this.accelerationMode,
-      };
-      try {
-        await new TestSetupsResolver().create(settings)
-        await router.push('/testBlock/create')
-      } catch (e) {
-        console.log((e as DefaultErrorDto).message)
+      if (this.currentTestType) {
+        try {
+          const setupId = this.setupId
+          if (!setupId || isNaN(parseInt(setupId))) {
+            await new TestSetupsResolver().create(this.settings)
+          }
+          else {
+            await new TestSetupsResolver().update({
+              id: parseInt(setupId),
+              updated: this.settings
+            })
+          }
+          await router.push('/testBlock/create')
+        } catch (e) {
+          console.log((e as DefaultErrorDto).message)
+        }
       }
     },
   },
   async mounted() {
     if ( ![UserRole.EXPERT, UserRole.ADMIN].includes(UserState.role!) ) await router.push('/profile')
-    this.currentTestType = await new TestTypeResolver().getById(parseInt(this.testTypeId))
+    if (this.setupId && !isNaN(parseInt(this.setupId))) {
+      const setupId = this.setupId
+      const existedSettings = (await new TestSetupsResolver().getAllByTestType(this.testTypeName as TestType))
+        .find((setup) => setup.id === parseInt(setupId))
+      this.settings = {...existedSettings} as TestSetupInputDto
+      if (existedSettings) this.currentTestType = await new TestTypeResolver().getById(existedSettings.testTypeId)
+      else {
+        this.currentTestType = await new TestTypeResolver().getByName(this.testTypeName)
+        this.settings.duration = this.maxTimeValue / 2
+      }
+    } else {
+      this.currentTestType = await new TestTypeResolver().getByName(this.testTypeName)
+      this.settings.duration = this.maxTimeValue / 2
+    }
+
   }
 });
 </script>
@@ -99,6 +113,12 @@ export default defineComponent({
         <h2>Выберите настройки теста: <br />{{ currentTestType ? currentTestType.description : "Load error" }}</h2>
       </div>
       <div v-if="currentTestType" class="settings-group">
+        <div class="setup-name">
+          <CustomInput
+            type="text"
+            v-model="settings.testName"
+          />
+        </div>
         <div class="time-interval-selector">
           <label
             >Время прохождения теста:
@@ -106,7 +126,7 @@ export default defineComponent({
           >
           <CustomInput
             type="range"
-            v-model.number="duration"
+            v-model.number="settings.duration"
             :minNumber="minTimeValue"
             :maxNumber="maxTimeValue"
             selector="range"
@@ -119,7 +139,8 @@ export default defineComponent({
           <div class="setting-item">
             <CustomInput
               type="checkbox"
-              @change="showTimer = !showTimer"
+              v-model="settings.showTimer"
+              :checked="settings.showTimer"
               labelText="Отображать оставшееся время"
               selector="checkbox"
             />
@@ -128,7 +149,8 @@ export default defineComponent({
           <div class="setting-item">
             <CustomInput
               type="checkbox"
-              @change="showTotalResults = !showTotalResults"
+              v-model="settings.showTotalResults"
+              :checked="settings.showTotalResults"
               labelText="Показывать общий результат"
               selector="checkbox"
             />
@@ -137,7 +159,8 @@ export default defineComponent({
           <div class="setting-item">
             <CustomInput
               type="checkbox"
-              @change="showProgress = !showProgress"
+              v-model="settings.showProgress"
+              :checked="settings.showProgress"
               labelText="Отображать прогресс выполнения"
               selector="checkbox"
             />
@@ -152,14 +175,15 @@ export default defineComponent({
                 type="radio"
                 labelText="Дискретное"
                 name="accelerationMode"
-                @click="accelerationMode = 'DISCRETE'"
-                checked
+                @click="settings.accelerationMode = 'DISCRETE'"
+                :checked="settings.accelerationMode === 'DISCRETE'"
               />
               <CustomInput
                 type="radio"
                 labelText="Непрерывное"
                 name="accelerationMode"
-                @click="accelerationMode = 'STEADY'"
+                @click="settings.accelerationMode = 'STEADY'"
+                :checked="settings.accelerationMode === 'STEADY'"
               />
             </div>
             <br />

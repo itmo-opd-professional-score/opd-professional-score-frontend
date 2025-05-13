@@ -2,10 +2,16 @@
 import CommonButton from '../UI/CommonButton.vue';
 import router from '../../router/router.ts';
 
-defineProps<{
+const props = defineProps<{
   blockId: number
   token: string
+  guest?: boolean
 }>()
+
+const copyLink = () => {
+  navigator.clipboard.writeText(`${window.location.origin}/testBlock/${props.blockId}`)
+  alert("Ссылка на блок успешно скопирована!")
+}
 </script>
 
 <template>
@@ -14,8 +20,11 @@ defineProps<{
     <div class="field" id="name">
       <slot name="name">Название</slot>
     </div>
-    <CommonButton class="open-button" id="btn" @click="router.push(`/testBlock/${blockId}`)">
+    <CommonButton v-if="!guest" class="open-button" id="btn" @click="router.push(`/testBlock/${blockId}`)">
       <template v-slot:placeholder>Перейти</template>
+    </CommonButton>
+    <CommonButton v-else class="submit_button" id="btn" @click="copyLink">
+      <template v-slot:placeholder>Поделиться</template>
     </CommonButton>
   </div>
 </template>

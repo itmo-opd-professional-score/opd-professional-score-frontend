@@ -34,9 +34,21 @@ export class TestSetupsResolver {
       'POST',
       data,
       this.token ? this.token : undefined,
-    ).then((res) => {
+    ).then((_) => {
       this.usePopUp.activateInfoPopup("Setup was created successfully!")
-      return res
+      return null
+    })
+  }
+
+  public async update(data: {id: number, updated: TestSetupInputDto}): Promise<DefaultOutputDto<TestSetupOutputDTO> | null> {
+    return await this.apiResolver.request<{id: number, updated: TestSetupInputDto}, DefaultOutputDto<TestSetupOutputDTO>>(
+      'updateSetup',
+      'PATCH',
+      data,
+      this.token ? this.token : undefined,
+    ).then((_) => {
+      this.usePopUp.activateInfoPopup("Setup was created successfully!")
+      return null
     })
   }
 }

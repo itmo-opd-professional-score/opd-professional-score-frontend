@@ -16,6 +16,7 @@ export default defineComponent({
     setupId: String
   },
   setup(props) {
+    console.log(props)
     const { settings, updateTestBlockToken } = useTest({
       setupId: props.setupId,
       testBlockId: props.testBlockId,
@@ -66,7 +67,7 @@ export default defineComponent({
     },
     TRIAL_COUNT() {
       if (!this.settings) return 10
-      return Math.round(this.settings.duration / 0.6)
+      return Math.round(this.settings.duration / 1.5)
     },
     testResultDto(): CreateSimpleInputDto {
       return {

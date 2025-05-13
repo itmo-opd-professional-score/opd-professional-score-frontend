@@ -2,16 +2,16 @@
 import { computed, ref } from 'vue';
 import CommonButton from '../UI/CommonButton.vue';
 import TestManagerElement from './TestManagerElement.vue';
-import type { TestDataOutputDto } from '../../api/resolvers/test/dto/output/test-data-output.dto.ts';
 import { useTestTypesStore } from '../../store/test-types.store.ts';
 import type { UserDataOutputDto } from '../../api/resolvers/user/dto/output/user-data-output.dto.ts';
 import { UserState } from '../../utils/userState/UserState.ts';
 import router from '../../router/router.ts';
+import type { TestDataOutputUnionDto } from '../../api/resolvers/test/dto/output/test-data-output-union.dto.ts';
 
 const props = withDefaults(
   defineProps<{
     maxElementsCount: number;
-    tests: TestDataOutputDto[];
+    tests: TestDataOutputUnionDto[];
     users?: UserDataOutputDto[]
   }>(),
   {
@@ -57,7 +57,6 @@ const prevPage = () => {
     <div class="header">
       <div class="id">Id</div>
       <div class="test_type">Тип теста</div>
-      <div class="test_type">Время ответа</div>
       <div class="test_type">Пользователь</div>
       <div class="test_type">Пройден</div>
       <div class="test_type">Дата</div>
@@ -69,9 +68,6 @@ const prevPage = () => {
     >
       <template #id>{{ item.id }}</template>
       <template #test_type>{{ testTypesStore.checkTestType(item).description }}</template>
-      <template #average_callback>{{
-        item.averageCallbackTime.toFixed(2)
-      }}</template>
       <template #user>
         {{
           item.userId ?
@@ -126,7 +122,7 @@ const prevPage = () => {
   justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 1fr 3fr 3fr 3fr 2fr 2fr;
+  grid-template-columns: 1fr 3fr 3fr 2fr 2fr;
   margin-bottom: 1rem;
 }
 

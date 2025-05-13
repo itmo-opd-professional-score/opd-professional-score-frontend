@@ -68,6 +68,7 @@ const isFlipped = ref(false);
   height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   position: absolute;
   backface-visibility: hidden; /* Скрыть обратную сторону */
   border-radius: 15px;

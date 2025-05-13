@@ -45,7 +45,7 @@ export const useTestBlock = (blockId: number) => {
       if (testBlock.value) {
         if (userId == 999999) localStorage.setItem(`guestTestBlock-${blockId}`, JSON.stringify(testBlock.value));
         if (testBlock.value.userId !== userId) await router.push('/profile')
-      }
+      } else await router.push('/profile')
     }
     return testBlock
   }

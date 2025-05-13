@@ -3,10 +3,10 @@ import { defineComponent } from 'vue';
 import TestStatisticsCard from '../../components/TestStatisticsCard.vue';
 import TestScoreList from '../../components/TestsScoreList.vue';
 import { UserState } from '../../utils/userState/UserState.ts';
-import type { TestDataOutputDto } from '../../api/resolvers/test/dto/output/test-data-output.dto.ts';
 import { TestResolver } from '../../api/resolvers/test/test.resolver.ts';
 import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver.ts';
 import { UserRole } from '../../utils/userState/UserState.types.ts';
+import type { TestDataOutputUnionDto } from '../../api/resolvers/test/dto/output/test-data-output-union.dto.ts';
 import type { TestTypeDataOutputDto } from '../../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 
 export default defineComponent({
@@ -36,9 +36,9 @@ export default defineComponent({
   data() {
     return {
       testResolver: new TestResolver(),
-      currentTest: {} as TestDataOutputDto,
-      testsData: [] as TestDataOutputDto[],
-      userTestsData: [] as TestDataOutputDto[],
+      currentTest: {} as TestDataOutputUnionDto,
+      testsData: [] as TestDataOutputUnionDto[],
+      userTestsData: [] as TestDataOutputUnionDto[],
       testType: {} as TestTypeDataOutputDto | null,
       endpoint: ''
     }
@@ -68,6 +68,21 @@ export default defineComponent({
         case 'HARD_RDO':
           this.endpoint = 'rdo';
           break
+        case 'NUMERICAL':
+          this.endpoint = 'cognitive';
+          break
+        case 'STROOP':
+          this.endpoint = 'cognitive';
+          break
+        case 'VERBAL':
+          this.endpoint = 'cognitive';
+          break
+        case 'SIMPLE_TRACKING':
+          this.endpoint = 'tracking/simple';
+          break
+        case 'HARD_TRACKING':
+          this.endpoint = 'tracking/hard';
+          break
       }
       this.currentTest = await this.testResolver.getByTypeById(this.endpoint, parseInt(this.testId));
       const tests = await this.testResolver.getAllByType(this.endpoint)
@@ -86,16 +101,23 @@ export default defineComponent({
     <section class="current-test">
       <TestStatisticsCard
         v-if="currentTest.id != undefined"
-        :time="parseFloat(currentTest.averageCallbackTime.toFixed(2))"
-        :date="currentTest.createdAt.substring(0, 10)"
-        :max-score="currentTest.allSignals"
-        :test-type="testType ? testType : undefined"
-        :user-name="UserState.username"
+        :time="
+          'averageCallbackTime' in currentTest ?
+            parseFloat(currentTest.averageCallbackTime.toFixed(2)) :
+            undefined
+        "
+        :max-score="
+          'allSignals' in currentTest ? currentTest.allSignals :
+            'totalOverlap' in currentTest ? currentTest.totalOverlap : undefined
+        "
         :score="
           currentTest.misclicks != null ?
           currentTest.allSignals - currentTest.misclicks :
           currentTest.allSignals - currentTest.mistakes
         "
+        :date="currentTest.createdAt.substring(0, 10)"
+        :test-type="testType ? testType : undefined"
+        :user-name="UserState.username"
         :valid="currentTest.valid"
       />
       <div class="user-test-history">

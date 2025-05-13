@@ -13,33 +13,26 @@ export default defineComponent({
       type: String,
       default: 'Anonymous',
     },
-    score: {
-      type: Number,
-      required: true,
-    },
-    maxScore: {
-      type: Number,
-      required: true,
-    },
+    score: Number,
+    maxScore: Number,
+    time: Number,
     date: {
       type: String,
       required: true,
     },
-    time: {
-      type: Number,
-      required: true,
-    },
     valid: {
       type: Boolean,
-      default: false,
+      required: true,
     },
     testType: {} as PropType<TestTypeDataOutputDto>,
   },
   computed: {
-    scorePercentage(): string {
+    scorePercentage() {
+      if (!this.maxScore || !this.score) return undefined
       return ((this.score / this.maxScore) * 100).toFixed(2) + '%';
     },
-    cardColors(): string {
+    cardColors() {
+      if (!this.maxScore || !this.score) return undefined
       const percentage = (this.score / this.maxScore) * 100;
       return percentage >= 80 ? 'green' : percentage >= 50 ? 'orange' : 'red';
     },
@@ -88,7 +81,7 @@ export default defineComponent({
       <p class="fields">Правильные ответы: {{ score }} / {{ maxScore }}</p>
       <p class="fields">Респондент: {{ userName }}</p>
       <p class="fields">Среднее время реакции: {{ Math.abs(time) }}</p>
-      <p class="fields">Статус:
+      <p class="fields" v-if="score && maxScore">Статус:
         <span :style="{ color: (score / maxScore) > 0.6 ? 'green' : 'red'}">
             {{ (score / maxScore) > 0.6 ? 'Сдан' : 'Не сдан' }}
           </span>

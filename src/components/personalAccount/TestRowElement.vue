@@ -65,6 +65,7 @@ export default {
           text: `Конфиг №${setup.id}`,
         });
       })
+      this.setups.sort((a, b) => parseInt(a.value) - parseInt(b.value));
     } catch (e) { return (e as DefaultErrorDto).message }
   },
 };
@@ -85,7 +86,7 @@ export default {
         class="select"
       />
       <CommonButton
-        @click="router().push(`/test/settings/${test.name}`)"
+        @click="router().push(`/test/settings/${test.name}/${currentSetup}`)"
         class="submit_button btn"
       >
         <template v-slot:placeholder>Настроить</template>

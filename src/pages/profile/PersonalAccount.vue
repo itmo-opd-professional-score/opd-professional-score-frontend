@@ -13,13 +13,29 @@ import router from '../../router/router.ts';
 import { TestResolver } from '../../api/resolvers/test/test.resolver.ts';
 import { UserResolver } from '../../api/resolvers/user/user.resolver.ts';
 import type { UserDataOutputDto } from '../../api/resolvers/user/dto/output/user-data-output.dto.ts';
-import type { TestDataOutputDto } from '../../api/resolvers/test/dto/output/test-data-output.dto.ts';
 import { UserRole } from '../../utils/userState/UserState.types.ts';
 import { useTestTypesStore } from '../../store/test-types.store.ts';
 import type { GetTestBlockOutputDto } from '../../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
 import { TestBlockResolver } from '../../api/resolvers/testBlocks/test-block.resolver.ts';
 import TestBlocksManagerList from '../../components/personalAccount/TestBlocksManagerList.vue';
 import CommonButton from '../../components/UI/CommonButton.vue';
+import type {
+  TestDataOutputAdditionRdoDto
+} from '../../api/resolvers/test/dto/output/test-data-output-addition-rdo.dto.ts';
+import type {
+  TestDataOutputSimpleTrackingDto
+} from '../../api/resolvers/test/dto/output/test-data-output-simple-tracking.dto.ts';
+import type {
+  TestDataOutputHardTrackingDto
+} from '../../api/resolvers/test/dto/output/test-data-output-hard-tracking.dto.ts';
+import type { TestDataOutputCognitiveDto } from '../../api/resolvers/test/dto/output/test-data-output-cognitive.dto.ts';
+import type {
+  TestDataOutputHardLightDto
+} from '../../api/resolvers/test/dto/output/test-data-output-hard-light.dto.ts';
+import type {
+  TestDataOutputSimpleLightSoundDto
+} from '../../api/resolvers/test/dto/output/test-data-output-simple-light-sound.dto.ts';
+import type { TestDataOutputUnionDto } from '../../api/resolvers/test/dto/output/test-data-output-union.dto.ts';
 
 const authResolver = new AuthResolver();
 const userResolver = new UserResolver();
@@ -33,18 +49,18 @@ testTypesStore.loadTestTypes();
 const users = ref<UserDataOutputDto[]>([]);
 const professions = ref<GetProfessionOutputDto[] | null>(null);
 const tests = ref<{
-  additionSound: TestDataOutputDto[];
-  additionVisual: TestDataOutputDto[];
-  simpleSound: TestDataOutputDto[];
-  simpleLight: TestDataOutputDto[];
-  hardLight: TestDataOutputDto[];
-  simpleRdo: TestDataOutputDto[];
-  hardRdo: TestDataOutputDto[];
-  simpleTracking: TestDataOutputDto[];
-  hardTracking: TestDataOutputDto[];
-  numerical: TestDataOutputDto[];
-  stroop: TestDataOutputDto[];
-  verbal: TestDataOutputDto[];
+  additionSound: TestDataOutputAdditionRdoDto[];
+  additionVisual: TestDataOutputAdditionRdoDto[];
+  simpleSound: TestDataOutputSimpleLightSoundDto[];
+  simpleLight: TestDataOutputSimpleLightSoundDto[];
+  hardLight: TestDataOutputHardLightDto[];
+  simpleRdo: TestDataOutputAdditionRdoDto[];
+  hardRdo: TestDataOutputAdditionRdoDto[];
+  simpleTracking: TestDataOutputSimpleTrackingDto[];
+  hardTracking: TestDataOutputHardTrackingDto[];
+  numerical: TestDataOutputCognitiveDto[];
+  stroop: TestDataOutputCognitiveDto[];
+  verbal: TestDataOutputCognitiveDto[];
 }>({
   additionSound: [],
   additionVisual: [],
@@ -59,15 +75,18 @@ const tests = ref<{
   stroop: [],
   verbal: [],
 });
-const allTests = ref<TestDataOutputDto[]>([]);
+const allTests = ref<TestDataOutputUnionDto[]>([]);
 const professionsArchive = ref<GetProfessionOutputDto[]>([]);
 const professionsPublished = ref<GetProfessionOutputDto[]>([]);
 const testBlocks = ref<GetTestBlockOutputDto[]>([]);
+const publicTestBlocks = ref<GetTestBlockOutputDto[]>([]);
 
 const reloadTestBlocks = async () => {
   try {
     testBlocks.value = await testBlockResolver.getAllByUserId(UserState.id!);
+    publicTestBlocks.value = await testBlockResolver.getAllByUserId(999999);
     testBlocks.value.sort((a, b) => a.id - b.id);
+    publicTestBlocks.value.sort((a, b) => a.id - b.id);
   } catch (e) {}
 };
 
@@ -102,18 +121,22 @@ const reloadProfessions = async () => {
 const reloadTests = async () => {
   if (UserState.role) {
     try {
-      let additionTests: TestDataOutputDto[];
-      let rdoTests: TestDataOutputDto[];
-      let cognitiveTests: TestDataOutputDto[];
+      let additionTests: TestDataOutputAdditionRdoDto[];
+      let rdoTests: TestDataOutputAdditionRdoDto[];
+      let cognitiveTests: TestDataOutputCognitiveDto[];
       if (UserState.role == UserRole.ADMIN || UserState.role == UserRole.EXPERT) {
-        allTests.value.push(...(await testResolver.getAllByType('at')));
-        allTests.value.push(...(await testResolver.getAllByType('sst')));
-        allTests.value.push(...(await testResolver.getAllByType('slt')));
-        allTests.value.push(...(await testResolver.getAllByType('hlt')));
-        allTests.value.push(...(await testResolver.getAllByType('rdo')));
-        allTests.value.push(...(await testResolver.getAllByType('tracking/simple')));
-        allTests.value.push(...(await testResolver.getAllByType('tracking/hard')));
-        allTests.value.push(...(await testResolver.getAllByType('cognitive')));
+        const promises: TestDataOutputUnionDto[] = [
+          ...await testResolver.getAllByType<'at'>('at'),
+          ...await testResolver.getAllByType<'sst'>('sst'),
+          ...await testResolver.getAllByType<'slt'>('slt'),
+          ...await testResolver.getAllByType<'hlt'>('hlt'),
+          ...await testResolver.getAllByType<'rdo'>('rdo'),
+          ...await testResolver.getAllByType<'tracking/simple'>('tracking/simple'),
+          ...await testResolver.getAllByType<'tracking/hard'>('tracking/hard'),
+          ...await testResolver.getAllByType<'cognitive'>('cognitive')
+        ]
+        await Promise.all(promises);
+        allTests.value.push(...promises)
       }
       additionTests = await testResolver.getTestsByTypeByUserId(
         UserState.id!,
@@ -154,20 +177,21 @@ const reloadTests = async () => {
           testTypesStore.checkTestType(test).name == 'VERBAL' ? test : null,
         );
       }
+
       tests.value.simpleSound.push(
-        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'sst')),
+        ...(await testResolver.getTestsByTypeByUserId<TestDataOutputSimpleLightSoundDto>(UserState.id!, 'sst')),
       );
       tests.value.simpleLight.push(
-        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'slt')),
+        ...(await testResolver.getTestsByTypeByUserId<TestDataOutputSimpleLightSoundDto>(UserState.id!, 'slt')),
       );
       tests.value.hardLight.push(
-        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'hlt')),
+        ...(await testResolver.getTestsByTypeByUserId<TestDataOutputHardLightDto>(UserState.id!, 'hlt')),
       );
       tests.value.simpleTracking.push(
-        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'tracking/simple'))
+        ...(await testResolver.getTestsByTypeByUserId<TestDataOutputSimpleTrackingDto>(UserState.id!, 'tracking/simple'))
       )
       tests.value.hardTracking.push(
-        ...(await testResolver.getTestsByTypeByUserId(UserState.id!, 'tracking/hard'))
+        ...(await testResolver.getTestsByTypeByUserId<TestDataOutputHardTrackingDto>(UserState.id!, 'tracking/hard'))
       )
       Object.entries(tests.value).forEach(([_, category]) => {
         category.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -184,19 +208,17 @@ const emptyProfile = computed(() => {
 })
 
 onMounted(() => {
-  if (UserState.role == UserRole.ADMIN) {
-    reloadUsers();
-  }
+  reloadUsers();
+  reloadTests();
+  reloadTestBlocks();
   if (UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN) {
     reloadProfessions();
   }
-  reloadTests();
-  reloadTestBlocks();
 });
 </script>
 
 <template>
-  <div class="container">
+  <div class="container" v-if="testTypesStore.getTestTypes.length > 0">
     <div class="user-info-left">
       <div class="user-data-block">
         <p class="block_header">Информация о пользователе</p>
@@ -292,6 +314,11 @@ onMounted(() => {
       <div class="tests-info" v-if="testBlocks && testBlocks.length > 0">
         <div class="block_header">Информация о назначенных блоках тестов</div>
         <TestBlocksManagerList :test-blocks="testBlocks" />
+      </div>
+
+      <div class="tests-info" v-if="publicTestBlocks && publicTestBlocks.length > 0">
+        <div class="block_header">Гостевые блоки тестов</div>
+        <TestBlocksManagerList :test-blocks="publicTestBlocks" :guest="true"/>
       </div>
 
       <div

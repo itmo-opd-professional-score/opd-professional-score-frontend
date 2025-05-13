@@ -87,12 +87,6 @@ const testBlockRoutes = [
     component: TestMapper,
     props: true,
   },
-  {
-    path: '/test/settings/:testTypeId',
-    component: SelectSettingsPage,
-    meta: { ruName: 'Настройки теста', requiresAuth: true },
-    props: true,
-  },
 ]
 const testRoutes = [
   {
@@ -155,9 +149,8 @@ const testRoutes = [
     component: VerbalTest,
     meta: { ruName: 'Вербальное восприятие', requiresAuth: true },
   },
-
   {
-    path: '/test/settings/:testTypeId',
+    path: '/test/settings/:testTypeName/:setupId',
     component: SelectSettingsPage,
     meta: { ruName: 'Настройки теста', requiresAuth: true },
     props: true,

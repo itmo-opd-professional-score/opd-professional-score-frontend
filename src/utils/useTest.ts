@@ -3,6 +3,7 @@ import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resol
 import { onMounted, ref } from 'vue';
 import { TestBlockResolver } from '../api/resolvers/testBlocks/test-block.resolver.ts';
 import type { TestBlockJwt, TestType } from '../pages/tests/types';
+import { defaultTestSettingsOutput } from '../pages/testSetups/defaultValues.ts';
 
 export interface UseTestOptions {
   testBlockId: string | undefined;
@@ -11,18 +12,7 @@ export interface UseTestOptions {
 }
 
 export function useTest(options: UseTestOptions) {
-  const settings = ref<TestSetupOutputDTO>({
-    id: 0,
-    testName: '',
-    testTypeId: -1,
-    showTotalResults: true,
-    showProgress: false,
-    showTimer: false,
-    duration: 10,
-    accelerationMode: 'DISCRETE',
-    createdAt: '',
-    updatedAt: '',
-  });
+  const settings = ref<TestSetupOutputDTO>(defaultTestSettingsOutput);
   const testBlockId = options.testBlockId && !isNaN(parseInt(options.testBlockId)) ?
     parseInt(options.testBlockId) : undefined;
   const setupId = options.setupId && !isNaN(parseInt(options.setupId)) ?

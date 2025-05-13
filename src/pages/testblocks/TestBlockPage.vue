@@ -5,6 +5,7 @@ import CommonButton from '../../components/UI/CommonButton.vue';
 import router from '../../router/router.ts';
 import { useTestBlock } from '../../utils/useTestBlock.ts';
 import type { TestType } from '../tests/types';
+import { UserState } from '../../utils/userState/UserState.ts';
 
 const props = defineProps<{
   blockId: string,
@@ -20,13 +21,17 @@ const tests = ref<{
 onMounted(async () => {
   const testBlock = await loadTestBlock()
   if (testBlock.value) {
-    tests.value = await loadMatchedTests(testBlock.value.tests)
+    tests.value = testBlock.value.tests
   }
 })
 </script>
 
 <template>
   <div class="container">
+    <div class="header" v-if="tests.every(test => test.available === false)">
+      <h2>Вы успешно прошли весь блок!</h2>
+      <h2>Перейдите в профиль и ознакомьтесь с результатами!</h2>
+    </div>
     <div class="test-block">
       <div
         v-for="(test, index) in tests"
@@ -58,8 +63,18 @@ onMounted(async () => {
     width: 100vw;
     height: 70vh;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 3vw;
+
+    .header {
+      max-width: 50%;
+
+      h2 {
+        color: white;
+      }
+    }
 
     .test-block {
       width: 50%;
