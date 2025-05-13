@@ -91,7 +91,7 @@ export default {
 
 .anonymous {
   grid-template-columns: 64% 26%;
-  gap: 6vh;
+  column-gap: 10%;
   margin-top: 2vw;
   white-space: nowrap;
   .user-id, .user-email {
