@@ -14,14 +14,12 @@ import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver
 import CustomInput from '../../components/UI/inputs/CustomInput.vue';
 import type { TestBatteryOutputDto } from '../../api/resolvers/testBattery/dto/output/test-battery-output.dto.ts';
 import { TestBatteryResolver } from '../../api/resolvers/testBattery/test-battery.resolver.ts';
-export type TestBattery = {
-  testBatteryId: number | null
-  approvedUsers: number[],
-  approvedTests: TestBlockTest[]
-}
+import type { LocalTestBlock } from '../../components/testBattery/types';
+import TestBatteryRowElement from '../../components/testBattery/TestBatteryRowElement.vue';
+
 export default {
   name: 'CreateTestBlockPage',
-  components: { CustomInput, UserRowElement, CommonButton, TestRowElement },
+  components: { TestBatteryRowElement, CustomInput, UserRowElement, CommonButton, TestRowElement },
   data() {
     const popupStore = usePopupStore();
     const testBlockResolver = new TestBlockResolver();
@@ -34,7 +32,7 @@ export default {
       searchedUser: '',
       usersFromApi: [] as UserDataOutputDto[],
       batteries: [] as TestBatteryOutputDto[],
-      currentBatteryId: null as number | null,
+      localTestBlock: {} as LocalTestBlock,
       testBlockResolver,
       userResolver,
       popupStore,
@@ -58,11 +56,11 @@ export default {
         .sort((a, b) => a.id - b.id);
       if (types !== null) this.tests = types.sort((a, b) => a.id - b.id);
 
-      const currentTestBatteryCash = localStorage.getItem("currentTestBattery")
-      if (currentTestBatteryCash != null) {
-        const currentTestBattery = JSON.parse(currentTestBatteryCash) as TestBattery;
-        this.approvedUsers = currentTestBattery.approvedUsers
-        this.approvedTests = currentTestBattery.approvedTests
+      const localTestBlockCash = localStorage.getItem("localTestBlock")
+      if (localTestBlockCash != null) {
+        const localTestBlock = JSON.parse(localTestBlockCash) as LocalTestBlock;
+        this.approvedUsers = localTestBlock.userIds
+        this.approvedTests = localTestBlock.tests
       }
     } catch (e) {}
   },
@@ -97,12 +95,14 @@ export default {
       this.approvedUsers = []
     },
     saveTestBlockConfig() {
-      localStorage.removeItem("currentTestBattery");
-      localStorage.setItem("currentTestBattery", JSON.stringify({
-        testBatteryId: this.currentBatteryId ? this.currentBatteryId : null,
-        approvedUsers: this.approvedUsers,
-        approvedTests: this.approvedTests,
-      } as TestBattery));
+      this.localTestBlock = {
+        testBatteryId: this.localTestBlock.testBatteryId ?
+          this.localTestBlock.testBatteryId : null,
+        userIds: this.approvedUsers,
+        tests: this.approvedTests,
+      }
+      localStorage.removeItem("localTestBlock");
+      localStorage.setItem("localTestBlock", JSON.stringify(this.localTestBlock));
     },
   },
   watch: {
@@ -141,14 +141,16 @@ export default {
         :test="test"
         :selected="approvedTests.find(tesT => tesT.name == test.name) !== undefined"
         :setup-id="approvedTests.find(tesT => tesT.name == test.name)?.setupId"
-        @apply-test="(configuredTest: TestBlockTest) => approvedTests = [...approvedTests, configuredTest]"
-        @remove-test="(configuredTest: TestBlockTest) =>
-          approvedTests = approvedTests.filter(tesT => tesT.name !== configuredTest.name)
-        "
+        @apply-test="(appliedTest) => approvedTests = [...approvedTests, appliedTest]"
+        @remove-test="(removedTest) =>approvedTests = approvedTests.filter(tesT => tesT.name !== removedTest.name)"
       />
 
       <div class="batteries-container" v-if="batteryMode">
-
+        <TestBatteryRowElement
+          v-for="(battery, index) in batteries"
+          :key="index"
+          :test-battery="battery"
+        />
       </div>
     </div>
     <h2 class="block-header">Выберите пользователей:</h2>
