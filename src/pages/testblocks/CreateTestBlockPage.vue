@@ -71,6 +71,7 @@ export default {
     reset() {
       this.approvedTests = []
       this.approvedUsers = []
+      router.go(0)
     },
     saveTestBlockConfig() {
       localStorage.removeItem("newTestBlock");

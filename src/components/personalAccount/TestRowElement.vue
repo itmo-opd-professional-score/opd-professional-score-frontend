@@ -30,7 +30,7 @@ export default {
   },
   computed: {
     buttonText() {
-      if (this.added) {
+      if (this.added && this.selected) {
         this.buttonClass = 'logout_button';
         return 'Удалить';
       } else {
@@ -68,6 +68,7 @@ export default {
           text: `Конфиг №${setup.id}`,
         });
       })
+      if (!this.setups.find(setup => setup.value == this.currentSetup)) this.currentSetup = ''
       this.setups.sort((a, b) => parseInt(a.value) - parseInt(b.value));
     } catch (e) { return (e as DefaultErrorDto).message }
   },

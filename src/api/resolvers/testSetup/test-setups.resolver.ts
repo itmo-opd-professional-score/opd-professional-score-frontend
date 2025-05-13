@@ -4,6 +4,7 @@ import type { TestSetupOutputDTO } from './dto/output/test-setup-output.dto.ts';
 import type { TestSetupInputDto } from './dto/input/test-setup-input.dto.ts';
 import type { DefaultOutputDto } from '../../dto/common/default-output.dto.ts';
 import type { TestType } from '../../../pages/tests/types';
+import type { DefaultErrorDto } from '../../dto/common/default-error.dto.ts';
 
 export class TestSetupsResolver {
   private apiResolver = new ApiResolverUtil('testSetup');
@@ -49,6 +50,18 @@ export class TestSetupsResolver {
     ).then((_) => {
       this.usePopUp.activateInfoPopup("Setup was created successfully!")
       return null
+    })
+  }
+
+  public async deleteById(id: number): Promise<DefaultOutputDto<string> | DefaultErrorDto> {
+    return await this.apiResolver.request<null, DefaultOutputDto<string>>(
+      `deleteSetup/${id}`,
+      'DELETE',
+      null,
+      this.token ? this.token : undefined,
+    ).catch((error: DefaultErrorDto) => {
+      this.usePopUp.activateErrorPopup("Setup wasn't found!")
+      return error
     })
   }
 }

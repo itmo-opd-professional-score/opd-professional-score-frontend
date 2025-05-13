@@ -14,7 +14,6 @@ import { max, min } from '@floating-ui/utils';
 import type { DefaultErrorDto } from '../../api/dto/common/default-error.dto.ts';
 import { defaultTestSettingsInput } from '../testSetups/defaultValues.ts';
 
-
 export default defineComponent({
   name: 'SelectSettingsPage',
   components: { CustomInput, CommonButton },
@@ -84,6 +83,12 @@ export default defineComponent({
         }
       }
     },
+    async removeSettings() {
+      if (this.setupId && !isNaN(parseInt(this.setupId))) {
+        await new TestSetupsResolver().deleteById(parseInt(this.setupId))
+      }
+      await router.push('/testBlock/create')
+    }
   },
   async mounted() {
     if ( ![UserRole.EXPERT, UserRole.ADMIN].includes(UserState.role!) ) await router.push('/profile')
@@ -191,6 +196,9 @@ export default defineComponent({
         </div>
       </div>
       <div class="section">
+        <CommonButton @click="removeSettings">
+          <template v-slot:placeholder>Удалить настройки</template>
+        </CommonButton>
         <CommonButton @click="saveSettings">
           <template v-slot:placeholder>Сохранить настройки</template>
         </CommonButton>
