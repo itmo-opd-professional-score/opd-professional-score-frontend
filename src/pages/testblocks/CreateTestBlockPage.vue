@@ -11,31 +11,39 @@ import type { TestTypeDataOutputDto } from '../../api/resolvers/testType/dto/out
 import router from '../../router/router.ts';
 import type { TestBlockTest } from '../tests/types';
 import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver.ts';
+import CustomInput from '../../components/UI/inputs/CustomInput.vue';
 
 export default {
   name: 'CreateTestBlockPage',
-  components: { UserRowElement, CommonButton, TestRowElement },
+  components: { CustomInput, UserRowElement, CommonButton, TestRowElement },
   data() {
     const popupStore = usePopupStore();
     const testBlockResolver = new TestBlockResolver();
     const userResolver = new UserResolver();
-    const users: UserDataOutputDto[] = [];
 
     return {
       approvedUsers: [] as number[],
       approvedTests: [] as TestBlockTest[],
       tests: [] as TestTypeDataOutputDto[],
-      users,
+      searchedUser: '',
+      usersFromApi: [] as UserDataOutputDto[],
       testBlockResolver,
       userResolver,
       popupStore,
     };
   },
+  computed: {
+    users() {
+      if (this.searchedUser == '') return this.usersFromApi
+      return this.usersFromApi
+        .filter(user => user.username.toLowerCase().includes(this.searchedUser.toLowerCase()));
+    }
+  },
   async mounted() {
     try {
       const usersFromApi = await this.userResolver.getAll();
       const types = await new TestTypeResolver().getAll();
-      if (usersFromApi !== null) this.users = usersFromApi.body
+      if (usersFromApi !== null) this.usersFromApi = usersFromApi.body
         .filter(user => user.id !== 999999)
         .sort((a, b) => a.id - b.id);
       if (types !== null) this.tests = types.sort((a, b) => a.id - b.id);
@@ -69,9 +77,9 @@ export default {
       }
     },
     reset() {
+      router.go(0)
       this.approvedTests = []
       this.approvedUsers = []
-      router.go(0)
     },
     saveTestBlockConfig() {
       localStorage.removeItem("newTestBlock");
@@ -89,7 +97,7 @@ export default {
 </script>
 
 <template>
-  <div class="container" v-if="tests.length > 0 && users.length > 0">
+  <div class="container" v-if="tests.length > 0 && usersFromApi.length > 0">
     <h1 class="container-header">Создание блока тестов</h1>
 
     <h2 class="block-header">Выберите тесты:</h2>
@@ -108,6 +116,14 @@ export default {
     </div>
     <h2 class="block-header">Выберите пользователей:</h2>
     <div class="user-container">
+      <div class="search-field">
+        <CustomInput
+          class="inner"
+          type="text"
+          v-model="searchedUser"
+          placeholder="Напишите имя пользователя"
+        />
+      </div>
       <UserRowElement
         v-for="(user, index) in users"
         :key="index"
@@ -132,10 +148,18 @@ export default {
     />
 
     <div class="controls">
-      <CommonButton class="btn" @click="reset">
+      <CommonButton
+        class="btn"
+        @click="reset"
+        :disabled="approvedTests.length === 0 && approvedUsers.length === 0"
+      >
         <template v-slot:placeholder> Сбросить </template>
       </CommonButton>
-      <CommonButton class="submit_button btn" @click="save">
+      <CommonButton
+        class="submit_button btn"
+        @click="save"
+        :disabled="approvedTests.length === 0 || approvedUsers.length === 0"
+      >
         <template v-slot:placeholder> Сохранить </template>
       </CommonButton>
     </div>
@@ -193,6 +217,15 @@ export default {
 
   .btn {
     width: 100%;
+  }
+}
+
+.search-field {
+  min-height: 6vh;
+
+  .inner {
+    display: flex;
+    height: 100%;
   }
 }
 
