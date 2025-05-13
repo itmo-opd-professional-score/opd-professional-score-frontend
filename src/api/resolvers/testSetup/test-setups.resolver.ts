@@ -30,7 +30,6 @@ export class TestSetupsResolver {
   }
 
   public async create(data: TestSetupInputDto): Promise<DefaultOutputDto<TestSetupOutputDTO> | null> {
-    console.log(data)
     return await this.apiResolver.request<TestSetupInputDto, DefaultOutputDto<TestSetupOutputDTO>>(
       'createSetup',
       'POST',

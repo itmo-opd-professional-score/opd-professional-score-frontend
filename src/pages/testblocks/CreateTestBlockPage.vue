@@ -12,7 +12,13 @@ import router from '../../router/router.ts';
 import type { TestBlockTest } from '../tests/types';
 import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver.ts';
 import CustomInput from '../../components/UI/inputs/CustomInput.vue';
-
+import type { TestBatteryOutputDto } from '../../api/resolvers/testBattery/dto/output/test-battery-output.dto.ts';
+import { TestBatteryResolver } from '../../api/resolvers/testBattery/test-battery.resolver.ts';
+export type TestBattery = {
+  testBatteryId: number | null
+  approvedUsers: number[],
+  approvedTests: TestBlockTest[]
+}
 export default {
   name: 'CreateTestBlockPage',
   components: { CustomInput, UserRowElement, CommonButton, TestRowElement },
@@ -27,9 +33,12 @@ export default {
       tests: [] as TestTypeDataOutputDto[],
       searchedUser: '',
       usersFromApi: [] as UserDataOutputDto[],
+      batteries: [] as TestBatteryOutputDto[],
+      currentBatteryId: null as number | null,
       testBlockResolver,
       userResolver,
       popupStore,
+      batteryMode: false,
     };
   },
   computed: {
@@ -40,6 +49,7 @@ export default {
     }
   },
   async mounted() {
+    await this.loadBatteries()
     try {
       const usersFromApi = await this.userResolver.getAll();
       const types = await new TestTypeResolver().getAll();
@@ -48,15 +58,20 @@ export default {
         .sort((a, b) => a.id - b.id);
       if (types !== null) this.tests = types.sort((a, b) => a.id - b.id);
 
-      const testBlockCash = localStorage.getItem("newTestBlock")
-      if (testBlockCash != null) {
-        const testBlock = JSON.parse(testBlockCash) as { approvedUsers: number[], approvedTests: TestBlockTest[] };
-        this.approvedUsers = testBlock.approvedUsers
-        this.approvedTests = testBlock.approvedTests
+      const currentTestBatteryCash = localStorage.getItem("currentTestBattery")
+      if (currentTestBatteryCash != null) {
+        const currentTestBattery = JSON.parse(currentTestBatteryCash) as TestBattery;
+        this.approvedUsers = currentTestBattery.approvedUsers
+        this.approvedTests = currentTestBattery.approvedTests
       }
     } catch (e) {}
   },
   methods: {
+    async loadBatteries() {
+      try {
+        this.batteries = await new TestBatteryResolver().getAll()
+      } catch (error) {}
+    },
     async save() {
       if (this.approvedTests.length > 0 && this.approvedUsers.length > 0) {
         const data: CreateTestBlockInputDto = {
@@ -82,12 +97,13 @@ export default {
       this.approvedUsers = []
     },
     saveTestBlockConfig() {
-      localStorage.removeItem("newTestBlock");
-      localStorage.setItem("newTestBlock", JSON.stringify({
+      localStorage.removeItem("currentTestBattery");
+      localStorage.setItem("currentTestBattery", JSON.stringify({
+        testBatteryId: this.currentBatteryId ? this.currentBatteryId : null,
         approvedUsers: this.approvedUsers,
         approvedTests: this.approvedTests,
-      }));
-    }
+      } as TestBattery));
+    },
   },
   watch: {
     approvedTests() { this.saveTestBlockConfig() },
@@ -100,7 +116,24 @@ export default {
   <div class="container" v-if="tests.length > 0 && usersFromApi.length > 0">
     <h1 class="container-header">Создание блока тестов</h1>
 
-    <h2 class="block-header">Выберите тесты:</h2>
+    <div class="block-header">
+      <h2>Выберите тесты:</h2>
+      <div class="battery-controls">
+        <CommonButton
+          class="battery-switch"
+          @click="batteryMode = !batteryMode"
+        >
+          <template v-slot:placeholder>{{ batteryMode ? 'Скрыть' : 'Показать'}} батареи</template>
+        </CommonButton>
+        <CommonButton
+          class="battery-switch"
+          :disabled="approvedTests.length == 0"
+          @click=""
+        >
+          <template v-slot:placeholder>Сохранить батарею</template>
+        </CommonButton>
+      </div>
+    </div>
     <div class="tests-container">
       <TestRowElement
         v-for="(test, index) in tests"
@@ -113,6 +146,10 @@ export default {
           approvedTests = approvedTests.filter(tesT => tesT.name !== configuredTest.name)
         "
       />
+
+      <div class="batteries-container" v-if="batteryMode">
+
+      </div>
     </div>
     <h2 class="block-header">Выберите пользователей:</h2>
     <div class="user-container">
@@ -188,6 +225,15 @@ export default {
   flex-direction: column;
   align-items: center;
   height: 100%;
+  position: relative;
+
+  .batteries-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+  }
 }
 
 .user-container {
@@ -205,6 +251,14 @@ export default {
 
 .block-header {
   margin: 2vw 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.battery-controls {
+  display: flex;
+  gap: 1vw;
 }
 
 .controls {

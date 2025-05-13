@@ -166,11 +166,11 @@ export default defineComponent({
       return {
         userId: UserState.id ? UserState.id : null,
         duration: this.settings.duration,
-        totalOverlapTime,
+        totalOverlapTime: totalOverlapTime,
         bestOverlap: this.bestOverlap,
-        averageOverlap,
+        averageOverlap: averageOverlap,
         overlapCount: this.overlapTimes.length,
-        successRate,
+        score: successRate,
       };
     },
   },

@@ -152,7 +152,7 @@ export default {
           <template v-slot:placeholder>Нечетное</template>
         </CommonButton>
         <CommonButton v-else class="submit_button" @click="resetTest">
-          <template v-slot:placeholder>Пройти еще раз</template>
+          <template v-slot:placeholder>{{ testBlockId ? 'Вернуться к блоку' : 'Пройти еще раз'}}</template>
         </CommonButton>
       </div>
     </div>

@@ -41,6 +41,11 @@ export interface TestBlockJwt {
   iat: number;
   exp: number;
 }
+export interface TestBatteryJwt {
+  tests: TestBlockTest[];
+  iat: number;
+  exp: number;
+}
 export interface TestBlockTest {
   name: TestType;
   setupId?: number;

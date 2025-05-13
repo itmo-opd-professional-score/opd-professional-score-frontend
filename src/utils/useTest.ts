@@ -40,7 +40,7 @@ export function useTest(options: UseTestOptions) {
   }
 
   onMounted(async () => {
-    if (setupId) new TestSetupsResolver().getById(setupId).then((result => {
+    if (setupId && setupId !== -1) new TestSetupsResolver().getById(setupId).then((result => {
       settings.value = result
     }))
   })

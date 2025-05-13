@@ -5,6 +5,5 @@ export interface CreateHardTrackingInputDto {
   bestOverlap: number;
   averageOverlap: number;
   overlapCount: number;
-  successRate: number;
-  testBlockId?: number;
+  score: number;
 }
