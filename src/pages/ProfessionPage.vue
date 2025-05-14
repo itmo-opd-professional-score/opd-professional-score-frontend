@@ -11,6 +11,7 @@ import { usePopupStore } from '../store/popup.store.ts';
 import type { DefaultErrorDto } from '../api/dto/common/default-error.dto.ts';
 import { UserRole } from '../utils/userState/UserState.types.ts';
 import type { PredictOutputDto } from '../api/resolvers/neuro/dto/output/predict-output.dto.ts';
+import { NeuroResolver } from '../api/resolvers/neuro/neuro.resolver.ts';
 
 const props = defineProps<{
   id: number;
@@ -27,6 +28,9 @@ const neuroPredictions = ref<PredictOutputDto[]>([])
 
 onMounted(async () => {
   const popupStore = usePopupStore();
+  if (UserState.id) {
+    neuroPredictions.value = await new NeuroResolver().predict(UserState.id);
+  }
 
   try {
     professionStatistics.value =
@@ -49,7 +53,7 @@ const filteredItems = (items: GetProfessionStatisticsOutputDto[]) => {
 };
 
 const professionConfidence = computed(() => {
-  return neuroPredictions.value.find(prediction => prediction.profession == profession.value?.name)
+  return neuroPredictions.value.find(prediction => profession.value?.name.toLowerCase().includes(prediction.profession.toLowerCase()))
 })
 </script>
 

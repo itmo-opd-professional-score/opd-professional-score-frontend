@@ -252,10 +252,10 @@ onMounted(async () => {
         </div>
         <div class="info-block" v-if="neuroPredictions.length > 0">
           <p class="field_label">Рекомендуемая профессия</p>
-          <p class="field">{{ neuroPredictions.sort((a, b) =>  a.confidence - b.confidence)[0].profession }}</p>
+          <p class="field">{{ neuroPredictions.sort((b, a) =>  a.confidence - b.confidence)[0].profession }}</p>
           <p class="field">
             {{(neuroPredictions.sort(
-                (a, b) =>  a.confidence - b.confidence
+                (b, a) =>  a.confidence - b.confidence
               )[0].confidence * 100).toFixed(2)
             }}
           </p>
