@@ -257,7 +257,7 @@ onMounted(async () => {
             {{(neuroPredictions.sort(
                 (b, a) =>  a.confidence - b.confidence
               )[0].confidence * 100).toFixed(2)
-            }}
+            }}%
           </p>
         </div>
       </div>

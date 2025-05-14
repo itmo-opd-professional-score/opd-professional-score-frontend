@@ -160,7 +160,6 @@ export default {
 </script>
 
 <template>
-  {{ batteryMode }}
   <BatteryForm
     v-if="currentBattery && showModal"
     :current-battery="currentBattery"
@@ -289,6 +288,7 @@ export default {
   align-items: center;
   height: 100%;
   grid-column: 1 / 2;
+  gap: 1vh;
 }
 
 .user-container {
