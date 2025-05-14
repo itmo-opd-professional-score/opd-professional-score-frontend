@@ -40,15 +40,16 @@ export default {
       popupStore,
       batteryMode: false,
       showModal: false,
-      currentBattery: null as CreateTestBatteryInputDto | null,
+      currentBattery: {} as CreateTestBatteryInputDto,
       batteryId: null as number | null
     };
   },
   computed: {
     users() {
-      if (this.searchedUser == '') return this.usersFromApi
+      if (this.searchedUser == '') return this.usersFromApi.sort((a, b) => a.id - b.id)
       return this.usersFromApi
-        .filter(user => user.username.toLowerCase().includes(this.searchedUser.toLowerCase()));
+        .filter(user => user.username.toLowerCase().includes(this.searchedUser.toLowerCase()))
+        .sort((a, b) => a.id - b.id);
     }
   },
   async mounted() {
@@ -60,6 +61,9 @@ export default {
     } catch (e) {}
   },
   methods: {
+    router() {
+      return router
+    },
     async loadBatteries() {
       const batteriesApi = await new TestBatteryResolver().getAll()
       if (batteriesApi) this.batteries = batteriesApi
@@ -90,7 +94,6 @@ export default {
       }
     },
     updateBatteryOnEdit(selectedBattery: TestBatteryOutputDto) {
-      console.log(selectedBattery);
       this.showModal = true;
       this.currentBattery = {
         name: selectedBattery.name,
@@ -104,51 +107,66 @@ export default {
       }
       this.batteryId = selectedBattery.id
     },
-    reset() {
-      router.go(0)
-      this.approvedTests = []
-      this.approvedUsers = []
-    },
-    saveTestBlockConfig() {
+    updateApproved() {
+      this.currentBattery.tests = this.approvedTests.map(test => {
+        return {
+          name: test.name,
+          setupId: test.setupId ? test.setupId : null,
+        }
+      })
       this.batteryId = null
-      this.currentBattery = {
-        name: '',
-        description: '',
-        tests: this.approvedTests.map((test) => {
-          return {
-            name: test.name,
-            setupId: test.setupId ? test.setupId : null,
-          }
-        })
-      }
     },
-  },
-  watch: {
-    approvedTests() { this.saveTestBlockConfig() },
-    approvedUsers() { this.saveTestBlockConfig() },
-    async showModal() { await this.loadBatteries() },
-    async currentBattery() {
-      if (this.currentBattery) {
-        this.approvedTests = this.currentBattery.tests.map(test => {
+    clearBattery(id: number) {
+      if (id === this.batteryId)  {
+        this.batteryId = null;
+        this.approvedTests = [];
+        this.currentBattery = { description: '', name: '', tests: [] }
+        router.go(0)
+      }
+      this.showModal = false
+    },
+    async setBattery(selectedBattery: TestBatteryOutputDto) {
+      {
+        this.currentBattery = {
+          name: selectedBattery.name,
+          description: selectedBattery.description,
+          tests: selectedBattery.testInTestBattery.map(test => {
+            return {
+              name: test.name,
+              setupId: test.setupId,
+            }
+          }),
+        };
+        this.approvedTests = selectedBattery.testInTestBattery.map(test => {
           return {
             name: test.name,
             setupId: test.setupId != null ? test.setupId : undefined,
             available: true
           }
         })
+        this.batteryMode = false;
+        this.batteryId = selectedBattery.id
+        this.testTypes = []
+        await this.loadTests()
       }
-      this.testTypes = []
-      await this.loadTests()
     }
+  },
+  watch: {
+    async showModal() {
+      await this.loadBatteries()
+    },
   }
 };
 </script>
 
 <template>
+  {{ batteryMode }}
   <BatteryForm
     v-if="currentBattery && showModal"
     :current-battery="currentBattery"
     :battery-id="batteryId ? batteryId : undefined"
+    @create-or-update="id => {showModal = false; batteryId = id}"
+    @delete="id => clearBattery(id)"
     @close-modal="showModal = false"
   />
   <div class="container" v-if="usersFromApi.length > 0 && testTypes.length > 0">
@@ -165,33 +183,36 @@ export default {
         </CommonButton>
         <CommonButton
           class="battery-switch"
-          :disabled="approvedTests.length == 0 && !batteryId"
+          :disabled="approvedTests.length == 0 || batteryMode"
           @click="showModal = true"
         >
-          <template v-slot:placeholder>{{ batteryId ? 'Изменить' : 'Сохранить'}} батарею</template>
+          <template v-slot:placeholder>{{ batteryId != null ? 'Изменить' : 'Сохранить'}} батарею</template>
         </CommonButton>
       </div>
     </div>
-    <div class="tests-container">
+    <div class="batteries-container" v-if="batteryMode">
+      <TestBatteryRowElement
+        v-for="(battery, index) in batteries"
+        :key="index"
+        :test-battery="battery"
+        @edit-battery="(selectedBattery) => updateBatteryOnEdit(selectedBattery)"
+        @select-battery="selectedBattery => setBattery(selectedBattery)"
+      />
+    </div>
+    <div class="tests-container" v-else>
       <TestRowElement
         v-for="(test, index) in testTypes"
         :key="index"
         :test="test"
         :selected="approvedTests.find(tesT => tesT.name == test.name) !== undefined"
         :setup-id="approvedTests.find(tesT => tesT.name == test.name)?.setupId"
-        @apply-test="(appliedTest) => approvedTests = [...approvedTests, appliedTest]"
-        @remove-test="(removedTest) =>approvedTests = approvedTests.filter(tesT => tesT.name !== removedTest.name)"
+        @apply-test="(appliedTest) => {
+          approvedTests = [...approvedTests, appliedTest]; updateApproved()
+        }"
+        @remove-test="(removedTest) => {
+          approvedTests = approvedTests.filter(tesT => tesT.name !== removedTest.name); updateApproved()
+        }"
       />
-
-      <div class="batteries-container" v-if="batteryMode">
-        <TestBatteryRowElement
-          v-for="(battery, index) in batteries"
-          :key="index"
-          :test-battery="battery"
-          @edit-battery="(selectedBattery) => updateBatteryOnEdit(selectedBattery)"
-          @select-battery="selectedBattery => {currentBattery = selectedBattery; batteryMode = false}"
-        />
-      </div>
     </div>
     <h2 class="block-header">Выберите пользователей:</h2>
     <div class="user-container">
@@ -229,7 +250,7 @@ export default {
     <div class="controls">
       <CommonButton
         class="btn"
-        @click="reset"
+        @click="router().go(0)"
         :disabled="approvedTests.length === 0 && approvedUsers.length === 0"
       >
         <template v-slot:placeholder> Сбросить </template>
@@ -262,25 +283,18 @@ export default {
   grid-column: 1 / 3;
 }
 
-.tests-container {
+.tests-container, .batteries-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   height: 100%;
-  position: relative;
-
-  .batteries-container {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    background-color: white;
-  }
+  grid-column: 1 / 2;
 }
 
 .user-container {
   display: flex;
   flex-direction: column;
+  grid-column: 2 / 3;
 }
 
 .tests-container, .user-container {
@@ -296,6 +310,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  grid-row: 2 / 3;
 }
 
 .battery-controls {

@@ -29,16 +29,7 @@ export default {
       </CommonButton>
       <CommonButton
         class="wrapper-block btn submit_button"
-        @click="$emit('selectBattery', {
-          name: testBattery.name,
-          description: testBattery.description,
-          tests: testBattery.testInTestBattery.map(test => {
-            return {
-              name: test.name,
-              setupId: test.setupId,
-            }
-          })
-        })"
+        @click="$emit('selectBattery', testBattery)"
       >
         <template v-slot:placeholder>Выбрать</template>
       </CommonButton>

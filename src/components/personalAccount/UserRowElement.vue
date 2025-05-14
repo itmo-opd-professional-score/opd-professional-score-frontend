@@ -73,9 +73,9 @@ export default {
   border: 1px solid var(--input-border);
   background: white;
   display: grid;
-  grid-template-columns: 2% 35% 35% 19%;
+  grid-template-columns: 4% 34% 32% 18%;
   align-items: center;
-  column-gap: 3%;
+  column-gap: 4%;
   height: 6vh;
 
   .wrapper-block, .user-button {

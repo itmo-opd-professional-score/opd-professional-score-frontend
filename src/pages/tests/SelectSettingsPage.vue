@@ -85,7 +85,6 @@ export default defineComponent({
       }
     },
     async removeSettings() {
-      console.log(this.setupId)
       if (this.setupId && !isNaN(parseInt(this.setupId))) {
         await new TestSetupsResolver().deleteById(parseInt(this.setupId))
       }
@@ -200,7 +199,7 @@ export default defineComponent({
       </div>
       <div class="section">
         <CommonButton @click="removeSettings" class="logout_button">
-          <template v-slot:placeholder>Удалить настройки</template>
+          <template v-slot:placeholder>{{ setupId != 'default' ? 'Удалить настройки' : 'Вернуться назад' }}</template>
         </CommonButton>
         <CommonButton @click="saveSettings" class="submit_button">
           <template v-slot:placeholder>Сохранить настройки</template>

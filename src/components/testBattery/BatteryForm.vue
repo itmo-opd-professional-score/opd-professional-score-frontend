@@ -7,51 +7,38 @@ import type {
   CreateTestBatteryInputDto
 } from '../../api/resolvers/testBattery/dto/input/create-test-battery-input.dto.ts';
 import CustomTextareaInput from '../UI/inputs/CustomTextareaInput.vue';
-import type { LocalTestBlock } from './types';
 
 const props = defineProps<{
   currentBattery: CreateTestBatteryInputDto,
   batteryId?: number
 }>()
-const emits = defineEmits(['closeModal', 'deleteBattery'])
+const emits = defineEmits(['createOrUpdate', 'delete', 'closeModal'])
 
 const currentBattery = ref<CreateTestBatteryInputDto>(props.currentBattery)
 
 const createOrUpdateBattery = async () => {
-  if (props.batteryId) {
+  let batteryId = props.batteryId
+  if (batteryId) {
     await new TestBatteryResolver().updateById({
-      testBatteryId: props.batteryId,
+      testBatteryId: batteryId,
       updatedData: currentBattery.value
     })
   } else {
-    const batteryId = (await new TestBatteryResolver().create(currentBattery.value)).body.id
-    const localTestBlockCash = localStorage.getItem('localTestBlock');
-    if (localTestBlockCash) {
-      const localTestBlock = JSON.parse(localTestBlockCash) as LocalTestBlock;
-      localTestBlock.testBatteryId = batteryId
-      localStorage.setItem('localTestBlock', JSON.stringify(localTestBlock))
-    }
+    batteryId = (await new TestBatteryResolver().create(currentBattery.value)).body.id
   }
-  emits('closeModal')
+  emits('createOrUpdate', batteryId)
 }
 
 const deleteBattery = async () => {
   if (props.batteryId) {
-    const localTestBlockCash = localStorage.getItem('localTestBlock');
-    if (localTestBlockCash) {
-      const localTestBlockId = JSON.parse(localTestBlockCash).testBatteryId
-      if (localTestBlockId === props.batteryId) localStorage.removeItem("localTestBlock");
-    }
     await new TestBatteryResolver().deleteById(props.batteryId)
   }
-  emits('closeModal')
-  emits('deleteBattery')
+  emits('delete', props.batteryId)
 }
 </script>
 
 <template>
-  {{currentBattery}}
-  <div class="background">
+  <div class="background" @click.self="$emit('closeModal')">
     <div class="container">
       <div class="inputs">
         <CustomInput
@@ -70,7 +57,10 @@ const deleteBattery = async () => {
         <CommonButton @click="deleteBattery" v-if="batteryId">
           <template #placeholder>Удалить</template>
         </CommonButton>
-        <CommonButton @click="createOrUpdateBattery">
+        <CommonButton
+          :disabled="!currentBattery.description || !currentBattery.name"
+          @click="createOrUpdateBattery"
+        >
           <template #placeholder>{{ batteryId ? 'Обновить' : 'Сохранить' }}</template>
         </CommonButton>
       </div>
