@@ -36,6 +36,8 @@ import type {
   TestDataOutputSimpleLightSoundDto
 } from '../../api/resolvers/test/dto/output/test-data-output-simple-light-sound.dto.ts';
 import type { TestDataOutputUnionDto } from '../../api/resolvers/test/dto/output/test-data-output-union.dto.ts';
+import type { PredictOutputDto } from '../../api/resolvers/neuro/dto/output/predict-output.dto.ts';
+import { NeuroResolver } from '../../api/resolvers/neuro/neuro.resolver.ts';
 
 const authResolver = new AuthResolver();
 const userResolver = new UserResolver();
@@ -207,12 +209,17 @@ const emptyProfile = computed(() => {
     users.value.length == 0
 })
 
-onMounted(() => {
-  reloadUsers();
-  reloadTests();
-  reloadTestBlocks();
+const neuroPredictions = ref<PredictOutputDto[]>([])
+
+onMounted(async () => {
+  await reloadUsers();
+  await reloadTests();
+  await reloadTestBlocks();
+  if (UserState.id) {
+    neuroPredictions.value = await new NeuroResolver().predict(UserState.id)
+  }
   if (UserState.role == UserRole.EXPERT || UserState.role == UserRole.ADMIN) {
-    reloadProfessions();
+    await reloadProfessions();
   }
 });
 </script>
@@ -242,6 +249,16 @@ onMounted(() => {
         <div class="info-block" v-if="UserState.gender">
           <p class="field_label">Gender</p>
           <p class="field">{{ UserState.gender }}</p>
+        </div>
+        <div class="info-block" v-if="neuroPredictions.length > 0">
+          <p class="field_label">Рекомендуемая профессия</p>
+          <p class="field">{{ neuroPredictions.sort((a, b) =>  a.confidence - b.confidence)[0].profession }}</p>
+          <p class="field">
+            {{(neuroPredictions.sort(
+                (a, b) =>  a.confidence - b.confidence
+              )[0].confidence * 100).toFixed(2)
+            }}
+          </p>
         </div>
       </div>
       <div class="buttons_container">
