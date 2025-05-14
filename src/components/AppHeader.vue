@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { updateUserState, UserState } from '../../utils/userState/UserState.ts';
-import { AuthResolver } from '../../api/resolvers/auth/auth.resolver.ts';
-import { UserRole } from '../../utils/userState/UserState.types.ts';
+import { updateUserState, UserState } from '../utils/userState/UserState.ts';
+import { AuthResolver } from '../api/resolvers/auth/auth.resolver.ts';
+import { UserRole } from '../utils/userState/UserState.types.ts';
 
 updateUserState();
 const authResolver = new AuthResolver();
@@ -11,7 +11,7 @@ const authResolver = new AuthResolver();
   <header class="header">
     <nav class="nav-container">
       <router-link to="/">
-        <img src="../../assets/logo_end.png" class="logo" alt="logo" />
+        <img src="../assets/logo_end.png" class="logo" alt="logo" />
       </router-link>
 
       <div class="nav-links">

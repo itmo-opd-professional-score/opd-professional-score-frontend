@@ -24,11 +24,12 @@ export default {
           'tel',
           'date',
           'range',
+          'submit'
         ].includes(v),
     },
     selector: String,
     modelValue: {
-      type: [String, Number],
+      type: [String, Number, Boolean],
     },
     minNumber: {
       type: Number,
@@ -59,6 +60,7 @@ export default {
     checked: {
       type: Boolean,
     },
+    hidden: Boolean,
   },
   methods: {
     validate(event: InputEvent) {
@@ -89,15 +91,26 @@ export default {
       }
     },
     update(event: InputEvent) {
+      const target = event.target as HTMLInputElement;
+      let value: string | number | boolean = target.value;
+
       this.$emit('search');
-      this.$emit('update:modelValue', (event.target as HTMLInputElement).value);
+      switch (this.type) {
+        case 'number':
+          value = Number(value)
+          break
+        case 'checkbox':
+          value = target.checked
+          break
+      }
+      this.$emit('update:modelValue', value);
     },
   },
 };
 </script>
 
 <template>
-  <div class="input-wrapper">
+  <div class="input-wrapper" v-if="!hidden">
     <label :for="id" v-if="labelText">
       {{ labelText }}
     </label>
@@ -109,6 +122,7 @@ export default {
       :value="modelValue"
       :placeholder="placeholder"
       :disabled="disabled"
+      :hidden="hidden"
       :required="required"
       :class="selector"
       :name="name"
@@ -122,6 +136,8 @@ export default {
 <style scoped>
 .input-wrapper {
   min-height: 2.5rem;
+  display: flex;
+  align-items: center;
 }
 
 .input {

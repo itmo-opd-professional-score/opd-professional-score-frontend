@@ -9,7 +9,6 @@ import SimpleLightTest from './simple/SimpleLightTest.vue';
 import HardLightTest from './hard/HardLightTest.vue';
 import SimpleRdoTest from './simple/SimpleRdoTest.vue';
 import HardRdoTest from './hard/HardRdoTest.vue';
-import router from '../../router/router.ts';
 import SimpleTrackingTest from './simple/SimpleTrackingTest.vue';
 import HardTrackingTest from './hard/HardTrackingTest.vue';
 import NumericalSeriesTest from './cognitive/NumericalSeriesTest.vue';
@@ -17,7 +16,7 @@ import StroopTest from './cognitive/StroopTest.vue';
 import VerbalTest from './cognitive/VerbalTest.vue';
 import { useTestBlock } from '../../utils/useTestBlock.ts';
 
-const testSetupId = ref<number | undefined>(undefined)
+const testSetupId = ref<string>('')
 const props = defineProps<{
   blockId: string;
   testTypeName: string;
@@ -54,22 +53,22 @@ const testComponent = computed(() => {
 });
 
 onMounted(async () => {
-  const { testBlock } = await useTestBlock(parseInt(props.blockId))
+  const { loadTestBlock } = useTestBlock(parseInt(props.blockId))
+  const testBlock = await loadTestBlock()
   if (testBlock.value) {
     const test = testBlock.value.tests.find(test => test.name === props.testTypeName)
     if (test && test.available) {
-      testSetupId.value = test.setupId
-      return
+      testSetupId.value = test.setupId ? test.setupId?.toString() : '-1'
     }
   }
-  await router.push(`/testBlock/${props.blockId}`)
 })
 </script>
 
 <template>
   <component
+    v-if="testSetupId !== ''"
     :test-block-id="blockId"
-    :setup="testSetupId"
+    :setup-id="testSetupId"
     :is="testComponent"
   />
 </template>

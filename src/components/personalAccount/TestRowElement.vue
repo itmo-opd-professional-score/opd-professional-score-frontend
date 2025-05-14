@@ -1,12 +1,12 @@
 <script lang="ts">
-import CommonButton from './UI/CommonButton.vue';
-import CustomSelect from './UI/inputs/CustomSelect.vue';
-import { TestSetupsResolver } from '../api/resolvers/testSetup/test-setups.resolver.ts';
-import router from '../router/router.ts';
-import type { TestBlockTest } from '../pages/tests/types';
-import type { DefaultErrorDto } from '../api/dto/common/default-error.dto.ts';
+import CommonButton from '../UI/CommonButton.vue';
+import CustomSelect from '../UI/inputs/CustomSelect.vue';
+import { TestSetupsResolver } from '../../api/resolvers/testSetup/test-setups.resolver.ts';
+import router from '../../router/router.ts';
+import type { TestBlockTest } from '../../pages/tests/types';
+import type { DefaultErrorDto } from '../../api/dto/common/default-error.dto.ts';
 import type { PropType } from 'vue';
-import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
+import type { TestTypeDataOutputDto } from '../../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 
 export default {
   name: 'TestRowElement',
@@ -16,19 +16,21 @@ export default {
     test: {
       type: {} as PropType<TestTypeDataOutputDto>,
       required: true,
-    }
+    },
+    selected: Boolean,
+    setupId: Number
   },
   data() {
     return {
-      added: false,
+      added: this.selected,
       buttonClass: 'submit_button',
       setups: [] as { value: string; text: string }[],
-      currentSetup: '',
+      currentSetup: this.setupId ? this.setupId.toString() : 'default',
     };
   },
   computed: {
     buttonText() {
-      if (this.added) {
+      if (this.added && this.selected) {
         this.buttonClass = 'logout_button';
         return 'Удалить';
       } else {
@@ -57,6 +59,7 @@ export default {
     },
   },
   async mounted() {
+    this.added = this.selected
     try {
       const setups = await new TestSetupsResolver().getAllByTestType(this.test.name)
       setups.forEach((setup) => {
@@ -65,8 +68,17 @@ export default {
           text: `Конфиг №${setup.id}`,
         });
       })
+      if (!this.setups.find(setup => setup.value == this.currentSetup)) this.currentSetup = 'default'
+      this.setups.sort((a, b) => parseInt(a.value) - parseInt(b.value));
     } catch (e) { return (e as DefaultErrorDto).message }
   },
+  watch: {
+    currentSetup() {
+      console.log('currentSetup', this.currentSetup);
+      this.added = true
+      this.applyTest()
+    }
+  }
 };
 </script>
 
@@ -78,14 +90,14 @@ export default {
         v-if="setups.length > 0"
         v-model="currentSetup"
         :options="[
-          {value: '', text: 'Не выбран'},
+          {value: 'default', text: 'Не выбран'},
           ...setups
         ]"
         placeholder="Не выбран"
         class="select"
       />
       <CommonButton
-        @click="router().push(`/test/settings/${test.name}`)"
+        @click="router().push(`/test/settings/${test.name}/${currentSetup}`)"
         class="submit_button btn"
       >
         <template v-slot:placeholder>Настроить</template>

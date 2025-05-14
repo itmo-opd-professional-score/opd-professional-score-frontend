@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { usePopupStore } from '../store/popup.store.ts';
-import { UserResolver } from '../api/resolvers/user/user.resolver.ts';
-import { UserRole } from '../utils/userState/UserState.types.ts';
+import { usePopupStore } from '../../store/popup.store.ts';
+import { UserResolver } from '../../api/resolvers/user/user.resolver.ts';
+import { UserRole } from '../../utils/userState/UserState.types.ts';
 
 const emit = defineEmits(['role-update']);
 const props = defineProps<{

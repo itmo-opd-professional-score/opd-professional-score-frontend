@@ -29,6 +29,7 @@ export default defineComponent({
     return {
       colors: ['red', 'green', 'yellow', 'blue', 'purple'],
       currentWord: '',
+      currentWordTranslation: undefined,
       currentColor: '',
       levelOfDifficulty: 0,
       score: 0,
@@ -196,7 +197,7 @@ export default defineComponent({
         </div>
       </div>
       <div class="current-word">
-        <h1 :style="{ color: currentColor }">{{ currentWord }}</h1>
+        <h1 :style="{ color: currentColor }">{{ currentWordTranslation ? currentWordTranslation : currentWord }}</h1>
       </div>
       <div class="buttons">
         <CommonButton

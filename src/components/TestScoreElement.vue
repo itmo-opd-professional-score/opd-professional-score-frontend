@@ -1,8 +1,8 @@
 <script setup lang="ts">
-  import type { UserDataOutputDto } from '../../api/resolvers/user/dto/output/user-data-output.dto.ts';
+  import type { UserDataOutputDto } from '../api/resolvers/user/dto/output/user-data-output.dto.ts';
   import { onMounted, ref } from 'vue';
-  import { UserResolver } from '../../api/resolvers/user/user.resolver.ts';
-  import type { DefaultOutputDto } from '../../api/dto/common/default-output.dto.ts';
+  import { UserResolver } from '../api/resolvers/user/user.resolver.ts';
+  import type { DefaultOutputDto } from '../api/dto/common/default-output.dto.ts';
   const props = defineProps<{
     userId?: number
   }>()
@@ -20,10 +20,7 @@
       #
       <slot name="id">0</slot>
     </div>
-    <div class="score">
-      <slot name="current_points">0</slot> / <slot name="max_points">100</slot>
-    </div>
-    <div class="time"><slot name="time">00:00:00</slot></div>
+    <div class="time" v-if="$slots.time"><slot name="time">00:00:00</slot></div>
     <div class="username" v-if="$slots.username || userId">
       <p v-if="userId">{{ currentUser != null ? currentUser.body.username : "Аноним"}}</p>
       <slot name="username" v-else>Имя пользователя</slot>
@@ -40,14 +37,17 @@
   width: 95%;
   height: 4rem;
   padding: 0 1rem;
-  justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 1fr repeat(5, 2fr);
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .wrapper:hover {
   cursor: pointer;
+}
+
+.hide-username {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .wrapper > div {
@@ -58,11 +58,6 @@
   flex-direction: column;
   justify-content: center;
   text-align: center;
-}
-
-#id,
-#test_name {
-  text-align: left;
 }
 
 .wrapper > div:last-child {

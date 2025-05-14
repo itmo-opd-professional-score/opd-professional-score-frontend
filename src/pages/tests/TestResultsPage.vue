@@ -3,11 +3,12 @@ import { defineComponent } from 'vue';
 import TestStatisticsCard from '../../components/TestStatisticsCard.vue';
 import TestScoreList from '../../components/TestsScoreList.vue';
 import { UserState } from '../../utils/userState/UserState.ts';
-import type { TestDataOutputDto } from '../../api/resolvers/test/dto/output/test-data-output.dto.ts';
 import { TestResolver } from '../../api/resolvers/test/test.resolver.ts';
 import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver.ts';
 import { UserRole } from '../../utils/userState/UserState.types.ts';
+import type { TestDataOutputUnionDto } from '../../api/resolvers/test/dto/output/test-data-output-union.dto.ts';
 import type { TestTypeDataOutputDto } from '../../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
+import { UserResolver } from '../../api/resolvers/user/user.resolver.ts';
 
 export default defineComponent({
   name: 'TestResultsPage',
@@ -36,11 +37,12 @@ export default defineComponent({
   data() {
     return {
       testResolver: new TestResolver(),
-      currentTest: {} as TestDataOutputDto,
-      testsData: [] as TestDataOutputDto[],
-      userTestsData: [] as TestDataOutputDto[],
+      currentTest: {} as TestDataOutputUnionDto,
+      testsData: [] as TestDataOutputUnionDto[],
+      userTestsData: [] as TestDataOutputUnionDto[],
       testType: {} as TestTypeDataOutputDto | null,
-      endpoint: ''
+      endpoint: '',
+      username: undefined as string | undefined,
     }
   },
   methods: {
@@ -68,15 +70,45 @@ export default defineComponent({
         case 'HARD_RDO':
           this.endpoint = 'rdo';
           break
+        case 'NUMERICAL':
+          this.endpoint = 'cognitive';
+          break
+        case 'STROOP':
+          this.endpoint = 'cognitive';
+          break
+        case 'VERBAL':
+          this.endpoint = 'cognitive';
+          break
+        case 'SIMPLE_TRACKING':
+          this.endpoint = 'tracking/simple';
+          break
+        case 'HARD_TRACKING':
+          this.endpoint = 'tracking/hard';
+          break
       }
       this.currentTest = await this.testResolver.getByTypeById(this.endpoint, parseInt(this.testId));
       const tests = await this.testResolver.getAllByType(this.endpoint)
       this.testsData = tests.filter(test => test.testTypeId == parseInt(this.testTypeId))
-      this.userTestsData = this.testsData.filter((test) => test.userId === UserState.id)
+      this.userTestsData = this.testsData.filter((test) => test.userId === this.currentTest.userId)
+      if (this.currentTest.userId) this.username = (await new UserResolver().getById(this.currentTest.userId))?.body.username
+    },
+    checkScore() {
+      if ('score' in this.currentTest) return this.currentTest.score
+      if ('allSignals' in this.currentTest && 'misclicks' in this.currentTest)
+        return this.currentTest.allSignals - this.currentTest.misclicks
+      if ('allSignals' in this.currentTest && 'mistakes' in this.currentTest)
+        return this.currentTest.allSignals - this.currentTest.mistakes
+    },
+    checkMaxScore() {
+      if ('allSignals' in this.currentTest) return this.currentTest.allSignals;
+    },
+    checkDispersion() {
+      if ('dispersion' in this.currentTest) return this.currentTest.dispersion;
     }
   },
   mounted() {
       this.load()
+    console.log(this.userTestsData)
   },
 });
 </script>
@@ -86,16 +118,22 @@ export default defineComponent({
     <section class="current-test">
       <TestStatisticsCard
         v-if="currentTest.id != undefined"
-        :time="parseFloat(currentTest.averageCallbackTime.toFixed(2))"
-        :date="currentTest.createdAt.substring(0, 10)"
-        :max-score="currentTest.allSignals"
-        :test-type="testType ? testType : undefined"
-        :user-name="UserState.username"
-        :score="
-          currentTest.misclicks != null ?
-          currentTest.allSignals - currentTest.misclicks :
-          currentTest.allSignals - currentTest.mistakes
+        :time="
+          'averageCallbackTime' in currentTest ?
+            parseFloat(currentTest.averageCallbackTime.toFixed(2)) :
+            undefined
         "
+        :max-score="checkMaxScore()"
+        :score="checkScore()"
+        :dispersion="checkDispersion()"
+        :duration="'duration' in currentTest ? currentTest.duration : undefined"
+        :totalOverlapTime="'totalOverlapTime' in currentTest ? currentTest.totalOverlapTime : undefined"
+        :bestOverlap="'bestOverlap' in currentTest ? currentTest.bestOverlap : undefined"
+        :averageOverlap="'averageOverlap' in currentTest ? currentTest.averageOverlap : undefined"
+        :overlapCount="'overlapCount' in currentTest ? currentTest.overlapCount : undefined"
+        :date="currentTest.createdAt.substring(0, 10)"
+        :test-type="testType ? testType : undefined"
+        :user-name="username"
         :valid="currentTest.valid"
       />
       <div class="user-test-history">

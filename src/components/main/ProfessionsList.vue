@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import FlipCard from './UI/FlipCard.vue';
-import { ProfessionResolver } from '../api/resolvers/profession/profession.resolver.ts';
+import FlipCard from '../FlipCard.vue';
+import { ProfessionResolver } from '../../api/resolvers/profession/profession.resolver.ts';
 import { onMounted, ref } from 'vue';
-import type { GetProfessionOutputDto } from '../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
+import type { GetProfessionOutputDto } from '../../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
 
 const cards = ref<GetProfessionOutputDto[] | null>(null);
 const cardsPublished = ref<GetProfessionOutputDto[] | null>(null);

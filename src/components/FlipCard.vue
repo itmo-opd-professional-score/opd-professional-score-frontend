@@ -27,7 +27,6 @@ const isFlipped = ref(false);
         <p class="profession-description">
           {{ description }}
         </p>
-        <a class="profession-link" :href="`/profession/${id}`">Подробнее</a>
       </div>
       <div class="card-back">
         <h3 class="profession-title">{{ title }}</h3>
@@ -37,6 +36,7 @@ const isFlipped = ref(false);
         <p class="profession-description">
           {{ `Сфера деятельности: ${sphere}` }}
         </p>
+        <a class="profession-link" :href="`/profession/${id}`" @click.stop>Подробнее</a>
       </div>
     </div>
   </div>
@@ -68,6 +68,7 @@ const isFlipped = ref(false);
   height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   position: absolute;
   backface-visibility: hidden; /* Скрыть обратную сторону */
   border-radius: 15px;

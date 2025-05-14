@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import CommonButton from './CommonButton.vue';
+import CommonButton from '../UI/CommonButton.vue';
 
 defineEmits(['changeRole']);
 defineProps<{ isDisabled: boolean }>();
 </script>
 
 <template>
-  <div class="wrapper" ref="reference">
+  <div class="wrapper">
     <div class="id" id="id">
       #
       <slot name="id">12345</slot>

@@ -122,7 +122,7 @@ export default defineComponent({
       />
     </div>
     <div class="auth-links-container">
-      <router-link to="/auth/registration">Уже есть аккаунт?</router-link>
+      <router-link to="/auth/login">Уже есть аккаунт?</router-link>
     </div>
     <CommonButton class="auth-button" @click="validatePassword">
       <template v-slot:placeholder>Зарегистрироваться</template>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import CommonButton from './UI/CommonButton.vue';
-import ProfessionsManagerElement from './UI/ProfessionsManagerElement.vue';
+import CommonButton from '../UI/CommonButton.vue';
+import ProfessionsManagerElement from './ProfessionsManagerElement.vue';
 import ProfessionEditForm from './ProfessionEditForm.vue';
 import { autoUpdate, hide, useFloating } from '@floating-ui/vue';
-import router from '../router/router.ts';
-import type { GetProfessionOutputDto } from '../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
-import type { UpdateProfessionInputDto } from '../api/resolvers/profession/dto/input/update-profession-input.dto.ts';
+import router from '../../router/router.ts';
+import type { GetProfessionOutputDto } from '../../api/resolvers/profession/dto/output/get-profession-output.dto.ts';
+import type { UpdateProfessionInputDto } from '../../api/resolvers/profession/dto/input/update-profession-input.dto.ts';
 
 const reference = ref<HTMLElement | null>(null);
 const floating = ref(null);
@@ -29,6 +29,7 @@ const toggleForm = (
     isOpen.value = false;
   }
   if (!isOpen.value) {
+    reference.value = el;
     currentProfession.value = {
       id: id,
       updatedData: {

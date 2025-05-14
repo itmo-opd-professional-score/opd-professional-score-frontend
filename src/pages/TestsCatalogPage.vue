@@ -47,7 +47,7 @@ const testsData = [
   {
     name: "Сложная реакция на преследование",
     category: "Сложный",
-    link: "/test/simple/tracking"
+    link: "/test/hard/tracking"
   },
   {
     name: "Тест Струпа",
@@ -74,12 +74,14 @@ const testsData = [
         v-for="(test, index) in testsData"
         :key="index"
         class="card"
-        @click="router.push(test.link)"
       >
         <div class="pic"></div>
         <h2>{{ test.name }}</h2>
         <p>Категория: <b>{{ test.category }}</b></p>
-        <CommonButton class="submit_button">
+        <CommonButton
+          class="submit_button"
+          @click="router.push(test.link)"
+        >
           <template #placeholder>Пройти</template>
         </CommonButton>
       </div>

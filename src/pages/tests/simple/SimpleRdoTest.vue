@@ -42,7 +42,7 @@ export default defineComponent({
       animationFrameId: 0,
       loopStartTime: null as number | null,
       loopCount: 0,
-      acceleration: 0.001,
+      acceleration: this.startAcceleration ? this.startAcceleration : 0.001,
 
       currentDeviation: 0,
       deviationHistory: [] as Array<number>,

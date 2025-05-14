@@ -141,9 +141,9 @@ export default defineComponent({
       return {
         userId: UserState.id ? UserState.id : null,
         allSignals: this.successTimes.length,
-        successCount: this.successCount,
-        avgTime: this.avgTime,
-        timeDeviation: this.timeDeviation,
+        score: this.successCount,
+        averageCallbackTime: this.avgTime,
+        dispersion: this.timeDeviation,
       };
     },
 

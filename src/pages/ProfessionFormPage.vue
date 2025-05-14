@@ -1,8 +1,8 @@
 <script lang="ts">
-import CommonButton from './UI/CommonButton.vue';
-import CustomInput from './UI/inputs/CustomInput.vue';
-import CustomTextareaInput from './UI/inputs/CustomTextareaInput.vue';
-import CustomSelect from './UI/inputs/CustomSelect.vue';
+import CommonButton from '../components/UI/CommonButton.vue';
+import CustomInput from '../components/UI/inputs/CustomInput.vue';
+import CustomTextareaInput from '../components/UI/inputs/CustomTextareaInput.vue';
+import CustomSelect from '../components/UI/inputs/CustomSelect.vue';
 import ApiResolverUtil from '../utils/ApiResolver.ts';
 import router from '../router/router.ts';
 import { usePopupStore } from '../store/popup.store.ts';

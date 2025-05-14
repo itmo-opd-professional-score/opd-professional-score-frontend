@@ -4,6 +4,7 @@ import CustomInput from '../../components/UI/inputs/CustomInput.vue';
 import CommonButton from '../../components/UI/CommonButton.vue';
 import { AuthResolver } from '../../api/resolvers/auth/auth.resolver.ts';
 import type { LoginUserInputDto } from '../../api/resolvers/auth/dto/input/login-user-input.dto.ts';
+import router from '../../router/router.ts';
 
 export default defineComponent({
   name: 'LogInPage',
@@ -25,6 +26,7 @@ export default defineComponent({
     },
   },
   mounted() {
+    if (localStorage.getItem('token')) router.push('/profile')
     document.addEventListener('keydown', (e) => {
       if (e.key == 'Enter') {
         this.login();

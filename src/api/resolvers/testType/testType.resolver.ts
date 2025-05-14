@@ -33,4 +33,17 @@ export class TestTypeResolver {
       return null;
     })
   }
+
+  public async getByName(name: string) {
+    return await this.apiResolver.request<null, TestTypeDataOutputDto>(
+      `getByName/${name}`,
+      'GET',
+      null,
+      this.token ? this.token : undefined,
+    ).catch((err) => {
+      const error = err as DefaultErrorDto;
+      this.usePopUp.activateErrorPopup(error.message);
+      return null;
+    })
+  }
 }

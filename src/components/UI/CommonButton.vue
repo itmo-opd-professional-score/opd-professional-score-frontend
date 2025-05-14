@@ -15,7 +15,7 @@ defineProps<{ disabled?: boolean }>();
   justify-content: center;
   align-items: center;
   padding: 0.5rem;
-  border: 1px solid transparent;
+  border: 1px solid var(--input-border);
   border-radius: 0.5rem;
   text-align: center;
   background: var(--button-primary);

@@ -1,12 +1,11 @@
 import ApiResolverUtil from '../../../utils/ApiResolver.ts';
 import type { UpdateUserIdsInputDto } from './dto/input/update-user-ids-input.dto.ts';
 import type { DefaultOutputDto } from '../../dto/common/default-output.dto.ts';
-import type { TestDataOutputDto } from './dto/output/test-data-output.dto.ts';
 import type { CreateAdditionInputDto } from './dto/input/create-addition-input.dto.ts';
 import type { CreateOutputDto } from './dto/output/create-output.dto.ts';
 import type { CreateSimpleInputDto } from './dto/input/create-simple-input.dto.ts';
 import type { CreateRdoInputDto } from './dto/input/create-rdo-input.dto.ts';
-import type { TestType } from '../../../pages/tests/types';
+import type { TestType, typeEndpointMap } from '../../../pages/tests/types';
 import type { CreateHardLightInputDto } from './dto/input/create-hard-light-input.dto.ts';
 import type { CreateSimpleTrackingInputDto } from './dto/input/create-simple-tracking-input.dto.ts';
 import type { CreateCognitiveInputDto } from './dto/input/create-cognitive-input.dto.ts';
@@ -17,17 +16,20 @@ export class TestResolver {
   private apiResolver = new ApiResolverUtil('test');
   private token = localStorage.getItem('token');
 
-  public async getAllByType(typeEndpoint: string) {
-    return await this.apiResolver.request<null, TestDataOutputDto[]>(
+  public async getAllByType<T extends keyof typeEndpointMap>(typeEndpoint: string) {
+    return await this.apiResolver.request<null, typeEndpointMap[T][]>(
       `${typeEndpoint}/getAll`,
       'GET',
       null,
       this.token ? this.token : undefined,
-    )
+    ).catch((error) => {
+      console.error(error.message)
+      return []
+    })
   }
 
-  public async getByTypeById(typeEndpoint: string, id: number) {
-    return await this.apiResolver.request<null, TestDataOutputDto>(
+  public async getByTypeById<T>(typeEndpoint: string, id: number) {
+    return await this.apiResolver.request<null, T>(
       `${typeEndpoint}/getById/${id}`,
       'GET',
       null,
@@ -35,9 +37,18 @@ export class TestResolver {
     )
   }
 
-  public async getTestsByTypeByUserId(userId: number, typeEndpoint: string) {
-    return await this.apiResolver.request<null, TestDataOutputDto[]>(
+  public async getTestsByTypeByUserId<T>(userId: number, typeEndpoint: string) {
+    return await this.apiResolver.request<null, T[]>(
       `${typeEndpoint}/getByUserId/${userId}`,
+      'GET',
+      null,
+      this.token ? this.token : undefined,
+    )
+  }
+
+  public async getByTypeByTestBlockId<T>(typeEndpoint: string, testBlockId: number) {
+    return await this.apiResolver.request<null, T>(
+      `${typeEndpoint}/getByTestBlockId/${testBlockId}`,
       'GET',
       null,
       this.token ? this.token : undefined,

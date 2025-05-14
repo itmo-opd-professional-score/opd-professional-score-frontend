@@ -1,7 +1,7 @@
 <script lang="ts">
-import TestBlockElement from './UI/TestBlockElement.vue';
-import type { GetTestBlockOutputDto } from '../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
-import CommonButton from './UI/CommonButton.vue';
+import TestBlockElement from './TestBlockElement.vue';
+import type { GetTestBlockOutputDto } from '../../api/resolvers/testBlocks/dto/output/get-test-block-output.dto.ts';
+import CommonButton from '../UI/CommonButton.vue';
 import type { PropType } from 'vue';
 
 export default {
@@ -16,6 +16,7 @@ export default {
       type: Array as PropType<GetTestBlockOutputDto[] | null>,
       required: true,
     },
+    guest: Boolean
   },
   data() {
     return {
@@ -63,6 +64,7 @@ export default {
     <TestBlockElement
       :block-id="testBlock.id"
       :token="testBlock.testBlockToken"
+      :guest="guest"
       v-for="(testBlock, index) in paginatedData"
       :key="index"
     >

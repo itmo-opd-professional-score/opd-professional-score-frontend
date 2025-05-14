@@ -34,7 +34,10 @@ export class TestBlockResolver {
       'GET',
       null,
       this.token ? this.token : undefined,
-    ).catch((error) => { return error.message })
+    ).catch((error) => {
+      console.error(error.message)
+      return []
+    })
   }
 
   public async createTestBlock(data: CreateTestBlockInputDto) {
@@ -58,6 +61,11 @@ export class TestBlockResolver {
         ...data
       },
       this.token ? this.token : undefined,
-    ).catch((error) => { return error.message })
+    ).catch((error) => {
+      return {
+        status: error.status,
+        body: error.message
+      }
+    })
   }
 }

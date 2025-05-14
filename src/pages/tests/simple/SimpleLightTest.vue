@@ -16,6 +16,7 @@ export default defineComponent({
     setupId: String
   },
   setup(props) {
+    console.log(props)
     const { settings, updateTestBlockToken } = useTest({
       setupId: props.setupId,
       testBlockId: props.testBlockId,
@@ -29,12 +30,11 @@ export default defineComponent({
   data() {
     return {
       isButtonActive: false,
-      buttonText: 'Начать тест',
+      buttonText: 'Сейчас недоступно',
       reactionTimes: [] as Array<number>,
       showResults: false,
       isTestRunning: false,
       startTime: 0,
-      TRIAL_COUNT: 3,
       currentTrial: 0,
       timer: 0,
     }
@@ -62,8 +62,12 @@ export default defineComponent({
         deviation,
         best: Math.min(...times),
         worst: Math.max(...times),
-        missedCount: this.reactionTimes.filter(reaction => reaction > 600).length
+        missedCount: this.reactionTimes.filter(reaction => reaction > 600 || reaction < 200).length
       };
+    },
+    TRIAL_COUNT() {
+      if (!this.settings) return 10
+      return Math.round(this.settings.duration / 1.5)
     },
     testResultDto(): CreateSimpleInputDto {
       return {
@@ -85,7 +89,7 @@ export default defineComponent({
       this.startTime = new Date().getTime();
     },
     handleClick(): void {
-      if (this.currentTrial < this.TRIAL_COUNT) {
+      if (this.currentTrial <= this.TRIAL_COUNT) {
         const endTime = new Date().getTime();
         this.reactionTimes.push(endTime - (this.startTime as number));
         this.isButtonActive = false;
@@ -124,11 +128,12 @@ export default defineComponent({
 <template>
   <div class="container">
     <div class="test" v-if="!showResults">
-      <h2 class="title1">Оценка скорости простых реакции на свет</h2>
+      <h2 class="title1">Тест на скорость простой реакции на свет</h2>
       <p class="description">
         Этот тест измеряет время вашей реакции на визуальный сигнал.
+        После начала теста вы увидите {{ TRIAL_COUNT }} световых сигналов.
         Как только кнопка станет красной, нажмите на неё как можно быстрее.
-        Старайтесь не нажимать кнопку до сигнала!
+        Не стоит при этом пытаться нажать заранее - попытка не будет засчитана
       </p>
 
       <div class="button-wrapper">
@@ -162,7 +167,7 @@ export default defineComponent({
         <h2>Поздравляем с прохождением теста!</h2>
       </div>
       <div class="final-results" v-if="settings.showTotalResults">
-        <h2 class="title">Результаты:</h2>
+        <h2>Результаты:</h2>
         <p>
           Среднее время: <strong>{{ results.average }} мс</strong>
         </p>
@@ -176,11 +181,11 @@ export default defineComponent({
           Худшее время: <strong>{{ results.worst }} мс</strong>
         </p>
         <p>
-          Количество пропусков: <strong>{{ results.missedCount }}</strong>
+          Всего успешных нажатий: <strong>{{ TRIAL_COUNT - results.missedCount }} / {{ TRIAL_COUNT }}</strong>
         </p>
       </div>
       <CommonButton
-        class="retry-button"
+        class="retry-button submit_button"
         @click="testBlockId ? router().push(`/testBlock/${testBlockId}`) : router().go(0)"
       >
         <template v-slot:placeholder>{{ testBlockId ? 'Вернуться к блоку тестов' : 'Пройти заново'}}</template>
@@ -193,8 +198,6 @@ export default defineComponent({
 <style scoped>
 .title1 {
   font-size: 2rem;
-  margin-top: 1rem;
-  margin-bottom: 1.5rem;
   color: #fff;
 }
 .title {
@@ -211,16 +214,11 @@ export default defineComponent({
   background-color: #7c6fb5;
 }
 
-.reset-button, .retry-button {
-  font-size: 1.3rem;
-  margin-bottom: 1.25rem;
-  color: #000000;
-  background-color: #ffffff;
-  opacity: 0.8;
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
+.reset-button {
+  font-size: 1.2rem;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease;
+  padding: 1rem;
 }
 
 .reset-button:hover {
@@ -231,30 +229,31 @@ export default defineComponent({
   background-color: #7c6fb5;
 }
 
-.container {
-  .test {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  padding-bottom: 2rem;
+.test {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3vh;
 }
 
-.description {
+.description, .results {
   background: rgba(255, 255, 255, 0.9);
-  opacity: 0.85;
-  padding: 0.7rem;
-  border-radius: 1rem;
-  margin: 0.8rem 0;
-  color: #000000;
-  width: 50vw;
-  min-height: 3rem;
-  text-align: center;
+  padding: 20px;
+  border-radius: 15px;
+  color: black;
+  max-width: 45vw;
+  display: flex;
+  flex-direction: column;
+  gap: 1vw;
+}
+
+.results {
+  max-width: 25vw;
+  margin: 0 auto auto;
 }
 
 .button-wrapper {
-  margin: 2rem 0;
-  perspective: 10px;
+  margin: 3vh 0;
   display: flex;
   justify-content: center;
 }
@@ -283,28 +282,4 @@ export default defineComponent({
   opacity: 0.6;
   cursor: not-allowed;
 }
-
-
-.results {
-  margin-top: 10rem;
-  padding: 1rem 1.5rem;
-  background: #FFFFFF33;
-  border-radius: 1rem;
-  display: flex;
-  flex-direction: column;
-  
-  h2 {
-    text-align: center;
-  }
-
-  p {
-    color: white;
-    font-size: 1.2rem;
-  }
-
-  .retry-button {
-    margin-top: 2vw;
-  }
-}
-
 </style>
