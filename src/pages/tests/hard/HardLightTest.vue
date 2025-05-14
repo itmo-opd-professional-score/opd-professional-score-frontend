@@ -71,7 +71,7 @@ const props = defineProps<{
 const emits = defineEmits(['test-completed']);
 
 type Color = 'red' | 'blue' | 'green' | 'yellow'
-const colors: Color[] = ['red', 'blue', 'green', 'yellow']
+const colors: Color[] = ['red', 'blue', 'yellow', 'green']
 const colorMap = {
   red: '#ff4444',
   blue: '#4444ff',

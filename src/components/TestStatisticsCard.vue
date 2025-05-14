@@ -1,7 +1,6 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 import CommonButton from './UI/CommonButton.vue';
-import { TestResolver } from '../api/resolvers/test/test.resolver.ts';
 import type { TestTypeDataOutputDto } from '../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
 import router from '../router/router.ts';
 
@@ -16,6 +15,12 @@ export default defineComponent({
     score: Number,
     maxScore: Number,
     time: Number,
+    duration: Number,
+    totalOverlapTime: Number,
+    bestOverlap: Number,
+    averageOverlap: Number,
+    overlapCount: Number,
+    dispersion: Number,
     date: {
       type: String,
       required: true,
@@ -50,17 +55,6 @@ export default defineComponent({
     router() {
       return router
     },
-    async generateTestLink() {
-      if (this.testType?.name !== undefined) {
-        const testResolver = new TestResolver()
-        this.invitationToken = await testResolver.generateTestLink({
-          testType: this.testType?.name
-        })
-      }
-    },
-    copyLink() {
-      navigator.clipboard.writeText(this.shareLink)
-    }
   }
 });
 </script>
@@ -69,41 +63,29 @@ export default defineComponent({
   <div class="statistics-card">
     <h4 class="title">{{ testType?.description }}</h4>
     <div class="result">
-      <div class="valid">
+      <div class="valid" v-if="scorePercentage">
         <p>{{ scorePercentage}}</p>
       </div>
-      <div class="bar">
+      <div class="bar" v-if="scorePercentage">
         <div
           class="progress"
           :style="{ width: scorePercentage, backgroundColor: cardColors }"
         ></div>
       </div>
-      <p class="fields">Правильные ответы: {{ score }} / {{ maxScore }}</p>
+      <p class="fields" v-if="score && maxScore">Правильные ответы: {{ score }} / {{ maxScore }}</p>
       <p class="fields">Респондент: {{ userName }}</p>
-      <p class="fields">Среднее время реакции: {{ Math.abs(time) }}</p>
+      <p class="fields" v-if="time">Среднее время реакции: {{ time > 50 ? Math.abs(time / 100) : Math.abs(time) }} c</p>
       <p class="fields" v-if="score && maxScore">Статус:
         <span :style="{ color: (score / maxScore) > 0.6 ? 'green' : 'red'}">
             {{ (score / maxScore) > 0.6 ? 'Сдан' : 'Не сдан' }}
           </span>
       </p>
+      <p class="fields" v-if="dispersion">Отклонение: {{ dispersion > 50 ? (dispersion / 100).toFixed(2) : dispersion.toFixed(2) }} c </p>
+      <p class="fields" v-if="duration">Длительность: {{ duration }} c </p>
+      <p class="fields" v-if="averageOverlap">Среднее время наложения: {{ averageOverlap.toFixed(2) }} c </p>
+      <p class="fields" v-if="overlapCount">Количество наложений: {{ overlapCount }}</p>
+      <p class="fields" v-if="bestOverlap">Лучшее наложение: {{ bestOverlap.toFixed(2) }} c</p>
       <p class="fields">Дата: {{ date }}</p>
-    </div>
-    <div class="share-link">
-      <CommonButton @click="router().push('/profile')">
-        <template #placeholder>Другие тесты</template>
-      </CommonButton>
-      <CommonButton class="submit_button" @click="generateTestLink()">
-        <template #placeholder>Поделиться тестом</template>
-      </CommonButton>
-      <div :class="invitationToken ? 'wrapper' : 'wrapper hidden'">
-        <div class="link">
-          <p class="fields">Your link is:</p>
-          <span>{{ shareLink }}</span>
-          <CommonButton :disabled="invitationToken == null" class="tranparent" @click="copyLink()">
-            <template #placeholder></template>
-          </CommonButton>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -126,62 +108,14 @@ export default defineComponent({
   color: #ffffff;
   font-weight: bold;
 }
-.result, .share-link {
+.result {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   background-color: var(--background-secondary);
   padding: 1vw;
   gap: 1vw;
   border-radius: 15px;
-}
-
-.result {
-  display: flex;
-  flex-direction: column;
-}
-
-.share-link {
-  margin-top: auto;
-
-  .wrapper {
-    transition: height 0.5s;
-    height: 3vw;
-    overflow: hidden;
-    .link {
-      display: flex;
-      align-items: center;
-      gap: 0.5vw;
-
-      p {
-        white-space: nowrap;
-      }
-
-      span {
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        padding: 0.5vw;
-        color: blueviolet;
-        background-color: var(--background-secondary);
-        border-radius: 10px;
-        width: 100%;
-        height: 2.25vw;
-      }
-
-      button {
-        background: url("/copy.svg") center center no-repeat;
-        background-size: contain;
-        width: 3vw;
-        aspect-ratio: 1 / 1;
-      }
-    }
-  }
-
-  .wrapper.hidden {
-    height: 0;
-    margin-top: -1vw;
-  }
+  height: 100%;
 }
 
 .fields {

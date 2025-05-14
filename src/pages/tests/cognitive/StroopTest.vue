@@ -7,7 +7,6 @@ import { UserState } from '../../../utils/userState/UserState.ts';
 import router from '../../../router/router.ts';
 import type { CreateCognitiveInputDto } from '../../../api/resolvers/test/dto/input/create-cognitive-input.dto.ts';
 import { useTest } from '../../../utils/useTest.ts';
-import { useTranslation } from '../../../utils/useTranslation.ts';
 
 type TestState = 'ready' | 'reacting' | 'completed';
 
@@ -164,11 +163,6 @@ export default defineComponent({
       }
     },
   },
-  watch: {
-    async currentWord() {
-      this.currentWordTranslation = await useTranslation(this.currentWord, 'ru')
-    }
-  }
 });
 </script>
 

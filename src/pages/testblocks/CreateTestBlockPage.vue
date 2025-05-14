@@ -13,13 +13,16 @@ import type { TestBlockTest } from '../tests/types';
 import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver.ts';
 import CustomInput from '../../components/UI/inputs/CustomInput.vue';
 import type { TestBatteryOutputDto } from '../../api/resolvers/testBattery/dto/output/test-battery-output.dto.ts';
-import { TestBatteryResolver } from '../../api/resolvers/testBattery/test-battery.resolver.ts';
-import type { LocalTestBlock } from '../../components/testBattery/types';
 import TestBatteryRowElement from '../../components/testBattery/TestBatteryRowElement.vue';
+import type {
+  CreateTestBatteryInputDto
+} from '../../api/resolvers/testBattery/dto/input/create-test-battery-input.dto.ts';
+import BatteryForm from '../../components/testBattery/BatteryForm.vue';
+import { TestBatteryResolver } from '../../api/resolvers/testBattery/test-battery.resolver.ts';
 
 export default {
   name: 'CreateTestBlockPage',
-  components: { TestBatteryRowElement, CustomInput, UserRowElement, CommonButton, TestRowElement },
+  components: { BatteryForm, TestBatteryRowElement, CustomInput, UserRowElement, CommonButton, TestRowElement },
   data() {
     const popupStore = usePopupStore();
     const testBlockResolver = new TestBlockResolver();
@@ -28,15 +31,17 @@ export default {
     return {
       approvedUsers: [] as number[],
       approvedTests: [] as TestBlockTest[],
-      tests: [] as TestTypeDataOutputDto[],
-      searchedUser: '',
+      testTypes: [] as TestTypeDataOutputDto[],
       usersFromApi: [] as UserDataOutputDto[],
       batteries: [] as TestBatteryOutputDto[],
-      localTestBlock: {} as LocalTestBlock,
+      searchedUser: '',
       testBlockResolver,
       userResolver,
       popupStore,
       batteryMode: false,
+      showModal: false,
+      currentBattery: null as CreateTestBatteryInputDto | null,
+      batteryId: null as number | null
     };
   },
   computed: {
@@ -47,28 +52,22 @@ export default {
     }
   },
   async mounted() {
-    await this.loadBatteries()
     try {
-      const usersFromApi = await this.userResolver.getAll();
-      const types = await new TestTypeResolver().getAll();
-      if (usersFromApi !== null) this.usersFromApi = usersFromApi.body
-        .filter(user => user.id !== 999999)
-        .sort((a, b) => a.id - b.id);
-      if (types !== null) this.tests = types.sort((a, b) => a.id - b.id);
-
-      const localTestBlockCash = localStorage.getItem("localTestBlock")
-      if (localTestBlockCash != null) {
-        const localTestBlock = JSON.parse(localTestBlockCash) as LocalTestBlock;
-        this.approvedUsers = localTestBlock.userIds
-        this.approvedTests = localTestBlock.tests
-      }
+      await this.loadBatteries()
+      await this.loadTests()
+      const usersApi = (await new UserResolver().getAll())?.body.filter(user => user.id !== 999999)
+      if (usersApi) this.usersFromApi = usersApi
     } catch (e) {}
   },
   methods: {
     async loadBatteries() {
-      try {
-        this.batteries = await new TestBatteryResolver().getAll()
-      } catch (error) {}
+      const batteriesApi = await new TestBatteryResolver().getAll()
+      if (batteriesApi) this.batteries = batteriesApi
+      if (this.batteries.length == 0) this.batteryMode = false
+    },
+    async loadTests() {
+      const testTypesApi = await new TestTypeResolver().getAll()
+      if (testTypesApi) this.testTypes = testTypesApi
     },
     async save() {
       if (this.approvedTests.length > 0 && this.approvedUsers.length > 0) {
@@ -82,6 +81,7 @@ export default {
         if (this.approvedUsers.some(userId => userId === 999999)) {
           console.log(token)
         }
+        localStorage.removeItem("localTestBlock");
         await router.push('/profile');
       } else {
         this.popupStore.activateErrorPopup(
@@ -89,54 +89,92 @@ export default {
         );
       }
     },
+    updateBatteryOnEdit(selectedBattery: TestBatteryOutputDto) {
+      console.log(selectedBattery);
+      this.showModal = true;
+      this.currentBattery = {
+        name: selectedBattery.name,
+        description: selectedBattery.description,
+        tests: selectedBattery.testInTestBattery.map(test => {
+          return {
+            name: test.name,
+            setupId: test.setupId,
+          }
+        })
+      }
+      this.batteryId = selectedBattery.id
+    },
     reset() {
       router.go(0)
       this.approvedTests = []
       this.approvedUsers = []
     },
     saveTestBlockConfig() {
-      this.localTestBlock = {
-        testBatteryId: this.localTestBlock.testBatteryId ?
-          this.localTestBlock.testBatteryId : null,
-        userIds: this.approvedUsers,
-        tests: this.approvedTests,
+      this.batteryId = null
+      this.currentBattery = {
+        name: '',
+        description: '',
+        tests: this.approvedTests.map((test) => {
+          return {
+            name: test.name,
+            setupId: test.setupId ? test.setupId : null,
+          }
+        })
       }
-      localStorage.removeItem("localTestBlock");
-      localStorage.setItem("localTestBlock", JSON.stringify(this.localTestBlock));
     },
   },
   watch: {
     approvedTests() { this.saveTestBlockConfig() },
-    approvedUsers() { this.saveTestBlockConfig() }
+    approvedUsers() { this.saveTestBlockConfig() },
+    async showModal() { await this.loadBatteries() },
+    async currentBattery() {
+      if (this.currentBattery) {
+        this.approvedTests = this.currentBattery.tests.map(test => {
+          return {
+            name: test.name,
+            setupId: test.setupId != null ? test.setupId : undefined,
+            available: true
+          }
+        })
+      }
+      this.testTypes = []
+      await this.loadTests()
+    }
   }
 };
 </script>
 
 <template>
-  <div class="container" v-if="tests.length > 0 && usersFromApi.length > 0">
+  <BatteryForm
+    v-if="currentBattery && showModal"
+    :current-battery="currentBattery"
+    :battery-id="batteryId ? batteryId : undefined"
+    @close-modal="showModal = false"
+  />
+  <div class="container" v-if="usersFromApi.length > 0 && testTypes.length > 0">
     <h1 class="container-header">Создание блока тестов</h1>
-
     <div class="block-header">
       <h2>Выберите тесты:</h2>
       <div class="battery-controls">
         <CommonButton
           class="battery-switch"
+          :disabled="batteries.length == 0"
           @click="batteryMode = !batteryMode"
         >
           <template v-slot:placeholder>{{ batteryMode ? 'Скрыть' : 'Показать'}} батареи</template>
         </CommonButton>
         <CommonButton
           class="battery-switch"
-          :disabled="approvedTests.length == 0"
-          @click=""
+          :disabled="approvedTests.length == 0 && !batteryId"
+          @click="showModal = true"
         >
-          <template v-slot:placeholder>Сохранить батарею</template>
+          <template v-slot:placeholder>{{ batteryId ? 'Изменить' : 'Сохранить'}} батарею</template>
         </CommonButton>
       </div>
     </div>
     <div class="tests-container">
       <TestRowElement
-        v-for="(test, index) in tests"
+        v-for="(test, index) in testTypes"
         :key="index"
         :test="test"
         :selected="approvedTests.find(tesT => tesT.name == test.name) !== undefined"
@@ -150,6 +188,8 @@ export default {
           v-for="(battery, index) in batteries"
           :key="index"
           :test-battery="battery"
+          @edit-battery="(selectedBattery) => updateBatteryOnEdit(selectedBattery)"
+          @select-battery="selectedBattery => {currentBattery = selectedBattery; batteryMode = false}"
         />
       </div>
     </div>

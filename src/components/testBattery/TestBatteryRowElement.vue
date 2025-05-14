@@ -1,47 +1,17 @@
 <script lang="ts">
 import CommonButton from '../UI/CommonButton.vue';
 import CustomSelect from '../UI/inputs/CustomSelect.vue';
-import router from '../../router/router.ts';
 import type { PropType } from 'vue';
 import type { TestBatteryOutputDto } from '../../api/resolvers/testBattery/dto/output/test-battery-output.dto.ts';
-import type { LocalTestBlock } from './types';
-import type { TestBlockTest } from '../../pages/tests/types';
 
 export default {
   name: 'TestBatteryRowElement',
   components: { CustomSelect, CommonButton },
-  emits: ['selectBattery'],
+  emits: ['selectBattery', 'editBattery'],
   props: {
     testBattery: {
       type: {} as PropType<TestBatteryOutputDto>,
       required: true,
-    },
-  },
-  methods: {
-    router() {
-      return router
-    },
-    applyBattery() {
-      let userIds = [] as number[]
-      let tests = [] as TestBlockTest[]
-      this.testBattery.tests.forEach(test => {
-        tests.push({
-          name: test.name,
-          setupId: test.setupId !== null ? test.setupId : undefined,
-          available: true
-        })
-      })
-      const localTestBlockCash = localStorage.getItem('localTestBlock')
-      if(localTestBlockCash) {
-        const localTestBlock = JSON.parse(localTestBlockCash) as LocalTestBlock;
-        userIds = localTestBlock.userIds
-      }
-      localStorage.setItem("currentTestBattery", JSON.stringify({
-        testBatteryId: this.testBattery.id,
-        tests: tests,
-        userIds: userIds
-      } as LocalTestBlock));
-      this.$emit('selectBattery', this.testBattery);
     },
   },
 };
@@ -53,7 +23,22 @@ export default {
     <div class="buttons">
       <CommonButton
         class="wrapper-block btn submit_button"
-        @click="applyBattery"
+        @click="$emit('editBattery', testBattery)"
+      >
+        <template v-slot:placeholder>Изменить</template>
+      </CommonButton>
+      <CommonButton
+        class="wrapper-block btn submit_button"
+        @click="$emit('selectBattery', {
+          name: testBattery.name,
+          description: testBattery.description,
+          tests: testBattery.testInTestBattery.map(test => {
+            return {
+              name: test.name,
+              setupId: test.setupId,
+            }
+          })
+        })"
       >
         <template v-slot:placeholder>Выбрать</template>
       </CommonButton>

@@ -2,6 +2,7 @@ import ApiResolverUtil from '../../../utils/ApiResolver.ts';
 import type { TestBatteryOutputDto } from './dto/output/test-battery-output.dto.ts';
 import type { CreateTestBatteryInputDto } from './dto/input/create-test-battery-input.dto.ts';
 import type { UpdateTestBatteryInputDto } from './dto/input/update-test-battery-input.dto.ts';
+import type { DefaultOutputDto } from '../../dto/common/default-output.dto.ts';
 
 export class TestBatteryResolver {
   private apiResolver = new ApiResolverUtil('testBattery');
@@ -22,11 +23,12 @@ export class TestBatteryResolver {
       'GET',
       null,
       this.token ? this.token : undefined,
-    )
+    ).catch((_) => { return null })
   }
 
   public async create(data: CreateTestBatteryInputDto) {
-    return await this.apiResolver.request<CreateTestBatteryInputDto, TestBatteryOutputDto[]>(
+    console.log(data)
+    return await this.apiResolver.request<CreateTestBatteryInputDto, DefaultOutputDto<TestBatteryOutputDto>>(
       'create',
       'POST',
       data,
@@ -45,7 +47,7 @@ export class TestBatteryResolver {
 
   public async deleteById(id: number) {
     return await this.apiResolver.request<null, TestBatteryOutputDto>(
-      `deleteById/${id}`,
+      `delete/${id}`,
       'DELETE',
       null,
       this.token ? this.token : undefined,

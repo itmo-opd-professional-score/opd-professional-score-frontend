@@ -4,7 +4,7 @@ export interface TestBatteryOutputDto {
   id: number;
   name: string
   description: string
-  tests: {
+  testInTestBattery: {
     id: number;
     name: TestType;
     setupId: number | null;

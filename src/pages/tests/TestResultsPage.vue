@@ -8,6 +8,7 @@ import { TestTypeResolver } from '../../api/resolvers/testType/testType.resolver
 import { UserRole } from '../../utils/userState/UserState.types.ts';
 import type { TestDataOutputUnionDto } from '../../api/resolvers/test/dto/output/test-data-output-union.dto.ts';
 import type { TestTypeDataOutputDto } from '../../api/resolvers/testType/dto/output/test-type-data-output.dto.ts';
+import { UserResolver } from '../../api/resolvers/user/user.resolver.ts';
 
 export default defineComponent({
   name: 'TestResultsPage',
@@ -40,7 +41,8 @@ export default defineComponent({
       testsData: [] as TestDataOutputUnionDto[],
       userTestsData: [] as TestDataOutputUnionDto[],
       testType: {} as TestTypeDataOutputDto | null,
-      endpoint: ''
+      endpoint: '',
+      username: undefined as string | undefined,
     }
   },
   methods: {
@@ -87,11 +89,26 @@ export default defineComponent({
       this.currentTest = await this.testResolver.getByTypeById(this.endpoint, parseInt(this.testId));
       const tests = await this.testResolver.getAllByType(this.endpoint)
       this.testsData = tests.filter(test => test.testTypeId == parseInt(this.testTypeId))
-      this.userTestsData = this.testsData.filter((test) => test.userId === UserState.id)
+      this.userTestsData = this.testsData.filter((test) => test.userId === this.currentTest.userId)
+      if (this.currentTest.userId) this.username = (await new UserResolver().getById(this.currentTest.userId))?.body.username
+    },
+    checkScore() {
+      if ('score' in this.currentTest) return this.currentTest.score
+      if ('allSignals' in this.currentTest && 'misclicks' in this.currentTest)
+        return this.currentTest.allSignals - this.currentTest.misclicks
+      if ('allSignals' in this.currentTest && 'mistakes' in this.currentTest)
+        return this.currentTest.allSignals - this.currentTest.mistakes
+    },
+    checkMaxScore() {
+      if ('allSignals' in this.currentTest) return this.currentTest.allSignals;
+    },
+    checkDispersion() {
+      if ('dispersion' in this.currentTest) return this.currentTest.dispersion;
     }
   },
   mounted() {
       this.load()
+    console.log(this.userTestsData)
   },
 });
 </script>
@@ -106,18 +123,17 @@ export default defineComponent({
             parseFloat(currentTest.averageCallbackTime.toFixed(2)) :
             undefined
         "
-        :max-score="
-          'allSignals' in currentTest ? currentTest.allSignals :
-            'totalOverlap' in currentTest ? currentTest.totalOverlap : undefined
-        "
-        :score="
-          currentTest.misclicks != null ?
-          currentTest.allSignals - currentTest.misclicks :
-          currentTest.allSignals - currentTest.mistakes
-        "
+        :max-score="checkMaxScore()"
+        :score="checkScore()"
+        :dispersion="checkDispersion()"
+        :duration="'duration' in currentTest ? currentTest.duration : undefined"
+        :totalOverlapTime="'totalOverlapTime' in currentTest ? currentTest.totalOverlapTime : undefined"
+        :bestOverlap="'bestOverlap' in currentTest ? currentTest.bestOverlap : undefined"
+        :averageOverlap="'averageOverlap' in currentTest ? currentTest.averageOverlap : undefined"
+        :overlapCount="'overlapCount' in currentTest ? currentTest.overlapCount : undefined"
         :date="currentTest.createdAt.substring(0, 10)"
         :test-type="testType ? testType : undefined"
-        :user-name="UserState.username"
+        :user-name="username"
         :valid="currentTest.valid"
       />
       <div class="user-test-history">

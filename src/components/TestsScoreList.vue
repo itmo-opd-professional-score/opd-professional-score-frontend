@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="T extends TestDataOutputDto">
+<script setup lang="ts">
 import TestScore from './TestScoreElement.vue';
 import { computed, type PropType, ref, watch } from 'vue';
 import CommonButton from './UI/CommonButton.vue';
@@ -11,6 +11,7 @@ import { UserResolver } from '../api/resolvers/user/user.resolver.ts';
 import type { EnabledFilters } from './testFilter/testFilter.types';
 import { calculateAge } from '../utils/userState/UserState.ts';
 import type { TestDataOutputDto } from '../api/resolvers/test/dto/output/test-data-output.dto.ts';
+import router from '../router/router.ts';
 
 const props = defineProps({
   maxElementsCount: {
@@ -18,7 +19,7 @@ const props = defineProps({
     default: 5,
   },
   tests: {
-    type: Array as PropType<T[]>,
+    type: Array as PropType<TestDataOutputDto[]>,
     required: true,
   },
   enabledFilters: {
@@ -34,7 +35,7 @@ const props = defineProps({
 const userResolver = new UserResolver();
 const currentPage = ref(1);
 const currentGender = ref<UserSex | null>(null);
-const filteredTests = ref<T[]>(props.tests);
+const filteredTests = ref<TestDataOutputDto[]>(props.tests);
 const currentAgeRange = ref<UserAgeRange | null>(null);
 
 const handleAgeUpdate = (ageRange: UserAgeRange | null) => {
@@ -117,8 +118,13 @@ const applyFilters = async () => {
 
   filteredTests.value = filtered.filter(
     (test) => test !== false,
-  ) as T[];
+  ) as TestDataOutputDto[];
 };
+
+const redirect = async (route: string) => {
+  await router.push(route);
+  router.go(0)
+}
 
 watch(
   () => props.tests,
@@ -137,8 +143,6 @@ watch(
     />
     <div :class="hideUserId ? 'hide-username header' : 'header'">
       <div class="id" id="id">Id</div>
-      <div class="score">Score</div>
-      <div class="time">Time</div>
       <div class="username" v-if="!hideUserId">Имя пользователя</div>
       <div class="createdAt">Дата</div>
       <div class="valid">Результат</div>
@@ -148,27 +152,9 @@ watch(
       :key="item.id"
       :class="hideUserId ? 'hide-username' : ''"
       :user-id="!hideUserId ? (item.userId ? item.userId : -1) : undefined"
+      @click="redirect(`/test/results/${item.testTypeId}/${item.id}`)"
     >
       <template #id>{{ item.id }}</template>
-      <template
-        #current_points
-        v-if="'allSignals' in item && typeof item.allSignals === 'number'"
-      >
-        {{ 'misclicks' in item && typeof item.misclicks === 'number' ? item.allSignals - item.misclicks : undefined }}
-        {{ 'mistakes' in item && typeof item.mistakes === 'number' ? item.allSignals - item.mistakes : undefined }}
-      </template>
-      <template
-        #max_points
-        v-if="'allSignals' in item && typeof item.allSignals === 'number'"
-      >
-        {{ item.allSignals }}
-      </template>
-      <template
-        #time
-        v-if="'averageCallbackTime' in item && typeof item.averageCallbackTime === 'number'"
-      >
-        {{ item.averageCallbackTime.toFixed(2) }}
-      </template>
       <template #username v-if="!hideUserId">{{ item.userId }}</template>
       <template #createdAt>{{ item.createdAt.substring(0, 10) }}</template>
       <template #valid>{{ item.valid }}</template>
@@ -213,15 +199,14 @@ watch(
   width: 95%;
   height: 4rem;
   padding: 0 1rem;
-  justify-content: center;
   align-items: center;
   display: grid;
-  grid-template-columns: 1fr repeat(5, 2fr);
   margin-bottom: 1rem;
+  grid-template-columns: repeat(4, 1fr);
 }
 
-.hide-username {
-  grid-template-columns: 1fr repeat(4, 2fr);
+.header.hide-username {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .header:hover {
@@ -236,11 +221,6 @@ watch(
   flex-direction: column;
   justify-content: center;
   text-align: center;
-}
-
-#id,
-#test_name {
-  text-align: left;
 }
 
 .header > div:last-child {
