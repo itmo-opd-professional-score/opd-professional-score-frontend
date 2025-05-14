@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { ProfessionResolver } from '../api/resolvers/profession/profession.resolver.ts';
 import CommonButton from '../components/UI/CommonButton.vue';
 import { UserState } from '../utils/userState/UserState.ts';
@@ -10,6 +10,8 @@ import type { GetProfessionOutputDto } from '../api/resolvers/profession/dto/out
 import { usePopupStore } from '../store/popup.store.ts';
 import type { DefaultErrorDto } from '../api/dto/common/default-error.dto.ts';
 import { UserRole } from '../utils/userState/UserState.types.ts';
+import type { PredictOutputDto } from '../api/resolvers/neuro/dto/output/predict-output.dto.ts';
+import { NeuroResolver } from '../api/resolvers/neuro/neuro.resolver.ts';
 
 const props = defineProps<{
   id: number;
@@ -22,9 +24,13 @@ const professionStatistics = ref<GetProfessionStatisticsOutputDto[] | null>(
   null,
 );
 const profession = ref<GetProfessionOutputDto | null>(null);
+const neuroPredictions = ref<PredictOutputDto[]>([])
 
 onMounted(async () => {
   const popupStore = usePopupStore();
+  if (UserState.id) {
+    neuroPredictions.value = await new NeuroResolver().predict(UserState.id);
+  }
 
   try {
     professionStatistics.value =
@@ -45,6 +51,10 @@ const filteredItems = (items: GetProfessionStatisticsOutputDto[]) => {
     .sort((a, b) => b.averageScore - a.averageScore)
     .slice(0, 5);
 };
+
+const professionConfidence = computed(() => {
+  return neuroPredictions.value.find(prediction => profession.value?.name.toLowerCase().includes(prediction.profession.toLowerCase()))
+})
 </script>
 
 <template>
@@ -57,12 +67,13 @@ const filteredItems = (items: GetProfessionStatisticsOutputDto[]) => {
           {{ `Требования: ${profession.requirements}` }}
         </p>
         <p class="sphere">{{ `Сфера деятельности: ${profession.sphere}` }}</p>
-        <CommonButton
-          class="submit_button"
-          @click="router.push('/testBlock/999999')"
+        <div
+          class="prediction"
+          v-if="professionConfidence"
         >
-          <template #placeholder>Насколько мне подходит эта професия</template>
-        </CommonButton>
+          Процент совмесимости:
+          {{ (professionConfidence.confidence * 100).toFixed(2)}} %
+        </div>
       </div>
       <div class="qualities" v-if="professionStatistics">
         <h3>Профессионально-важные качества</h3>
